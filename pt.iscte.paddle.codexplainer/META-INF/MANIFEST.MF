@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Codexplainer
+Bundle-SymbolicName: pt.iscte.paddle.codexplainer
+Bundle-Version: 1.0.0.qualifier
+Automatic-Module-Name: pt.iscte.paddle.codexplainer
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

@@ -5,8 +5,7 @@ int max(int[] v) {
 	while(i < v.length) {
 		if(v[i] > m) {
 			m = v[i]
-		}
-		
+		}	
 	i = i + 1;
 	}
 	

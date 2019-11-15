@@ -1,12 +1,16 @@
 
 
 
+import pt.iscte.paddle.interpreter.IArray;
 import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBinaryOperator;
 import pt.iscte.paddle.model.IBlock;
+import pt.iscte.paddle.model.IBlockElement;
 import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.ILiteral;
+import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IOperator;
+import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.IVariableAssignment;
@@ -24,50 +28,115 @@ public interface IMostWantedHolder extends IVariableRole {
 		GREATER, SMALLER;
 	}
 	
+	enum VarPosition {
+		RIGHT, LEFT, NONE;
+	}
+	
 	class Visitor implements IBlock.IVisitor {
-		final IVariable var;
-		IExpression var2;
-		boolean condition1 = false;
-		boolean condition2 = false;
+		final IVariable targetVar;
+		IVariable arrayVar;
+		
+		/**
+		 * Checks if the visited If is inside a while 
+		 */
+		boolean isIfInsideWhile = false;
+		
+		/**
+		 * Checks if the While's guard has the arrayVar in it.
+		 */
+		boolean isArrayVarInWhileGuard = false;
+		
+		/**
+		 * Checks if the visited If has an Assignment of the type TargetVar = ArrayVar[Variable].
+		 */
+		boolean isAssignmentCorrect = false;
 		Operation RelOperator = null;
 		boolean first = true;
 
 		Visitor(IVariable var) {
-			this.var = var;
-			this.var2 = null;
+			this.targetVar = var;
+			this.arrayVar = null;
 		}
 		
+		
+		
 		@Override
-		public boolean visit(IBinaryExpression expression) {
-			System.out.println(expression);
-			//IBinaryExpression expression = (IBinaryExpression) condition.getGuard();
-			String varPos = "";
-			IExpression ex = null;
-			if( expression.getLeftOperand().equals(var)) {
-				varPos = "left";
-				ex = expression.getRightOperand();
+		public boolean visit(ISelection expression) {			
+			IBinaryExpression guard = (IBinaryExpression) expression.getGuard();
+			VarPosition varPos = VarPosition.NONE;
+			IVariable aVar = null;
+			if( guard.getLeftOperand().equals(targetVar)) {
+				varPos = VarPosition.LEFT;
+				aVar = (IVariable) guard.getRightOperand();
 			}	
-			if(expression.getRightOperand().equals(var)) {
-				varPos = "right";
-				ex = expression.getLeftOperand();
-			}	
+			if(guard.getRightOperand().equals(targetVar)) {
+				varPos = VarPosition.RIGHT;
+				aVar = (IVariable) guard.getLeftOperand();
+			}
+			
 				
-			if(!varPos.equals("")) {
-				Operation op = getRelationalOperator(expression, varPos);
+			if(!varPos.equals(VarPosition.NONE)) {
+				Operation op = getRelationalOperator(guard, varPos);
 				if(op != null && op != RelOperator) {
-					condition1 = true;
 					RelOperator = op;
-					var2 = ex; 
+					arrayVar = aVar; 
+					
+					IProgramElement parent =expression.getParent().getParent();
+					CheckWhileConditions(parent, aVar);
+					CheckStatementConditions(expression);				
 				}	
+				
+				
 			} 
 			
 			return false;
 		}
+		
+		
+		/**
+		 * Checks if certain conditions are true to discover if the target Variable is a MostWantedHolder
+		 * Condition 1: If the visited If is inside a While.
+		 * Condition 2: If the While's guard has a array variable.   
+		 * @param parent
+		 * @param aVar
+		 */
+		void CheckWhileConditions(IProgramElement parent, IVariable aVar) {
+			if (parent instanceof ILoop) {
+				isIfInsideWhile = true;
+				IExpression parentGuard = ((ILoop) parent).getGuard();
+				if (parentGuard.getParts().get(0).equals(aVar) || parentGuard.getParts().get(1).equals(aVar))
+					isArrayVarInWhileGuard = true;
+				arrayVar = aVar;
+			}
+		}
+		
+		/**
+		 * Checks if certain conditions are true to discover if the target Variable is a MostWantedHolder
+		 * Condition 1: Checks if the visited If has a VariableAssignment in which the target is the targetVariable 
+		 * and if the right of the operator is the array Variable.   
+		 * @param parent
+		 * @param aVar
+		 */
+		void CheckStatementConditions(ISelection expression) {
+			for (IBlockElement i : expression.getBlock().getChildren()) {
+				if (i instanceof IVariableAssignment) {
+					IVariableAssignment assignment = (IVariableAssignment) i;
+					IVariable target = assignment.getTarget();
 
+					if (target.equals(targetVar) && assignment.getExpression().equals(arrayVar)) {
+							isAssignmentCorrect = true;
+					}
+				}
+			}
+		}
+
+		/*
 		@Override
 		public boolean visit(IVariableAssignment assignment) {
-			System.out.println(assignment);
-			if (assignment.getTarget().equals(var)) {
+			//System.out.println(assignment);
+			System.out.println("1 --- " +assignment.getParent().getParent() );
+			System.out.println(assignment.getParent().getBlock());
+			if (assignment.getTarget().equals(targetVar)) {
 				if (first) {
 					first = false;
 				} else {
@@ -82,13 +151,15 @@ public interface IMostWantedHolder extends IVariableRole {
 
 			return false;
 		}
-
-	}
+*/
+		}
+		
 
 	static boolean isMostWantedHolder(IVariable var) {
 		Visitor v = new Visitor(var);
 		var.getProcedure().accept(v);
-		return v.condition1 && v.condition2 && v.RelOperator != null;
+		return v.isIfInsideWhile && v.isArrayVarInWhileGuard 
+						&& v.isAssignmentCorrect && v.RelOperator != null;
 	}
 
 	static class MostWantedHolder implements IMostWantedHolder {
@@ -115,13 +186,13 @@ public interface IMostWantedHolder extends IVariableRole {
 		return new MostWantedHolder(v.RelOperator);
 	}
 
-	static Operation getRelationalOperator(IBinaryExpression assignment, String varPos) { 
+	static Operation getRelationalOperator(IBinaryExpression assignment, VarPosition varPos) { 
 			if(assignment.getOperator().equals(IBinaryOperator.GREATER) || assignment.getOperator().equals(IBinaryOperator.SMALLER)) {
-				if(varPos.equals("right"))
+				if(varPos.equals(VarPosition.RIGHT))
 					return match(assignment.getOperator(), false);
 				else
 					return match(assignment.getOperator(), true);
-		}
+			}
 		return null;
 	}
 	

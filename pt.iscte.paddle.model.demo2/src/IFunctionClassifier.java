@@ -1,20 +1,9 @@
 import java.util.List;
 
 import pt.iscte.paddle.model.IArrayElementAssignment;
-import pt.iscte.paddle.model.IBinaryExpression;
-import pt.iscte.paddle.model.IBinaryOperator;
 import pt.iscte.paddle.model.IBlock;
-import pt.iscte.paddle.model.IBlockElement;
-import pt.iscte.paddle.model.IExpression;
-import pt.iscte.paddle.model.ILoop;
-import pt.iscte.paddle.model.IOperator;
-import pt.iscte.paddle.model.IProgramElement;
-import pt.iscte.paddle.model.IRecordAllocation;
-import pt.iscte.paddle.model.IRecordFieldAssignment;
-import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.IVariableAssignment;
-import pt.iscte.paddle.roles.IVariableRole;
 
 public interface IFunctionClassifier {
 

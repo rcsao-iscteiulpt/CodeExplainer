@@ -130,7 +130,7 @@ public interface IMostWantedHolder extends IVariableRole {
 
 	static boolean isMostWantedHolder(IVariable var) {
 		Visitor v = new Visitor(var);
-		var.getProcedure().accept(v);
+		var.getOwnerProcedure().accept(v);
 		return v.isIfInsideWhile && v.isArrayVarInWhileGuard && v.isAssignmentCorrect && v.RelOperator != null;
 	}
 
@@ -154,7 +154,7 @@ public interface IMostWantedHolder extends IVariableRole {
 	static IVariableRole createMostWantedHolder(IVariable var) {
 		assert isMostWantedHolder(var);
 		Visitor v = new Visitor(var);
-		var.getProcedure().accept(v);
+		var.getOwnerProcedure().accept(v);
 		return new MostWantedHolder(v.RelOperator);
 	}
 
@@ -168,6 +168,7 @@ public interface IMostWantedHolder extends IVariableRole {
 		}
 		return null;
 	}
+	
 
 	static Operation match(IBinaryOperator op, boolean inverse) {
 		if (!inverse)

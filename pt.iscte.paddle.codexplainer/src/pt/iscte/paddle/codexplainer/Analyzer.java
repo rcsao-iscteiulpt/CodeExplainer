@@ -1,51 +1,53 @@
 package pt.iscte.paddle.codexplainer;
 
-import java.io.File;
 
-import pt.iscte.paddle.interpreter.ExecutionError;
-import pt.iscte.paddle.interpreter.IExecutionData;
-import pt.iscte.paddle.interpreter.IMachine;
-import pt.iscte.paddle.interpreter.IProgramState;
-import pt.iscte.paddle.interpreter.IProgramState.IListener;
-import pt.iscte.paddle.interpreter.IValue;
+import java.util.Map;
+
+
+
+
 import pt.iscte.paddle.javali.translator.Translator;
+import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
-import pt.iscte.paddle.model.IProgramElement;
-import pt.iscte.paddle.model.IVariableAssignment;
+import pt.iscte.paddle.model.IReturn;
+import pt.iscte.paddle.model.ISelection;
+import pt.iscte.paddle.model.IVariable;
+import pt.iscte.paddle.roles.IVariableRole;
+import pt.iscte.paddle.semantics.java.VariableScope;
 
 
 public class Analyzer {
+	
+	static Map<IVariable, IVariableRole> variables;
+	static ILoop[] loops;
+	static ISelection[] selections;
+	static IReturn[] returns;
+	
 
-	public static void main(String[] args) throws ExecutionError {
+	static void AnalyzeFuntion(IProcedure procedure) {
 
-		// instantiate model from file
-		Translator translator = new Translator(new File("naturals.javali").getAbsolutePath());
-		IModule module = translator.createProgram();
-		IProcedure nats = module.getProcedures().iterator().next(); // first
+		for(IVariable var : procedure.getVariables()) {
+			IVariableRole role = getVariableRole(var);
+			variables.put(var, role);
+		}
+	
+		
 
-		System.out.println(module);
+		
+	}
 
-		IProgramState state = IMachine.create(module);
-
-		// Tracer ----
-		state.addListener(new IListener() {
-			public void step(IProgramElement statement) {
-				if(statement instanceof IVariableAssignment) {
-					IVariableAssignment a = (IVariableAssignment) statement;
-					if(a.getTarget().getId().equals("i"))
-						System.out.println(state.getCallStack().getTopFrame().getVariableStore(a.getTarget()));
-				}
-			}
-		});
-
-		System.out.println("Modifications of variable i:");
-
-		IExecutionData data = state.execute(nats, 5);  // naturals(5)
-		IValue ret = data.getReturnValue();
-
-		System.out.println();
-		System.out.println("RESULT: " + ret);
-
+	private static IVariableRole getVariableRole(IVariable var) {
+		return null;
+		/*
+		if(IMostWantedHolder.isMostWantedHolder(var)) {
+			return IMostWantedHolder.createMostWantedHolder(var);
+		}
+		if(IGatherer.isGatherer(var)) {
+			return IGatherer.createGatherer(var);
+		}
+		etc....
+		return new IVariableRole();
+		*/
 	}
 }

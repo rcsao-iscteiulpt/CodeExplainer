@@ -1,3 +1,4 @@
+package pt.iscte.paddle.model.demo2;
 
 
 import pt.iscte.paddle.model.IArrayElement;
@@ -33,7 +34,6 @@ public interface IMostWantedHolder extends IVariableRole {
 	class Visitor implements IBlock.IVisitor {
 		final IVariable targetVar;
 		IVariable arrayVar;
-	
 
 		/**
 		 * Checks if the visited If is inside a while
@@ -62,22 +62,20 @@ public interface IMostWantedHolder extends IVariableRole {
 		public boolean visit(ISelection expression) {
 			IBinaryExpression guard = (IBinaryExpression) expression.getGuard();
 			VarPosition varPos = VarPosition.NONE;
-			IArrayElement arrayElement = null;
+			IArrayElement expressionVar = null;
 			IVariable aVar = null;
 			
 			try {
 				if (guard.getLeftOperand().equals(targetVar)) {
 					varPos = VarPosition.LEFT;
-					arrayElement = (IArrayElement) guard.getRightOperand();
-					aVar =  (IVariable) arrayElement.getTarget();
+					expressionVar = (IArrayElement) guard.getRightOperand();
+					aVar = (IVariable) expressionVar.getTarget();
 				}
 				if (guard.getRightOperand().equals(targetVar)) {
 					varPos = VarPosition.RIGHT;
-					arrayElement = (IArrayElement) guard.getLeftOperand();
-					aVar =  (IVariable) arrayElement.getTarget();
+					expressionVar = (IArrayElement) guard.getLeftOperand();
+					aVar = (IVariable) expressionVar.getTarget();
 				}
-
-				
 
 				if (!varPos.equals(VarPosition.NONE)) {
 					Operation op = getRelationalOperator(guard, varPos);
@@ -89,20 +87,18 @@ public interface IMostWantedHolder extends IVariableRole {
 						CheckWhileConditions(parent, aVar);
 						CheckStatementConditions(expression);
 					}
-
 				}
 			} catch (ClassCastException e) {
 				return false;
-			}	
+			}
 
 			return false;
 		}
-		
 
 		/**
 		 * Checks if certain conditions are true to discover if the target Variable is a
 		 * MostWantedHolder Condition 1: If the visited If is inside a While. Condition
-		 * 2: If the While's guard has an array variable.
+		 * 2: If the While's guard has a array variable.
 		 * 
 		 * @param parent
 		 * @param aVar
@@ -131,12 +127,11 @@ public interface IMostWantedHolder extends IVariableRole {
 				if (i instanceof IVariableAssignment) {
 					IVariableAssignment assignment = (IVariableAssignment) i;
 					IVariable target = assignment.getTarget();
-					//System.out.println(target.equals(targetVar));
-					
-					if (assignment.getExpression() instanceof IArrayElement) {
-						IArrayElement expressionVar = (IArrayElement) assignment.getExpression();
 
-						if (target.equals(targetVar) && expressionVar.getTarget().equals(arrayVar)) {
+					if (assignment.getExpression() instanceof IArrayElement) {
+						IArrayElement ex = (IArrayElement) assignment.getExpression();
+
+						if (target.equals(targetVar) && ex.getTarget().equals(arrayVar)) {
 							isAssignmentCorrect = true;
 						}
 					}

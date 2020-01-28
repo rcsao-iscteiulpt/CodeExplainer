@@ -13,16 +13,17 @@ import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IVariable;
+import pt.iscte.paddle.model.demo2.IMostWantedHolder;
 import pt.iscte.paddle.roles.IVariableRole;
 import pt.iscte.paddle.semantics.java.VariableScope;
 
 
 public class Analyzer {
 	
-	static Map<IVariable, IVariableRole> variables;
-	static ILoop[] loops;
-	static ISelection[] selections;
-	static IReturn[] returns;
+
+	 static Map<IVariable, IVariableRole> variables;
+	 ISelection[] selections;
+	 IReturn[] returns;
 	
 
 	static void AnalyzeFuntion(IProcedure procedure) {
@@ -32,22 +33,18 @@ public class Analyzer {
 			variables.put(var, role);
 		}
 	
-		
-
-		
 	}
 
 	private static IVariableRole getVariableRole(IVariable var) {
-		return null;
-		/*
+
 		if(IMostWantedHolder.isMostWantedHolder(var)) {
 			return IMostWantedHolder.createMostWantedHolder(var);
 		}
-		if(IGatherer.isGatherer(var)) {
-			return IGatherer.createGatherer(var);
-		}
-		etc....
-		return new IVariableRole();
-		*/
+		
+//		if(IGatherer.isGatherer(var)) {
+//			return IGatherer.createGatherer(var);
+//		}
+//      etc....
+		return null;
 	}
 }

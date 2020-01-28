@@ -1,8 +1,7 @@
+package pt.iscte.paddle.model.demo2;
 import static pt.iscte.paddle.model.IOperator.GREATER;
 import static pt.iscte.paddle.model.IOperator.SMALLER;
 import static pt.iscte.paddle.model.IType.INT;
-
-import java.io.ObjectInputStream.GetField;
 
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
@@ -41,26 +40,18 @@ public class DemoControlFlowGraph {
 		array.setId("array");
 		m.setId("m");
 		i.setId("i");
-		//System.out.println(max);
+		System.out.println(max);
 		
 		IControlFlowGraph cfg = IControlFlowGraph.create(max);
 		
-
-	
-
 		IStatementNode s_mAss = cfg.newStatement(mAss);
 		cfg.getEntryNode().setNext(s_mAss);
-		
-		System.out.println(cfg.getEntryNode());
-		System.out.println(s_mAss);
-		
+
 		IStatementNode s_iAss = cfg.newStatement(iAss);
 		s_mAss.setNext(s_iAss);
-		System.out.println();
-		
+
 		IBranchNode b_loop = cfg.newBranch(loop.getGuard());
 		s_iAss.setNext(b_loop);
-		
 		
 		IBranchNode b_if = cfg.newBranch(ifstat.getGuard());
 		b_loop.setBranch(b_if);
@@ -85,8 +76,8 @@ public class DemoControlFlowGraph {
 		
 //		cfg.getNodes().forEach(n -> System.out.println(n));
 	   
-//		for(INode n : cfg.reachability())
-//			System.out.println(n.isEntry() || n.isExit() ? n : n.getElement());
+		for(INode n : cfg.reachability())
+			System.out.println(n.isEntry() || n.isExit() ? n : n.getElement());
 		
 		System.out.println("dead: " + cfg.deadNodes());
 	

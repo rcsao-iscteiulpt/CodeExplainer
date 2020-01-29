@@ -8,6 +8,7 @@ import pt.iscte.paddle.interpreter.IArray;
 import pt.iscte.paddle.model.IArrayAllocation;
 import pt.iscte.paddle.model.IArrayElement;
 import pt.iscte.paddle.model.IArrayElementAssignment;
+import pt.iscte.paddle.model.IArrayLength;
 import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBinaryOperator;
 import pt.iscte.paddle.model.IBlock;
@@ -30,19 +31,17 @@ public class NLTranslator {
 
 		@Override
 		public boolean visit(IVariableAssignment assignment) {
-			System.out.println(assignment);
+			//System.out.println(assignment);
+			explanation += assignment +" : ";
 			if (!declaredVariables.contains(assignment.getTarget().toString())) {
 				declaredVariables.add(assignment.getTarget().toString());
-				explainVariableDeclaration(assignment);
+				explanation += "A variável " + assignment.getTarget().toString() + " é inicializada com o valor igual ";
+				explainVariableAssignment(assignment);
 			} else {
-
+				explanation += "Vai ser guardado na variável " +  assignment.getTarget().toString() + " o valor ";
+				explainVariableAssignment(assignment);
 			}
 			
-			//System.out.println(assignment.getTarget() instanceof IVariable);
-			
-			//System.out.println(assignment);
-			//System.out.println(assignment.getTarget());
-			//System.out.println(assignment.getExpressionParts());
 			return false;
 		}
 		
@@ -54,22 +53,29 @@ public class NLTranslator {
 		
 		@Override
 		public boolean visit(ILoop expression) {
-			
+			explanation += "While : Este while irá continuar a fazer loop enquanto ";
+			IBinaryExpression guard = (IBinaryExpression) expression.getGuard();
+			explainGuardCondition(guard);
 			//System.out.println(expression);
 			//expression,
+			explanation += "\n";
 			return true;
 		}
 
 		@Override
 		public boolean visit(ISelection expression) {
-			
+			explanation += "If : A condição deste If irá devolver true quando ";
+			IBinaryExpression guard = (IBinaryExpression) expression.getGuard();
+			explainGuardCondition(guard);
 			//System.out.println(expression);
+			explanation += "\n";
 			return true;
 		}
 		
-		void explainVariableDeclaration(IVariableAssignment assignment) {
-			explanation += "A variável " + assignment.getTarget().toString() + " é inicializada com o valor igual ";
+		void explainVariableAssignment(IVariableAssignment assignment) {
+			
 			IExpression expression = assignment.getExpression();
+			
 			if(!(expression instanceof IBinaryExpression)) {
 				if (!(expression instanceof IArrayElement)) {
 					explanation += expression.toString();
@@ -81,40 +87,110 @@ public class NLTranslator {
 				}
 			} else {		
 				IBinaryExpression ex = (IBinaryExpression) expression;
+				IExpression leftEx = ex.getLeftOperand();
+				IExpression rightEx = ex.getRightOperand();
+				
 				if(ex.getOperator().equals(IBinaryOperator.ADD)) {
 					explanation += "à soma dos valores ";
 				}		
 				if(ex.getOperator().equals(IBinaryOperator.SUB)) {
 					explanation += "à subtração entre os valores ";
 				}
-				List<IExpression> parts = ex.getParts();
 				
-				for(IExpression e: parts) {
-					if(e instanceof IArrayElement) {
-						IArrayElement element = (IArrayElement) e;
-						explanation += "da posição " + element.getIndexes().get(0) 
-								+ " do vetor " + element.getTarget();
-					} else {
-						explanation += expression.toString();
-					}
-					if(!parts.get(parts.size() - 1).equals(e)) {
-						explanation += " e ";
-					} else {
-						explanation += ".";
-					}
-						
+//				List<IExpression> parts = ex.getParts();
+//				for(IExpression e: parts) {
+//					if(e instanceof IArrayElement) {
+//						IArrayElement element = (IArrayElement) e;
+//						explanation += "da posição " + element.getIndexes().get(0) 
+//								+ " do vetor " + element.getTarget();
+//					} else {
+//						explanation += expression.toString();
+//					}
+//					if(!parts.get(parts.size() - 1).equals(e)) {
+//						explanation += " e ";
+//					} else {
+//						explanation += ".";
+//					}
+				
+				if(ex instanceof IArrayElement) {
+					IArrayElement leftExArray = (IArrayElement) ex;
+					explanation += "o valor da posição " + leftExArray.getIndexes().get(0) 
+							+ "do vetor " + leftExArray.getTarget() + " ";		
+				} else {
+					explanation += "o valor de " + leftEx.toString() + " ";	
 				}
+				
+				explanation += "e ";
+				
+				if(rightEx instanceof IArrayElement) {
+					IArrayElement rightExArray = (IArrayElement) rightEx;
+					explanation += "o valor da posição " + rightExArray.getIndexes().get(0) 
+							+ " do vetor " + rightExArray.getTarget();		
+				} else {
+					explanation += "o valor de " + rightEx.toString();	
+				}
+				
+						
+				
 			}
-
-			
-			
-			
 			explanation += "\n";
 		}
 
-	}
-	
+		
+		
+		void explainGuardCondition(IBinaryExpression guard) {
 
+			
+			IExpression leftEx = guard.getLeftOperand();
+			IExpression rightEx = guard.getRightOperand();
+			
+			
+			//Translate left expression
+			if(leftEx instanceof IArrayElement) {
+				IArrayElement leftExArray = (IArrayElement) leftEx;
+				explanation += "o valor da posição " + leftExArray.getIndexes().get(0)
+						+ " do vetor " + leftExArray.getTarget() + " ";		
+			} else {
+				explanation += "o valor de " + leftEx.toString() + " ";	
+			}
+			
+			explanation += "seja ";
+			//Translate Relational Operator
+			//TODO Generalize?
+			if (guard.getOperator().equals(IBinaryOperator.GREATER)) {
+				explanation += "maior que " ;	
+			}
+			if (guard.getOperator().equals(IBinaryOperator.GREATER_EQ)) {
+				explanation += "maior ou igual a "; 		
+			}
+			if (guard.getOperator().equals(IBinaryOperator.SMALLER)) {
+				explanation += "menor que "; 
+			}
+			if (guard.getOperator().equals(IBinaryOperator.SMALLER_EQ)) {
+				explanation += "menor ou igual a ";
+			}
+			if (guard.getOperator().equals(IBinaryOperator.EQUAL)) {
+				explanation += "igual a "; 
+			}
+			if (guard.getOperator().equals(IBinaryOperator.DIFFERENT)) {
+				explanation += "diferente de ";
+			}
+			
+			//System.out.println(rightEx instanceof IArray);
+			
+			//Translate right expression
+			if(rightEx instanceof IArrayElement) {
+				IArrayElement rightExArray = (IArrayElement) rightEx;
+				explanation += "o valor da posição " + rightExArray.getIndexes().get(0) 
+						+ " do vetor " + rightExArray.getTarget();		
+			} else {
+				explanation += "o valor de " + rightEx.toString();	
+			}
+			
+	
+		}
+
+	}
 	
 	static String getExplanation(IBlock body) {
 		Visitor v = new Visitor();

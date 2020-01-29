@@ -112,10 +112,10 @@ public class NLTranslator {
 //						explanation += ".";
 //					}
 				
-				if(ex instanceof IArrayElement) {
-					IArrayElement leftExArray = (IArrayElement) ex;
+				if(leftEx instanceof IArrayElement) {
+					IArrayElement leftExArray = (IArrayElement) leftEx;
 					explanation += "o valor da posição " + leftExArray.getIndexes().get(0) 
-							+ "do vetor " + leftExArray.getTarget() + " ";		
+							+ " do vetor " + leftExArray.getTarget() + " ";		
 				} else {
 					explanation += "o valor de " + leftEx.toString() + " ";	
 				}

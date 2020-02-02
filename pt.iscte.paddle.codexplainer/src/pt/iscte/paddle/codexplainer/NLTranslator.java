@@ -15,6 +15,8 @@ import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.ISelection;
+import pt.iscte.paddle.model.IUnaryExpression;
+import pt.iscte.paddle.model.IUnaryOperator;
 import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.cfg.IControlFlowGraph;
@@ -54,8 +56,7 @@ public class NLTranslator {
 		@Override
 		public boolean visit(ILoop expression) {
 			explanation += "While : Este while irá continuar a fazer loop enquanto ";
-			IBinaryExpression guard = (IBinaryExpression) expression.getGuard();
-			explainGuardCondition(guard);
+			explainGuardCondition(expression.getGuard());
 			//System.out.println(expression);
 			//expression,
 			explanation += "\n";
@@ -138,59 +139,29 @@ public class NLTranslator {
 
 		
 		
-		void explainGuardCondition(IBinaryExpression guard) {
+		void explainGuardCondition(IExpression guard) {
 
 			
-			IExpression leftEx = guard.getLeftOperand();
-			IExpression rightEx = guard.getRightOperand();
-			
-			
-			//Translate left expression
-			if(leftEx instanceof IArrayElement) {
-				IArrayElement leftExArray = (IArrayElement) leftEx;
-				explanation += "o valor da posição " + leftExArray.getIndexes().get(0)
-						+ " do vetor " + leftExArray.getTarget() + " ";		
+			if(guard instanceof IUnaryExpression) {
+				explanation += ExpressionTranslator.translateUnaryExpression((IUnaryExpression)guard);
 			} else {
-				explanation += "o valor de " + leftEx.toString() + " ";	
-			}
-			
-			explanation += "seja ";
-			//Translate Relational Operator
-			//TODO Generalize?
-			if (guard.getOperator().equals(IBinaryOperator.GREATER)) {
-				explanation += "maior que " ;	
-			}
-			if (guard.getOperator().equals(IBinaryOperator.GREATER_EQ)) {
-				explanation += "maior ou igual a "; 		
-			}
-			if (guard.getOperator().equals(IBinaryOperator.SMALLER)) {
-				explanation += "menor que "; 
-			}
-			if (guard.getOperator().equals(IBinaryOperator.SMALLER_EQ)) {
-				explanation += "menor ou igual a ";
-			}
-			if (guard.getOperator().equals(IBinaryOperator.EQUAL)) {
-				explanation += "igual a "; 
-			}
-			if (guard.getOperator().equals(IBinaryOperator.DIFFERENT)) {
-				explanation += "diferente de ";
-			}
-			
-			//System.out.println(rightEx instanceof IArray);
-			
-			//Translate right expression
-			if(rightEx instanceof IArrayElement) {
-				IArrayElement rightExArray = (IArrayElement) rightEx;
-				explanation += "o valor da posição " + rightExArray.getIndexes().get(0) 
-						+ " do vetor " + rightExArray.getTarget();		
-			} else {
-				explanation += "o valor de " + rightEx.toString();	
+				IBinaryExpression ex = (IBinaryExpression) guard;
+				IBinaryOperator op = ex.getOperator();
+				if(op.equals(IBinaryOperator.AND) || op.equals(IBinaryOperator.OR)) {
+					explainGuardCondition(ex.getLeftOperand());
+					explanation += ExpressionTranslator.translateOperator(ex.getOperator());
+					explainGuardCondition(ex.getRightOperand());
+				} else {
+					explanation += ExpressionTranslator.translateBinaryExpression(ex);
+				}
 			}
 			
 	
 		}
+		
 
 	}
+	
 	
 	static String getExplanation(IBlock body) {
 		Visitor v = new Visitor();

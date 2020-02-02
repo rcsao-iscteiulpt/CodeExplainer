@@ -1,8 +1,8 @@
 int max(int[] v) {
 	int i = 1;
 	int m = v[0];
-	int y = v[0] - v[2] ;
-	while(i < v.length) {
+	int y = v[0] - v[2];
+	while(i < v.length || i == 1) {
 		if(v[i] > m) {
 			m = v[i];
 		}	

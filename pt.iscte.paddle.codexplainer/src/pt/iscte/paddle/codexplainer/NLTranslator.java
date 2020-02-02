@@ -13,6 +13,7 @@ import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBinaryOperator;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.IExpression;
+import pt.iscte.paddle.model.ILiteral;
 import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IUnaryExpression;
@@ -23,24 +24,24 @@ import pt.iscte.paddle.model.cfg.IControlFlowGraph;
 
 public class NLTranslator {
 	
-	static String explanation = "";
+	//static String explanation = "";
 	
 	static class Visitor implements IBlock.IVisitor {
 		
 		ArrayList<String> declaredVariables = new ArrayList<String>(); 
-		
+		StringBuilder explanation = new StringBuilder();
 
 
 		@Override
 		public boolean visit(IVariableAssignment assignment) {
 			//System.out.println(assignment);
-			explanation += assignment +" : ";
+			explanation.append(assignment +" : ");
 			if (!declaredVariables.contains(assignment.getTarget().toString())) {
 				declaredVariables.add(assignment.getTarget().toString());
-				explanation += "A variável " + assignment.getTarget().toString() + " é inicializada com o valor igual ";
+				explanation.append("A variável " + assignment.getTarget().toString() + " é inicializada com o valor igual ");
 				explainVariableAssignment(assignment);
 			} else {
-				explanation += "Vai ser guardado na variável " +  assignment.getTarget().toString() + " o valor ";
+				explanation.append("Vai ser guardado na variável " +  assignment.getTarget().toString() + " o valor ");
 				explainVariableAssignment(assignment);
 			}
 			
@@ -55,21 +56,19 @@ public class NLTranslator {
 		
 		@Override
 		public boolean visit(ILoop expression) {
-			explanation += "While : Este while irá continuar a fazer loop enquanto ";
+			explanation.append("While : Este while irá continuar a fazer loop enquanto ");
 			explainGuardCondition(expression.getGuard());
 			//System.out.println(expression);
 			//expression,
-			explanation += "\n";
 			return true;
 		}
 
 		@Override
 		public boolean visit(ISelection expression) {
-			explanation += "If : A condição deste If irá devolver true quando ";
+			explanation.append("If : A condição deste If irá devolver true quando ");
 			IBinaryExpression guard = (IBinaryExpression) expression.getGuard();
 			explainGuardCondition(guard);
 			//System.out.println(expression);
-			explanation += "\n";
 			return true;
 		}
 		
@@ -77,6 +76,34 @@ public class NLTranslator {
 			
 			IExpression expression = assignment.getExpression();
 			
+			
+			if(expression instanceof IUnaryExpression) 
+				explanation.append(ExpressionTranslator.translateUnaryExpression((IUnaryExpression)expression));
+			
+			if(expression instanceof IBinaryExpression) {
+				IBinaryExpression ex = (IBinaryExpression) expression;
+				IBinaryOperator op = ex.getOperator();
+				if(op.equals(IBinaryOperator.AND) || op.equals(IBinaryOperator.OR)) {
+					explainGuardCondition(ex.getLeftOperand());
+					explanation.append(ExpressionTranslator.translateOperator(ex.getOperator()));
+					explainGuardCondition(ex.getRightOperand());
+				} else {
+					explanation.append(ExpressionTranslator.translateBinaryExpression(ex));
+				}
+			}
+			
+			if(expression instanceof IArrayElement) {
+				explanation.append(ExpressionTranslator.translateArrayElement((IArrayElement)expression));
+			}
+			
+			if(expression instanceof ILiteral || expression instanceof IVariable) {
+				explanation.append(ExpressionTranslator.translateSimple(expression));
+			}
+			
+			
+			explanation.append("\n");
+			
+			/*
 			if(!(expression instanceof IBinaryExpression)) {
 				if (!(expression instanceof IArrayElement)) {
 					explanation += expression.toString();
@@ -135,6 +162,7 @@ public class NLTranslator {
 				
 			}
 			explanation += "\n";
+			*/
 		}
 
 		
@@ -143,18 +171,19 @@ public class NLTranslator {
 
 			
 			if(guard instanceof IUnaryExpression) {
-				explanation += ExpressionTranslator.translateUnaryExpression((IUnaryExpression)guard);
+				explanation.append(ExpressionTranslator.translateUnaryExpression((IUnaryExpression)guard));
 			} else {
 				IBinaryExpression ex = (IBinaryExpression) guard;
 				IBinaryOperator op = ex.getOperator();
 				if(op.equals(IBinaryOperator.AND) || op.equals(IBinaryOperator.OR)) {
 					explainGuardCondition(ex.getLeftOperand());
-					explanation += ExpressionTranslator.translateOperator(ex.getOperator());
+					explanation.append(ExpressionTranslator.translateOperator(ex.getOperator()));
 					explainGuardCondition(ex.getRightOperand());
 				} else {
-					explanation += ExpressionTranslator.translateBinaryExpression(ex);
+					explanation.append(ExpressionTranslator.translateBinaryExpression(ex));
 				}
 			}
+			explanation.append("\n");
 			
 	
 		}
@@ -166,7 +195,7 @@ public class NLTranslator {
 	static String getExplanation(IBlock body) {
 		Visitor v = new Visitor();
 		body.getOwnerProcedure().accept(v);
-		return explanation;
+		return v.explanation.toString();
 	}
 
 }

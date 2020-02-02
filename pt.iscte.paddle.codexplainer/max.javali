@@ -1,5 +1,6 @@
 int max(int[] v) {
 	int i = 1;
+	int i = i;
 	int m = v[0];
 	int y = v[0] - v[2];
 	while(i < v.length || i == 1) {

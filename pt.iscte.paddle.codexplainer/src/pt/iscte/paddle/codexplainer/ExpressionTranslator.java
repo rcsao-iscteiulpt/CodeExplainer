@@ -48,13 +48,10 @@ public class ExpressionTranslator {
 					+ " do vetor " + element.getTarget() + " ";
 	}
 	
-	String translateVariable(IVariable variable) {
-		return variable.toString();
+	static String translateSimple(IExpression ex) {
+		//TODO
+		return ex.toString();
 }
-	
-	
-	
-	
 	
 	static String translateOperator(IBinaryOperator op) {
 		if (op.equals(IBinaryOperator.GREATER)) {

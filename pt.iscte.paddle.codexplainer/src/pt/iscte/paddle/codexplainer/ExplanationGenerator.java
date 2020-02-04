@@ -2,6 +2,7 @@ package pt.iscte.paddle.codexplainer;
 
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 import pt.iscte.paddle.javali.translator.Translator;
@@ -16,19 +17,20 @@ import pt.iscte.paddle.roles.IVariableRole;
 
 public class ExplanationGenerator {
 	
-    static Map<IVariable, IVariableRole> localVariables;
+    static Map<IVariable, String> variablesRolesExplanation = new HashMap<IVariable, String>();
 	
-	private static IVariableRole getVariableRole(IVariable var) {
+	private static void getVariableRole(IVariable var) {
 
 		if(IMostWantedHolder.isMostWantedHolder(var)) {
-			return IMostWantedHolder.createMostWantedHolder(var);
+			IMostWantedHolder role = (IMostWantedHolder) IMostWantedHolder.createMostWantedHolder(var);
+			variablesRolesExplanation.put(var, role.getRoleExplanation());
 		}
 		
 //		if(IGatherer.isGatherer(var)) {
 //			return IGatherer.createGatherer(var);
 //		}
 //      etc....
-		return null;
+		return;
 	}
 	
 	
@@ -43,19 +45,15 @@ public class ExplanationGenerator {
 		//IControlFlowGraph cfg = IControlFlowGraph.create(method);
 		//CFGGeneration.getControlFlowGraph(cfg, method.getBody());
 		
-//		for(IVariable var : method.getVariables()) {
-//			System.out.println(var);
-//			
-//			IVariableRole role = getVariableRole(var);
-//			System.out.println(role);
-//			if(role != null) {
-//				localVariables.put(var, role);
-//			}
-//		}
+		for(IVariable var : method.getVariables()) {
+			//System.out.println(var);
+			
+			getVariableRole(var);
+		}
 		
 		//System.out.println(localVariables);
 		
-		String explanation = NLTranslator.getExplanation(method.getBody());
+		String explanation = NLTranslator.getExplanation(method.getBody(), variablesRolesExplanation);
 		
 		System.out.println(explanation);
 		

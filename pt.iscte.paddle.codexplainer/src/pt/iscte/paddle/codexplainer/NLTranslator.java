@@ -2,6 +2,7 @@ package pt.iscte.paddle.codexplainer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import pt.iscte.paddle.codexplainer.CFGGeneration.Visitor;
 import pt.iscte.paddle.interpreter.IArray;
@@ -21,6 +22,7 @@ import pt.iscte.paddle.model.IUnaryOperator;
 import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.cfg.IControlFlowGraph;
+import pt.iscte.paddle.roles.IVariableRole;
 
 public class NLTranslator {
 	
@@ -29,28 +31,39 @@ public class NLTranslator {
 	static class Visitor implements IBlock.IVisitor {
 		
 		ArrayList<String> declaredVariables = new ArrayList<String>(); 
+		Map<IVariable, String> variablesRolesExplanations;
 		StringBuilder explanation = new StringBuilder();
 
+
+		public Visitor(Map<IVariable, String> variablesRolesExplanation) {
+			this.variablesRolesExplanations = variablesRolesExplanation;
+		}
 
 		@Override
 		public boolean visit(IVariableAssignment assignment) {
 			//System.out.println(assignment);
+			//TODO declaration changes
 			explanation.append(assignment +" : ");
 			if (!declaredVariables.contains(assignment.getTarget().toString())) {
 				declaredVariables.add(assignment.getTarget().toString());
 				explanation.append("A variável " + assignment.getTarget().toString() + " é inicializada com o valor igual ");
 				explainVariableAssignment(assignment);
+				if(variablesRolesExplanations.containsKey(assignment.getTarget())) {
+					explanation.append(variablesRolesExplanations.get(assignment.getTarget()));
+				}
 			} else {
 				explanation.append("Vai ser guardado na variável " +  assignment.getTarget().toString() + " o valor ");
 				explainVariableAssignment(assignment);
 			}
 			
+			explanation.append("\n");
 			return false;
 		}
 		
 		@Override
 		public boolean visit(IArrayElementAssignment assignment) {
 			//System.out.println(assignment);
+			explanation.append("\n");
 			return false;
 		}
 		
@@ -60,6 +73,7 @@ public class NLTranslator {
 			explainGuardCondition(expression.getGuard());
 			//System.out.println(expression);
 			//expression,
+			explanation.append("\n");
 			return true;
 		}
 
@@ -69,6 +83,7 @@ public class NLTranslator {
 			IBinaryExpression guard = (IBinaryExpression) expression.getGuard();
 			explainGuardCondition(guard);
 			//System.out.println(expression);
+			explanation.append("\n");
 			return true;
 		}
 		
@@ -101,7 +116,7 @@ public class NLTranslator {
 			}
 			
 			
-			explanation.append("\n");
+			
 			
 			/*
 			if(!(expression instanceof IBinaryExpression)) {
@@ -183,7 +198,6 @@ public class NLTranslator {
 					explanation.append(ExpressionTranslator.translateBinaryExpression(ex));
 				}
 			}
-			explanation.append("\n");
 			
 	
 		}
@@ -192,8 +206,8 @@ public class NLTranslator {
 	}
 	
 	
-	static String getExplanation(IBlock body) {
-		Visitor v = new Visitor();
+	static String getExplanation(IBlock body, Map<IVariable, String> variablesRolesExplanation) {
+		Visitor v = new Visitor(variablesRolesExplanation);
 		body.getOwnerProcedure().accept(v);
 		return v.explanation.toString();
 	}

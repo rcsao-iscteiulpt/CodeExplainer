@@ -45,7 +45,7 @@ public class ExpressionTranslator {
 	
 	static String translateArrayElement(IArrayElement element) {
 			return "à posição " + element.getIndexes().get(0) 
-					+ " do vetor " + element.getTarget() + " ";
+					+ " do vetor " + element.getTarget() + "("+ element+ ")" + " ";
 	}
 	
 	static String translateSimple(IExpression ex) {

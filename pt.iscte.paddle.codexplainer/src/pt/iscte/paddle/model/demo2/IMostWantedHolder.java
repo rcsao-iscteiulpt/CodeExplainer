@@ -18,6 +18,8 @@ import pt.iscte.paddle.roles.IVariableRole;
 public interface IMostWantedHolder extends IVariableRole {
 
 	Operation getOperation();
+	
+	String getRoleExplanation();
 
 	default String getName() {
 		return "MostWantedHolder";
@@ -34,6 +36,8 @@ public interface IMostWantedHolder extends IVariableRole {
 	class Visitor implements IBlock.IVisitor {
 		final IVariable targetVar;
 		IVariable arrayVar;
+		IArrayElement arrayEl;
+		IVariable iterator;
 
 		/**
 		 * Checks if the visited If is inside a while
@@ -60,6 +64,7 @@ public interface IMostWantedHolder extends IVariableRole {
 
 		@Override
 		public boolean visit(ISelection expression) {
+			//Unary Expression
 			IBinaryExpression guard = (IBinaryExpression) expression.getGuard();
 			VarPosition varPos = VarPosition.NONE;
 			IArrayElement expressionVar = null;
@@ -69,17 +74,22 @@ public interface IMostWantedHolder extends IVariableRole {
 				if (guard.getLeftOperand().equals(targetVar)) {
 					varPos = VarPosition.LEFT;
 					expressionVar = (IArrayElement) guard.getRightOperand();
+					arrayEl = expressionVar;
 					aVar = (IVariable) expressionVar.getTarget();
 				}
 				if (guard.getRightOperand().equals(targetVar)) {
 					varPos = VarPosition.RIGHT;
 					expressionVar = (IArrayElement) guard.getLeftOperand();
+					arrayEl = expressionVar;
 					aVar = (IVariable) expressionVar.getTarget();
 				}
+				
+				
 
 				if (!varPos.equals(VarPosition.NONE)) {
 					Operation op = getRelationalOperator(guard, varPos);
 					if (op != null && op != RelOperator) {
+						
 						RelOperator = op;
 						arrayVar = aVar;
 
@@ -106,10 +116,14 @@ public interface IMostWantedHolder extends IVariableRole {
 		void CheckWhileConditions(IProgramElement parent, IVariable aVar) {
 			if (parent instanceof ILoop) {
 				isIfInsideWhile = true;
-				IExpression parentGuard = ((ILoop) parent).getGuard();
-				if (parentGuard.getParts().get(0).equals(aVar) || parentGuard.getParts().get(1).equals(aVar))
+				IBinaryExpression parentGuard = (IBinaryExpression) ((ILoop) parent).getGuard();
+				//TODO Double Condition and Unary Condition
+				if (parentGuard.getLeftOperand().equals(aVar))
 					isArrayVarInWhileGuard = true;
-				arrayVar = aVar;
+					iterator = (IVariable) parentGuard.getRightOperand();
+				if (parentGuard.getRightOperand().equals(aVar))
+					isArrayVarInWhileGuard = true;
+					iterator = (IVariable) parentGuard.getLeftOperand();
 			}
 		}
 
@@ -138,7 +152,6 @@ public interface IMostWantedHolder extends IVariableRole {
 				}
 			}
 		}
-
 	}
 
 	static boolean isMostWantedHolder(IVariable var) {
@@ -149,9 +162,32 @@ public interface IMostWantedHolder extends IVariableRole {
 
 	static class MostWantedHolder implements IMostWantedHolder {
 		private final Operation operator;
+		final IVariable targetVar;
+		IVariable arrayVar;
+		IArrayElement arrayEl;
+		IVariable iterator;
+		
 
-		public MostWantedHolder(Operation operator) {
+		public MostWantedHolder(Operation operator, IVariable targetVar, IVariable arrayVar, IArrayElement arrayEl, IVariable iterator) {
 			this.operator = operator;
+			this.targetVar = targetVar;
+			this.arrayVar = arrayVar;
+			this.arrayEl = arrayEl;
+			this.iterator = iterator;
+		}
+		
+		public String getRoleExplanation() {
+			String s1 = "";
+			String s2 = "";
+			if(operator.equals(Operation.GREATER)) {
+				s1 = "alto";
+				s2 = "maior que";
+			} else {
+				s1 = "baixo";
+				s2 = "menor que";
+			}
+			return ". A variável "+ targetVar + " é um MostWanteHolder cujo objetivo é guardar o valor mais "+ s1 +" de uma dada sequencia de inteiros." + " Neste caso o vetor " + arrayVar 
+					+ " vai ser iterado no while por a variável "+ iterator + " e cada vez que " + arrayEl + " for " + s2 + " " + targetVar+ ", " + targetVar+ " irá guardar o valor de "+ arrayEl + ". Sendo assim, após o while "+ targetVar +" irá conter o valor mais " + s1 + " do vetor " +arrayVar;		
 		}
 
 		@Override
@@ -168,7 +204,7 @@ public interface IMostWantedHolder extends IVariableRole {
 		assert isMostWantedHolder(var);
 		Visitor v = new Visitor(var);
 		var.getOwnerProcedure().accept(v);
-		return new MostWantedHolder(v.RelOperator);
+		return new MostWantedHolder(v.RelOperator, var, v.arrayVar, v.arrayEl, v.iterator);
 	}
 
 	static Operation getRelationalOperator(IBinaryExpression assignment, VarPosition varPos) {

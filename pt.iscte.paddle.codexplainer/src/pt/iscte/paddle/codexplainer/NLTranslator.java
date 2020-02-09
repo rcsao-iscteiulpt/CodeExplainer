@@ -1,46 +1,51 @@
 package pt.iscte.paddle.codexplainer;
 
 import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Map;
 
-import pt.iscte.paddle.codexplainer.CFGGeneration.Visitor;
-import pt.iscte.paddle.interpreter.IArray;
-import pt.iscte.paddle.model.IArrayAllocation;
+
+
 import pt.iscte.paddle.model.IArrayElement;
 import pt.iscte.paddle.model.IArrayElementAssignment;
-import pt.iscte.paddle.model.IArrayLength;
+
 import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBinaryOperator;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.ILiteral;
 import pt.iscte.paddle.model.ILoop;
+import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IUnaryExpression;
-import pt.iscte.paddle.model.IUnaryOperator;
+
 import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.IVariableAssignment;
-import pt.iscte.paddle.model.cfg.IControlFlowGraph;
-import pt.iscte.paddle.roles.IVariableRole;
 
 public class NLTranslator {
 	
 	//static String explanation = "";
+	
 	
 	static class Visitor implements IBlock.IVisitor {
 		
 		ArrayList<String> declaredVariables = new ArrayList<String>(); 
 		Map<IVariable, String> variablesRolesExplanations;
 		StringBuilder explanation = new StringBuilder();
+		int tabLevel = 0;
+		IBlock currentBlock;
+	    boolean alternativeBlock;
 
 
-		public Visitor(Map<IVariable, String> variablesRolesExplanation) {
+		public Visitor(Map<IVariable, String> variablesRolesExplanation, IBlock body) {
 			this.variablesRolesExplanations = variablesRolesExplanation;
+			this.currentBlock = body;
 		}
 
 		@Override
 		public boolean visit(IVariableAssignment assignment) {
+			checkBranch(assignment.getParent());
+			addTabs();
 			//System.out.println(assignment);
 			//TODO declaration changes
 			explanation.append(assignment +" : ");
@@ -52,7 +57,7 @@ public class NLTranslator {
 					explanation.append(variablesRolesExplanations.get(assignment.getTarget()));
 				}
 			} else {
-				explanation.append("Vai ser guardado na variável " +  assignment.getTarget().toString() + " o valor ");
+				explanation.append("Vai ser guardado na variável " +  assignment.getTarget().toString() + " ");
 				explainVariableAssignment(assignment);
 			}
 			
@@ -62,6 +67,8 @@ public class NLTranslator {
 		
 		@Override
 		public boolean visit(IArrayElementAssignment assignment) {
+			checkBranch(assignment.getParent());
+			addTabs();
 			//System.out.println(assignment);
 			explanation.append("\n");
 			return false;
@@ -69,29 +76,74 @@ public class NLTranslator {
 		
 		@Override
 		public boolean visit(ILoop expression) {
-			explanation.append("While : Este while irá continuar a fazer loop enquanto ");
-			explainGuardCondition(expression.getGuard());
-			//System.out.println(expression);
-			//expression,
+			IExpression guard = expression.getGuard();
+			checkBranch(expression.getParent());
+			addTabs();			
+			explanation.append("While("+guard+"): Este while irá continuar a fazer loop enquanto ");
+			explainGuardCondition(guard);
 			explanation.append("\n");
+			addTabs();
+			explanation.append("Condition == True:");
+			explanation.append("\n");
+			tabLevel++;
+			this.currentBlock = expression.getBlock();
 			return true;
 		}
 
 		@Override
 		public boolean visit(ISelection expression) {
-			explanation.append("If : A condição deste If irá devolver true quando ");
-			IBinaryExpression guard = (IBinaryExpression) expression.getGuard();
+			IExpression guard = expression.getGuard();
+			checkBranch(expression.getParent());
+			addTabs();
+			explanation.append("If("+guard+"): A condição deste If irá devolver true quando ");
 			explainGuardCondition(guard);
-			//System.out.println(expression);
 			explanation.append("\n");
+			addTabs();
+			explanation.append("Condition == True:");
+			explanation.append("\n");
+			tabLevel++;
+			
+			if(expression.getAlternativeBlock() != null) {
+				alternativeBlock = true;
+			}
+			this.currentBlock = expression.getBlock();
 			return true;
+		}
+		
+		@Override
+		public boolean visit(IReturn expression) {
+			checkBranch(expression.getParent());
+			addTabs();
+			return false;
+		}
+		
+		void checkBranch(IBlock currentBlock) {
+			if(!currentBlock.equals(this.currentBlock)) {
+				if(alternativeBlock != true) {
+					tabLevel--;
+					this.currentBlock = currentBlock;
+				} else {
+					tabLevel--;
+					addTabs();
+					tabLevel++;
+					explanation.append("Condition == False:");
+					explanation.append("\n");
+					this.currentBlock = currentBlock;
+					alternativeBlock = false;
+				}
+			}
+		}
+		
+		void addTabs() {
+			for(int i = 0; i <  tabLevel; i++) {
+				explanation.append("\t");
+			}
 		}
 		
 		void explainVariableAssignment(IVariableAssignment assignment) {
 			
 			IExpression expression = assignment.getExpression();
-			
-			
+		
 			if(expression instanceof IUnaryExpression) 
 				explanation.append(ExpressionTranslator.translateUnaryExpression((IUnaryExpression)expression));
 			
@@ -207,7 +259,7 @@ public class NLTranslator {
 	
 	
 	static String getExplanation(IBlock body, Map<IVariable, String> variablesRolesExplanation) {
-		Visitor v = new Visitor(variablesRolesExplanation);
+		Visitor v = new Visitor(variablesRolesExplanation, body);
 		body.getOwnerProcedure().accept(v);
 		return v.explanation.toString();
 	}

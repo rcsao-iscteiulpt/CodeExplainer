@@ -13,9 +13,8 @@ public class DemoFunctionClassifier {
 	public static void main(String[] args) {
 		Translator translator = new Translator(new File("max.javali").getAbsolutePath());
 		IModule module = translator.createProgram();
-		IProcedure sum = module.getProcedures().iterator().next(); // first procedure
-		
-		System.out.println(IFunctionClassifier.getClassification(sum.getParameters()));
+		IProcedure method = module.getProcedures().iterator().next(); // first procedure
+		System.out.println(IFunctionClassifier.getClassification(method));
 		}
 	}
 	

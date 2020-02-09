@@ -22,6 +22,8 @@ public class DemoMostWantedHolder {
 			System.out.println(var);
 			if(IMostWantedHolder.isMostWantedHolder(var)) {
 				IVariableRole g = IMostWantedHolder.createMostWantedHolder(var);
+				IMostWantedHolder g1 = (IMostWantedHolder) g;
+				System.out.println(g1.getOperation());
 				System.out.println(var + ": " + g);
 			}
 		}

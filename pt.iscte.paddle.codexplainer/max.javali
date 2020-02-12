@@ -1,4 +1,4 @@
-int max(int[] v) {
+void max(int[] v) {
 	int i = 1;
 	int[] v1 = v;
 	int m = v[0];

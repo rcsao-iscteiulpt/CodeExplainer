@@ -60,7 +60,6 @@ public class NLTranslator {
 				explanation.append("Vai ser guardado na variável " +  assignment.getTarget().toString() + " ");
 				explainVariableAssignment(assignment);
 			}
-			
 			explanation.append("\n");
 			return false;
 		}
@@ -114,6 +113,7 @@ public class NLTranslator {
 		public boolean visit(IReturn expression) {
 			checkBranch(expression.getParent());
 			addTabs();
+			explainReturn(expression);
 			return false;
 		}
 		
@@ -137,6 +137,26 @@ public class NLTranslator {
 		void addTabs() {
 			for(int i = 0; i <  tabLevel; i++) {
 				explanation.append("\t");
+			}
+		}
+		
+		void explainReturn(IReturn ret) {
+			System.out.println(ret.getExpression().getClass());
+			IExpression expression = ret.getExpression();
+			if(ret.isVoid()) {
+				explanation.append("Este return pára a execução do método sem devolver nada");
+			} else {
+				explanation.append("Este return devolve o valor do/a " + ret.getReturnValueType() + " ");
+				if(expression instanceof IBinaryExpression) {
+					explanation.append("de " + ExpressionTranslator.translateBinaryExpression((IBinaryExpression) expression));
+				}
+				if(expression instanceof IUnaryExpression) {
+					//TODO
+				}
+				if(expression instanceof IVariable) {
+					explanation.append(expression);
+				}
+				
 			}
 		}
 		

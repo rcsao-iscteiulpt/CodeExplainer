@@ -9,6 +9,8 @@ import pt.iscte.paddle.javali.translator.Translator;
 
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
+import pt.iscte.paddle.model.IRecordType;
+import pt.iscte.paddle.model.IType;
 import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.cfg.IControlFlowGraph;
 import pt.iscte.paddle.model.demo2.IMostWantedHolder;
@@ -38,7 +40,12 @@ public class ExplanationGenerator {
 	public static void main(String[] args) {
 		Translator translator = new Translator(new File("max.javali").getAbsolutePath());
 		IModule module = translator.createProgram();
+		IRecordType objType = module.addRecordType();
+		IVariable element = objType.addField(IType.INT);
+		
+
 		IProcedure method = module.getProcedures().iterator().next(); // first procedure
+		method.addParameter(objType);
 		//IProcedure max = module.getProcedure();
 		//System.out.println(method);
 		

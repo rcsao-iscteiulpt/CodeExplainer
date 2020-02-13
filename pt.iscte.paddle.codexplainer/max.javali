@@ -1,6 +1,5 @@
-void max(int[] v) {
+void max(int[] v, int x) {
 	int i = 1;
-	int[] v1 = v;
 	int m = v[0];
 	while(i < v.length ) {
 		if(v[i] > m) {

@@ -1,11 +1,11 @@
 package pt.iscte.paddle.model.demo2;
 import java.util.List;
 
-import pt.iscte.paddle.interpreter.IReference;
 import pt.iscte.paddle.model.IArrayElementAssignment;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IRecordFieldAssignment;
+import pt.iscte.paddle.model.IReferenceType;
 import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.IVariableAssignment;
 
@@ -55,7 +55,9 @@ public interface IFunctionClassifier {
 
 	static Status getClassification(IProcedure method) {
 		for(IVariable var: method.getParameters()) {
-			if(!(var.getType() instanceof IReference)) {
+			System.out.println(var.getType());
+			if(!(var.getType() instanceof IReferenceType)) {
+				System.out.println(var);
 				Visitor v = new Visitor(var);
 				var.getOwnerProcedure().accept(v);
 				if (v.isMemoryValueChanged) {

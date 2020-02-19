@@ -23,15 +23,6 @@ public interface IFunctionClassifier {
 		Visitor(IVariable var) {
 			this.var = var;
 		}
-
-		@Override
-		public boolean visit(IVariableAssignment assignment) {
-			//System.out.println(assignment);
-			if (assignment.getTarget().equals(var)) {
-				isMemoryValueChanged = true;
-			}	
-			return false;
-		}
 		
 		@Override
 		public boolean visit(IArrayElementAssignment assignment) {

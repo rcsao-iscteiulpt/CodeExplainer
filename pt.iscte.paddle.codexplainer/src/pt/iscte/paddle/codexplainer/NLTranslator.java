@@ -45,19 +45,18 @@ public class NLTranslator {
 		@Override
 		public boolean visit(IVariableAssignment assignment) {
 			checkBranch(assignment.getParent());
-			addTabs();
 			//System.out.println(assignment);
 			//TODO declaration changes
 			explanation.append(assignment +" : ");
 			if (!declaredVariables.contains(assignment.getTarget().toString())) {
 				declaredVariables.add(assignment.getTarget().toString());
-				explanation.append("A variável " + assignment.getTarget().toString() + " é inicializada com o valor igual ");
+				appendLine("A variável " + assignment.getTarget().toString() + " é inicializada com o valor igual ");
 				explainVariableAssignment(assignment);
 				if(variablesRolesExplanations.containsKey(assignment.getTarget())) {
 					explanation.append(variablesRolesExplanations.get(assignment.getTarget()));
 				}
 			} else {
-				explanation.append("Vai ser guardado na variável " +  assignment.getTarget().toString() + " ");
+				appendLine("Vai ser guardado na variável " +  assignment.getTarget().toString() + " ");
 				explainVariableAssignment(assignment);
 			}
 			explanation.append("\n");
@@ -76,13 +75,9 @@ public class NLTranslator {
 		@Override
 		public boolean visit(ILoop expression) {
 			IExpression guard = expression.getGuard();
-			checkBranch(expression.getParent());
-			addTabs();			
-			explanation.append("While("+guard+"): Este while irá continuar a fazer loop enquanto ");
+			checkBranch(expression.getParent());	
+			appendLine("while("+guard+"): Este ciclo continuará a repetir-se enquanto ");
 			explainGuardCondition(guard);
-			explanation.append("\n");
-			addTabs();
-			explanation.append("Condition == True:");
 			explanation.append("\n");
 			tabLevel++;
 			this.currentBlock = expression.getBlock();
@@ -93,13 +88,10 @@ public class NLTranslator {
 		public boolean visit(ISelection expression) {
 			IExpression guard = expression.getGuard();
 			checkBranch(expression.getParent());
-			addTabs();
-			explanation.append("If("+guard+"): A condição deste If irá devolver true quando ");
+			appendLine("if("+guard+"): ");
 			explainGuardCondition(guard);
 			explanation.append("\n");
-			addTabs();
-			explanation.append("Condition == True:");
-			explanation.append("\n");
+			appendLine("Caso a condição seja verdadeira:" + "\n");
 			tabLevel++;
 			
 			if(expression.getAlternativeBlock() != null) {
@@ -124,10 +116,9 @@ public class NLTranslator {
 					this.currentBlock = currentBlock;
 				} else {
 					tabLevel--;
-					addTabs();
+					appendLine("Caso contrário:" + "\n");
 					tabLevel++;
-					explanation.append("Condition == False:");
-					explanation.append("\n");
+					
 					this.currentBlock = currentBlock;
 					alternativeBlock = false;
 				}
@@ -138,6 +129,11 @@ public class NLTranslator {
 			for(int i = 0; i <  tabLevel; i++) {
 				explanation.append("\t");
 			}
+		}
+		
+		void appendLine(String line) {
+			addTabs();
+			explanation.append(line);
 		}
 		
 		void explainReturn(IReturn ret) {
@@ -187,69 +183,6 @@ public class NLTranslator {
 				explanation.append(ExpressionTranslator.translateSimple(expression));
 			}
 			
-			
-			
-			
-			/*
-			if(!(expression instanceof IBinaryExpression)) {
-				if (!(expression instanceof IArrayElement)) {
-					explanation += expression.toString();
-				} else {
-					IArrayElement element = (IArrayElement) expression;
-					System.out.println();
-					explanation += "à posição " + element.getIndexes().get(0) 
-							+ " do vetor " + element.getTarget();
-				}
-			} else {		
-				IBinaryExpression ex = (IBinaryExpression) expression;
-				IExpression leftEx = ex.getLeftOperand();
-				IExpression rightEx = ex.getRightOperand();
-				
-				if(ex.getOperator().equals(IBinaryOperator.ADD)) {
-					explanation += "à soma dos valores ";
-				}		
-				if(ex.getOperator().equals(IBinaryOperator.SUB)) {
-					explanation += "à subtração entre os valores ";
-				}
-				
-//				List<IExpression> parts = ex.getParts();
-//				for(IExpression e: parts) {
-//					if(e instanceof IArrayElement) {
-//						IArrayElement element = (IArrayElement) e;
-//						explanation += "da posição " + element.getIndexes().get(0) 
-//								+ " do vetor " + element.getTarget();
-//					} else {
-//						explanation += expression.toString();
-//					}
-//					if(!parts.get(parts.size() - 1).equals(e)) {
-//						explanation += " e ";
-//					} else {
-//						explanation += ".";
-//					}
-				
-				if(leftEx instanceof IArrayElement) {
-					IArrayElement leftExArray = (IArrayElement) leftEx;
-					explanation += "o valor da posição " + leftExArray.getIndexes().get(0) 
-							+ " do vetor " + leftExArray.getTarget() + " ";		
-				} else {
-					explanation += "o valor de " + leftEx.toString() + " ";	
-				}
-				
-				explanation += "e ";
-				
-				if(rightEx instanceof IArrayElement) {
-					IArrayElement rightExArray = (IArrayElement) rightEx;
-					explanation += "o valor da posição " + rightExArray.getIndexes().get(0) 
-							+ " do vetor " + rightExArray.getTarget();		
-				} else {
-					explanation += "o valor de " + rightEx.toString();	
-				}
-				
-						
-				
-			}
-			explanation += "\n";
-			*/
 		}
 
 		

@@ -20,13 +20,15 @@ public interface IMostWantedHolder extends IVariableRole {
 	Operation getOperation();
 	
 	String getRoleExplanation();
+	
+	IVariable getTargetArray();
 
 	default String getName() {
 		return "MostWantedHolder";
 	}
 
 	enum Operation {
-		GREATER, SMALLER;
+		GREATER, SMALLER, UNDEFINED;
 	}
 
 	enum VarPosition {
@@ -186,7 +188,7 @@ public interface IMostWantedHolder extends IVariableRole {
 				s1 = "baixo";
 				s2 = "menor que";
 			}
-			return "\nFunção da Variável: A variável "+ targetVar + " é um MostWanteHolder cujo objetivo é guardar o valor mais "+ s1 +" de uma dada sequencia de inteiros." + "\n" + "Neste caso o vetor " + arrayVar 
+			return "\nFunção da Variável: A variável "+ targetVar + " é um MostWanteHolder cujo objetivo é guardar o valor mais "+ s1 +" de um certo conjunto de valores." + "\n" + "Neste caso, o vetor " + arrayVar 
 					+ " vai ser iterado no while por a variável "+ iterator + " e cada vez que " + arrayEl + " for " + s2 + " " + targetVar+ ", " + targetVar+ " irá guardar o valor de "+ arrayEl + "\nSendo assim, após o while "+ targetVar +" irá conter o valor mais " + s1 + " do vetor " +arrayVar+".";		
 		}
 
@@ -197,6 +199,11 @@ public interface IMostWantedHolder extends IVariableRole {
 
 		public String toString() {
 			return getName() + "(" + getOperation() + ")";
+		}
+
+		@Override
+		public IVariable getTargetArray() {
+			return arrayVar; 
 		}
 	}
 

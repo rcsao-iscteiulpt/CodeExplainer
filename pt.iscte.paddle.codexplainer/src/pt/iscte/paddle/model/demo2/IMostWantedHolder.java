@@ -19,8 +19,6 @@ public interface IMostWantedHolder extends IVariableRole {
 
 	Operation getOperation();
 	
-	String getRoleExplanation();
-	
 	IVariable getTargetArray();
 
 	default String getName() {
@@ -163,35 +161,20 @@ public interface IMostWantedHolder extends IVariableRole {
 	}
 
 	static class MostWantedHolder implements IMostWantedHolder {
-		private final Operation operator;
+	    final Operation operator;
 		final IVariable targetVar;
 		IVariable arrayVar;
 		IArrayElement arrayEl;
-		IVariable iterator;
 		
 
-		public MostWantedHolder(Operation operator, IVariable targetVar, IVariable arrayVar, IArrayElement arrayEl, IVariable iterator) {
+		public MostWantedHolder(Operation operator, IVariable targetVar, IVariable arrayVar, IArrayElement arrayEl) {
 			this.operator = operator;
 			this.targetVar = targetVar;
 			this.arrayVar = arrayVar;
 			this.arrayEl = arrayEl;
-			this.iterator = iterator;
 		}
 		
-		public String getRoleExplanation() {
-			String s1 = "";
-			String s2 = "";
-			if(operator.equals(Operation.GREATER)) {
-				s1 = "alto";
-				s2 = "maior que";
-			} else {
-				s1 = "baixo";
-				s2 = "menor que";
-			}
-			return "\nFunção da Variável: A variável "+ targetVar + " é um MostWanteHolder cujo objetivo é guardar o valor mais "+ s1 +" de um certo conjunto de valores." + "\n" + "Neste caso, o vetor " + arrayVar 
-					+ " vai ser iterado no while por a variável "+ iterator + " e cada vez que " + arrayEl + " for " + s2 + " " + targetVar+ ", " + targetVar+ " irá guardar o valor de "+ arrayEl + "\nSendo assim, após o while "+ targetVar +" irá conter o valor mais " + s1 + " do vetor " +arrayVar+".";		
-		}
-
+		
 		@Override
 		public Operation getOperation() {
 			return operator;
@@ -211,7 +194,7 @@ public interface IMostWantedHolder extends IVariableRole {
 		assert isMostWantedHolder(var);
 		Visitor v = new Visitor(var);
 		var.getOwnerProcedure().accept(v);
-		return new MostWantedHolder(v.RelOperator, var, v.arrayVar, v.arrayEl, v.iterator);
+		return new MostWantedHolder(v.RelOperator, var, v.arrayVar, v.arrayEl);
 	}
 
 	static Operation getRelationalOperator(IBinaryExpression assignment, VarPosition varPos) {

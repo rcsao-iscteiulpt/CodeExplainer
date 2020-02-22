@@ -36,7 +36,11 @@ public interface IFunctionClassifier {
 		@Override
 		public boolean visit(IRecordFieldAssignment assignment) {
 			//TODO Untested
-			if (assignment.getTarget().equals(var)) {
+			IRecordFieldAssignment tempAssignment = assignment;
+			while(tempAssignment.getTarget() != null || !tempAssignment.getTarget().equals(var)) {
+				tempAssignment = (IRecordFieldAssignment) tempAssignment.getTarget();
+			}
+			if (tempAssignment.getTarget().equals(var)) {
 				isMemoryValueChanged = true;
 			}	
 			return false;
@@ -46,9 +50,9 @@ public interface IFunctionClassifier {
 
 	static Status getClassification(IProcedure method) {
 		for(IVariable var: method.getParameters()) {
-			System.out.println(var.getType());
+			//System.out.println(var.getType());
 			if(!(var.getType() instanceof IReferenceType)) {
-				System.out.println(var);
+				//System.out.println(var);
 				Visitor v = new Visitor(var);
 				var.getOwnerProcedure().accept(v);
 				if (v.isMemoryValueChanged) {

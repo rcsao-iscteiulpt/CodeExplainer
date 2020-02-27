@@ -5,8 +5,8 @@ import pt.iscte.paddle.javali.translator.Translator;
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IVariable;
-import pt.iscte.paddle.roles.IGatherer;
-import pt.iscte.paddle.roles.IVariableRole;
+import pt.iscte.paddle.model.roles.IVariableRole;
+
 
 
 
@@ -20,8 +20,8 @@ public class DemoMostWantedHolder {
 
 		for (IVariable var : sum.getVariables()) {
 			System.out.println(var);
-			if(IMostWantedHolder.isMostWantedHolder(var)) {
-				IVariableRole g = IMostWantedHolder.createMostWantedHolder(var);
+			if(MostWantedHolder.isMostWantedHolder(var)) {
+				IVariableRole g = new MostWantedHolder(var);
 				IMostWantedHolder g1 = (IMostWantedHolder) g;
 				System.out.println(g1.getOperation());
 				System.out.println(var + ": " + g);

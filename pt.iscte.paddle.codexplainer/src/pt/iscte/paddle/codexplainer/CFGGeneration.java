@@ -14,7 +14,6 @@ import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.cfg.IControlFlowGraph;
 import pt.iscte.paddle.model.cfg.IStatementNode;
-import pt.iscte.paddle.roles.IVariableRole;
 
 /**
  * An experimentation to generate a Control Flow graph for a method(still incomplete)

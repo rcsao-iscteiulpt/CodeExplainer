@@ -2,9 +2,8 @@ package pt.iscte.paddle.model.demo2;
 
 import pt.iscte.paddle.model.IArrayElement;
 import pt.iscte.paddle.model.IVariable;
-import pt.iscte.paddle.model.demo2.IMostWantedHolder.MostWantedHolder;
 import pt.iscte.paddle.model.demo2.IMostWantedHolder.Operation;
-import pt.iscte.paddle.roles.IVariableRole;
+import pt.iscte.paddle.model.roles.IVariableRole;
 
 public class IVariableRoleExplainer {
 

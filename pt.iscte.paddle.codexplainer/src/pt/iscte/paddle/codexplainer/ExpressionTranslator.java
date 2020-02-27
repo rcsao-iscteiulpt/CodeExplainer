@@ -1,51 +1,127 @@
 package pt.iscte.paddle.codexplainer;
 
 import pt.iscte.paddle.model.IArrayElement;
+import pt.iscte.paddle.model.IArrayLength;
 import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBinaryOperator;
 import pt.iscte.paddle.model.IExpression;
+import pt.iscte.paddle.model.ILiteral;
 import pt.iscte.paddle.model.IUnaryExpression;
 import pt.iscte.paddle.model.IUnaryOperator;
 import pt.iscte.paddle.model.IVariable;
-
+import pt.iscte.paddle.model.IVariableAssignment;
+import pt.iscte.paddle.model.IType;
 
 
 public class ExpressionTranslator {
 
 	
-	static String translateBinaryExpression(IBinaryExpression ex) {
-		String s = "";
-		IExpression leftEx = ex.getLeftOperand();
-		IExpression rightEx = ex.getRightOperand();
+	static String TranslateDeclaration(IVariableAssignment assignment) {
+		StringBuilder g = new StringBuilder();
 		
-		if(leftEx instanceof IArrayElement) {
-			IArrayElement leftExArray = (IArrayElement) leftEx;
-			s += translateArrayElement(leftExArray);	
-		} else {
-			s += "o valor de " + leftEx.toString() + " ";	
-		}
-		
-		s += translateOperator(ex.getOperator());
-		
-		if(rightEx instanceof IArrayElement) {
-			IArrayElement rightExArray = (IArrayElement) rightEx;
-			s += translateArrayElement(rightExArray);	
-		} else {
-			s += "o valor de " + rightEx.toString() + " ";	
-		}
-
-		return s;
+		return g.toString();	
 	}
 	
-	static String translateUnaryExpression(IUnaryExpression ex) {
+	static String TranslateVariableAssignment(IVariableAssignment assignment) {
+		StringBuilder g = new StringBuilder();
+		
+		
+		return g.toString();	
+	}
+	
+	static String translateBinaryExpression(IBinaryExpression ex) {
+		StringBuilder g = new StringBuilder();
+		IExpression leftEx = ex.getLeftOperand();
+		IExpression rightEx = ex.getRightOperand();
+
+		String specialCase = CheckBinaryExpressionSpecialCases(ex);
+		if (!specialCase.equals("")) {
+			g.append(specialCase);
+		} else {
+
+			if (leftEx instanceof IArrayElement) {
+				IArrayElement leftExArray = (IArrayElement) leftEx;
+				g.append(translateArrayElement(leftExArray));
+			} else {
+				g.append("o valor de " + leftEx.toString() + " ");
+			}
+
+			g.append(translateOperator(ex.getOperator()));
+
+			if (rightEx instanceof IArrayElement) {
+				IArrayElement rightExArray = (IArrayElement) rightEx;
+				g.append(translateArrayElement(rightExArray));
+			} else {
+				g.append("o valor de " + rightEx.toString() + " ");
+			}
+
+		}
+
+		return g.toString();
+	}
+	
+	static String CheckBinaryExpressionSpecialCases(IBinaryExpression ex) {
+		StringBuilder g = new StringBuilder();
+		IExpression leftEx = ex.getLeftOperand();
+		IExpression rightEx = ex.getRightOperand();
+		System.out.println(rightEx.getType());
+		
+		
+		//array positions
+		ILiteral l = null;
+		IArrayLength aLenght = null;
+		if(leftEx instanceof IArrayLength && rightEx instanceof ILiteral && ex.getOperator().equals(IBinaryOperator.SUB)) {
+			aLenght = (IArrayLength) leftEx; 
+			l = (ILiteral) rightEx;
+			
+		}
+		
+		if(rightEx instanceof IArrayLength && leftEx instanceof ILiteral && ex.getOperator().equals(IBinaryOperator.SUB)) {
+			aLenght = (IArrayLength) rightEx; 
+			l = (ILiteral) leftEx;
+			
+		}
+		
+		if(l != null) {
+			if(l.getStringValue().equals("1")) {
+				g.append("a última posição do vetor " + aLenght.getVariable());
+			}
+			if(l.getStringValue().equals("2")) {
+				g.append("a penúltima posição do vetor " + aLenght.getVariable());
+			}
+		}
+		
+		
+		
+		
+		
+		return g.toString();
+	}
+	
+	public static String translateUnaryExpression(IUnaryExpression ex) {
 		//TODO
 		return null;	
 	}
 	
 	
-	static String translateArrayElement(IArrayElement element) {
-			return "à posição " + element.getIndexes().get(0) 
-					+ " do vetor " + element.getTarget() + "("+ element+ ")" + " ";
+	public static String translateArrayElement(IArrayElement element) {
+		StringBuilder g = new StringBuilder();
+		IExpression e = element.getIndexes().get(0);
+		
+		if(element.getIndexes().get(0) instanceof IBinaryExpression) {
+			IBinaryExpression ex = (IBinaryExpression) e;
+			g.append(translateBinaryExpression(ex));
+		} else {
+			if(e.equals(IType.INT.literal(0))) {
+				g.append("a primeira posição do vetor " + element.getTarget());
+			} else {
+				g.append("à posição " + element.getIndexes().get(0) + " do vetor " 
+									+ element.getTarget() + "("+ element+ ")" + " ");
+			}
+		}
+		
+		
+		return g.toString();
 	}
 	
 	static String translateSimple(IExpression ex) {

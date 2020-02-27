@@ -56,7 +56,7 @@ public class NLTranslator {
 					explanation.append(variablesRolesExplanations.get(assignment.getTarget()));
 				}
 			} else {
-				appendLine("Vai ser guardado na variável " +  assignment.getTarget().toString() + " ");
+				
 				explainVariableAssignment(assignment);
 			}
 			explanation.append("\n");
@@ -158,8 +158,10 @@ public class NLTranslator {
 		
 		void explainVariableAssignment(IVariableAssignment assignment) {
 			
+			IVariable target = assignment.getTarget();
 			IExpression expression = assignment.getExpression();
 		
+			
 			if(expression instanceof IUnaryExpression) 
 				explanation.append(ExpressionTranslator.translateUnaryExpression((IUnaryExpression)expression));
 			

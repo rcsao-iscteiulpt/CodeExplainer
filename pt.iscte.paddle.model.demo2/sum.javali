@@ -1,9 +1,0 @@
-int sum(int[] v) {	
-	int i = 0;
-	int g = 0;
-	while(i < v.length) {
-		i = i + v[i];
-		g = g + 1;
-	}
-	return i;
-}

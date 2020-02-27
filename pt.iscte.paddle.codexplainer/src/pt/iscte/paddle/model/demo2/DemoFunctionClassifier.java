@@ -12,7 +12,6 @@ import pt.iscte.paddle.model.IRecordType;
 import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.IType;
 import pt.iscte.paddle.model.IVariable;
-import pt.iscte.paddle.roles.IVariableRole;
 
 
 public class DemoFunctionClassifier {
@@ -24,21 +23,22 @@ public class DemoFunctionClassifier {
 		
 		IRecordType objTypeParent = module.addRecordType();
 		IRecordType objType = module.addRecordType();
+		IVariable a = objTypeParent.addField(objType);
+		a.setId("field1");
 		
-		
-		objType.setId("Object");
-		IVariable element = objType.addField(IType.INT);
-		element.setId("field");
+		IVariable b = objType.addField(IType.INT);
+		b.setId("field2");
 		
 		IProcedure proc2 = module.addProcedure(IType.VOID);
 		IBlock block2 = proc2.getBody();
 		IVariable param = proc2.addParameter(objType.reference());
 		IVariable param2 = proc2.addParameter(objTypeParent.reference());
 		param.setId("parameter");
-		IRecordFieldAssignment recordAssignment =  block2.addRecordFieldAssignment(param.field(element), IType.INT.literal(7));
+		IRecordFieldAssignment recordAssignment =  block2.addRecordFieldAssignment(param2.field(a).field(b), IType.INT.literal(7));
 		//IRecordFieldAssignment recordAssignment2 =  block2.addRecordFieldAssignment(recordAssignment, IType.INT.literal(7));
 		System.out.println(recordAssignment.getField());
 		System.out.println(recordAssignment.getTarget().getTarget());
+		System.out.println(recordAssignment.getTarget());
 		
 		//objType.addField(IType.INT);
 		System.out.println(proc2);

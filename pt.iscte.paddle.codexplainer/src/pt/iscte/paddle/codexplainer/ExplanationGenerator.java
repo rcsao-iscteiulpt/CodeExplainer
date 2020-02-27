@@ -14,9 +14,9 @@ import pt.iscte.paddle.model.IType;
 import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.cfg.IControlFlowGraph;
 import pt.iscte.paddle.model.demo2.IMostWantedHolder;
-import pt.iscte.paddle.model.demo2.IMostWantedHolder.MostWantedHolder;
+import pt.iscte.paddle.model.demo2.MostWantedHolder;
+import pt.iscte.paddle.model.roles.IVariableRole;
 import pt.iscte.paddle.model.demo2.IVariableRoleExplainer;
-import pt.iscte.paddle.roles.IVariableRole;
 
 
 public class ExplanationGenerator {
@@ -25,8 +25,9 @@ public class ExplanationGenerator {
 	
 	private static void getVariableRole(IVariable var) {
 
-		if(IMostWantedHolder.isMostWantedHolder(var)) {
-			IVariableRole role =  IMostWantedHolder.createMostWantedHolder(var);
+		if(MostWantedHolder.isMostWantedHolder(var)) {
+			//System.out.println(var);
+			IVariableRole role =  new MostWantedHolder(var);
 			variablesRolesExplanation.put(var, IVariableRoleExplainer.getMostWantedHolderExplanation(role));
 		}
 		
@@ -40,7 +41,7 @@ public class ExplanationGenerator {
 	
 
 	public static void main(String[] args) {
-		Translator translator = new Translator(new File("max.javali").getAbsolutePath());
+		Translator translator = new Translator(new File("TestFunctions/max.javali").getAbsolutePath());
 		IModule module = translator.createProgram();
 		IRecordType objType = module.addRecordType();
 		IVariable element = objType.addField(IType.INT);

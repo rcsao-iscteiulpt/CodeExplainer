@@ -2,8 +2,9 @@ package pt.iscte.paddle.model.demo2;
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IVariable;
-import pt.iscte.paddle.roles.IGatherer;
-import pt.iscte.paddle.roles.IVariableRole;
+import pt.iscte.paddle.model.roles.impl.Gatherer;
+import pt.iscte.paddle.model.roles.IVariableRole;
+
 
 public class DemoGatherer {
 
@@ -12,8 +13,8 @@ public class DemoGatherer {
 		IProcedure sum = Examples.createArraySumFunction(module);
 
 		for (IVariable var : sum.getVariables()) {
-			if(IGatherer.isGatherer(var)) {
-				IVariableRole g = IGatherer.createGatherer(var);
+			if(Gatherer.isGatherer(var)) {
+				IVariableRole g = new Gatherer(var);
 				System.out.println(var + ": " + g);
 			}
 		}

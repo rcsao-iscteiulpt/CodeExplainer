@@ -5,7 +5,7 @@ import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.demo2.IMostWantedHolder.Operation;
 import pt.iscte.paddle.model.roles.IVariableRole;
 
-public class IVariableRoleExplainer {
+public class VariableRoleExplainer {
 
 	
 	public static String getMostWantedHolderExplanation(IVariableRole role) {

@@ -5,6 +5,7 @@ import pt.iscte.paddle.model.IArrayElementAssignment;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IRecordFieldAssignment;
+import pt.iscte.paddle.model.IRecordFieldExpression;
 import pt.iscte.paddle.model.IReferenceType;
 import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.IVariableAssignment;
@@ -36,11 +37,13 @@ public interface IFunctionClassifier {
 		@Override
 		public boolean visit(IRecordFieldAssignment assignment) {
 			//TODO Untested
-			IRecordFieldAssignment tempAssignment = assignment;
-			while(tempAssignment.getTarget() != null || !tempAssignment.getTarget().equals(var)) {
-				tempAssignment = (IRecordFieldAssignment) tempAssignment.getTarget();
+			IRecordFieldExpression tempTarget = assignment.getTarget();
+			
+			
+			while(tempTarget.getTarget() != null && !(tempTarget.getTarget() instanceof IVariable)) {
+				tempTarget = (IRecordFieldExpression) tempTarget.getTarget();
 			}
-			if (tempAssignment.getTarget().equals(var)) {
+			if (tempTarget.getTarget().equals(var)) {
 				isMemoryValueChanged = true;
 			}	
 			return false;
@@ -51,7 +54,7 @@ public interface IFunctionClassifier {
 	static Status getClassification(IProcedure method) {
 		for(IVariable var: method.getParameters()) {
 			//System.out.println(var.getType());
-			if(!(var.getType() instanceof IReferenceType)) {
+			if(var.getType() instanceof IReferenceType) {
 				//System.out.println(var);
 				Visitor v = new Visitor(var);
 				var.getOwnerProcedure().accept(v);

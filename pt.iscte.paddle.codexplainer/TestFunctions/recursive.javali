@@ -1,0 +1,5 @@
+void max(int[] v) {
+	int i = 1;
+	
+	return max(v);
+}

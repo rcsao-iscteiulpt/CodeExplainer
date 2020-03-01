@@ -16,7 +16,7 @@ import pt.iscte.paddle.model.cfg.IControlFlowGraph;
 import pt.iscte.paddle.model.demo2.IMostWantedHolder;
 import pt.iscte.paddle.model.demo2.MostWantedHolder;
 import pt.iscte.paddle.model.roles.IVariableRole;
-import pt.iscte.paddle.model.demo2.IVariableRoleExplainer;
+import pt.iscte.paddle.model.demo2.VariableRoleExplainer;
 
 
 public class ExplanationGenerator {
@@ -28,7 +28,7 @@ public class ExplanationGenerator {
 		if(MostWantedHolder.isMostWantedHolder(var)) {
 			//System.out.println(var);
 			IVariableRole role =  new MostWantedHolder(var);
-			variablesRolesExplanation.put(var, IVariableRoleExplainer.getMostWantedHolderExplanation(role));
+			variablesRolesExplanation.put(var, VariableRoleExplainer.getMostWantedHolderExplanation(role));
 		}
 		
 //		if(IGatherer.isGatherer(var)) {

@@ -157,7 +157,7 @@ public class NLTranslator {
 		}
 		
 		void explainVariableAssignment(IVariableAssignment assignment) {
-			
+			//assignment.is
 			IVariable target = assignment.getTarget();
 			IExpression expression = assignment.getExpression();
 		

@@ -1,15 +1,10 @@
 package pt.iscte.paddle.model.demo2;
-import java.io.File;
 
-import pt.iscte.paddle.javali.translator.Translator;
 import pt.iscte.paddle.model.IBlock;
-import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IRecordFieldAssignment;
-import pt.iscte.paddle.model.IRecordFieldExpression;
 import pt.iscte.paddle.model.IRecordType;
-import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.IType;
 import pt.iscte.paddle.model.IVariable;
 

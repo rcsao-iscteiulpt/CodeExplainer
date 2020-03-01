@@ -42,8 +42,15 @@ public class ExpressionTranslator {
 			if (leftEx instanceof IArrayElement) {
 				IArrayElement leftExArray = (IArrayElement) leftEx;
 				g.append(translateArrayElement(leftExArray));
-			} else {
+			}	
+			if (leftEx instanceof IArrayLength) {
 				g.append("o valor de " + leftEx.toString() + " ");
+			}
+			if (leftEx instanceof IVariable) {
+				g.append("o valor de " + leftEx.toString() + " ");
+			}
+			if (leftEx instanceof ILiteral) {
+				g.append(leftEx.toString() + " ");
 			}
 
 			g.append(translateOperator(ex.getOperator()));
@@ -51,8 +58,15 @@ public class ExpressionTranslator {
 			if (rightEx instanceof IArrayElement) {
 				IArrayElement rightExArray = (IArrayElement) rightEx;
 				g.append(translateArrayElement(rightExArray));
-			} else {
+			}	
+			if (rightEx instanceof IArrayLength) {
 				g.append("o valor de " + rightEx.toString() + " ");
+			}
+			if (rightEx instanceof IVariable) {
+				g.append("o valor de " + rightEx.toString() + " ");
+			}
+			if (rightEx instanceof ILiteral) {
+				g.append(rightEx.toString() + " ");
 			}
 
 		}
@@ -90,13 +104,17 @@ public class ExpressionTranslator {
 				g.append("a penúltima posição do vetor " + aLenght.getVariable());
 			}
 		}
-		
-		
-		
-		
-		
 		return g.toString();
 	}
+	
+	static String CheckAssignmentsSpecialCases(IVariable ex) {
+		
+		//TODO
+		return null;
+		
+		
+	}
+	
 	
 	public static String translateUnaryExpression(IUnaryExpression ex) {
 		//TODO

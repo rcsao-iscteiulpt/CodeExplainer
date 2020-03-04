@@ -26,15 +26,11 @@ public class DemoFunctionClassifier {
 		
 		IProcedure proc2 = module.addProcedure(IType.VOID);
 		IBlock block2 = proc2.getBody();
-		IVariableDeclaration param = proc2.addParameter(objType.reference());
 		IVariableDeclaration param2 = proc2.addParameter(objTypeParent.reference());
-		param.setId("parameter");
+		param2.setId("parameter");
 		IRecordFieldAssignment recordAssignment =  block2.addRecordFieldAssignment(param2.field(a).field(b), IType.INT.literal(7));
 		//IRecordFieldAssignment recordAssignment2 =  block2.addRecordFieldAssignment(recordAssignment, IType.INT.literal(7));
-		System.out.println(recordAssignment.getField());
-		System.out.println(recordAssignment.getTarget().getTarget());
-		System.out.println(recordAssignment.getTarget());
-		
+
 		//objType.addField(IType.INT);
 		System.out.println(proc2);
 

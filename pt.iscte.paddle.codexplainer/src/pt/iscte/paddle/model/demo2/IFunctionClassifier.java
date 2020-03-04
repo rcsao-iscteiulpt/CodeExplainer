@@ -8,6 +8,7 @@ import pt.iscte.paddle.model.IRecordFieldAssignment;
 import pt.iscte.paddle.model.IRecordFieldExpression;
 import pt.iscte.paddle.model.IReferenceType;
 import pt.iscte.paddle.model.IVariableDeclaration;
+import pt.iscte.paddle.model.IVariableExpression;
 
 public interface IFunctionClassifier {
 
@@ -16,12 +17,12 @@ public interface IFunctionClassifier {
 	}
 
 	class Visitor implements IBlock.IVisitor {
-		IVariableDeclaration var;
+		IVariableExpression var;
 
 		Boolean isMemoryValueChanged = false;
 
 		Visitor(IVariableDeclaration var) {
-			this.var = var;
+			this.var = var.expression();
 		}
 		
 		@Override
@@ -39,10 +40,10 @@ public interface IFunctionClassifier {
 			IRecordFieldExpression tempTarget = assignment.getTarget();
 			
 			
-			while(tempTarget.getTarget() != null && !(tempTarget.getTarget() instanceof IVariableDeclaration)) {
+			while(tempTarget.getTarget() != null && !(tempTarget.getTarget() instanceof IVariableExpression)) {
 				tempTarget = (IRecordFieldExpression) tempTarget.getTarget();
 			}
-			if (tempTarget.getTarget().equals(var)) {
+			if (tempTarget.getTarget().toString().equals(var.toString())) {
 				isMemoryValueChanged = true;
 			}	
 			return false;
@@ -54,7 +55,7 @@ public interface IFunctionClassifier {
 		for(IVariableDeclaration var: method.getParameters()) {
 			//System.out.println(var.getType());
 			if(var.getType() instanceof IReferenceType) {
-				//System.out.println(var);
+				System.out.println(var);
 				Visitor v = new Visitor(var);
 				var.getOwnerProcedure().accept(v);
 				if (v.isMemoryValueChanged) {

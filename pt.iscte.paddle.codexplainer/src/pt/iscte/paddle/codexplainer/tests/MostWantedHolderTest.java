@@ -2,14 +2,12 @@ package pt.iscte.paddle.codexplainer.tests;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
-import java.util.Iterator;
 
 import org.junit.jupiter.api.Test;
 
 import pt.iscte.paddle.javali.translator.Translator;
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
-import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.demo2.MostWantedHolder;
 
 class MostWantedHolderTest {

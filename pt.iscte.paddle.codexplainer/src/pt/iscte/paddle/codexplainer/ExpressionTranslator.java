@@ -8,7 +8,8 @@ import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.ILiteral;
 import pt.iscte.paddle.model.IUnaryExpression;
 import pt.iscte.paddle.model.IUnaryOperator;
-import pt.iscte.paddle.model.IVariable;
+import pt.iscte.paddle.model.IVariableDeclaration;
+import pt.iscte.paddle.model.IVariableExpression;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IType;
 
@@ -33,7 +34,6 @@ public class ExpressionTranslator {
 		StringBuilder g = new StringBuilder();
 		IExpression leftEx = ex.getLeftOperand();
 		IExpression rightEx = ex.getRightOperand();
-
 		String specialCase = CheckBinaryExpressionSpecialCases(ex);
 		if (!specialCase.equals("")) {
 			g.append(specialCase);
@@ -44,9 +44,9 @@ public class ExpressionTranslator {
 				g.append(translateArrayElement(leftExArray));
 			}	
 			if (leftEx instanceof IArrayLength) {
-				g.append("o valor de " + leftEx.toString() + " ");
+				g.append("o valor do tamanho do array " + ((IArrayLength)leftEx).getTarget() + " ");
 			}
-			if (leftEx instanceof IVariable) {
+			if (leftEx instanceof IVariableExpression) {
 				g.append("o valor de " + leftEx.toString() + " ");
 			}
 			if (leftEx instanceof ILiteral) {
@@ -54,15 +54,14 @@ public class ExpressionTranslator {
 			}
 
 			g.append(translateOperator(ex.getOperator()));
-
 			if (rightEx instanceof IArrayElement) {
 				IArrayElement rightExArray = (IArrayElement) rightEx;
 				g.append(translateArrayElement(rightExArray));
 			}	
 			if (rightEx instanceof IArrayLength) {
-				g.append("o valor de " + rightEx.toString() + " ");
+				g.append("o valor do tamanho do array " + ((IArrayLength)rightEx).getTarget() + " ");
 			}
-			if (rightEx instanceof IVariable) {
+			if (rightEx instanceof IVariableExpression) {
 				g.append("o valor de " + rightEx.toString() + " ");
 			}
 			if (rightEx instanceof ILiteral) {
@@ -78,7 +77,7 @@ public class ExpressionTranslator {
 		StringBuilder g = new StringBuilder();
 		IExpression leftEx = ex.getLeftOperand();
 		IExpression rightEx = ex.getRightOperand();
-		System.out.println(rightEx.getType());
+	
 		
 		
 		//array positions
@@ -98,16 +97,16 @@ public class ExpressionTranslator {
 		
 		if(l != null) {
 			if(l.getStringValue().equals("1")) {
-				g.append("a última posição do vetor " + aLenght.getVariable());
+				g.append("última posição do vetor " + aLenght.getTarget());
 			}
 			if(l.getStringValue().equals("2")) {
-				g.append("a penúltima posição do vetor " + aLenght.getVariable());
+				g.append("penúltima posição do vetor " + aLenght.getTarget());
 			}
 		}
 		return g.toString();
 	}
 	
-	static String CheckAssignmentsSpecialCases(IVariable ex) {
+	static String CheckAssignmentsSpecialCases(IVariableAssignment ex) {
 		
 		//TODO
 		return null;
@@ -131,10 +130,10 @@ public class ExpressionTranslator {
 			g.append(translateBinaryExpression(ex));
 		} else {
 			if(e.equals(IType.INT.literal(0))) {
-				g.append("a primeira posição do vetor " + element.getTarget());
+				g.append("primeira posição do vetor " + element.getTarget() +" ");
 			} else {
-				g.append("à posição " + element.getIndexes().get(0) + " do vetor " 
-									+ element.getTarget() + "("+ element+ ")" + " ");
+				g.append("posição " + element.getIndexes().get(0) + " do vetor " 
+									+ element.getTarget() +" ");
 			}
 		}
 		

@@ -1,7 +1,7 @@
 package pt.iscte.paddle.model.demo2;
 
 import pt.iscte.paddle.model.IArrayElement;
-import pt.iscte.paddle.model.IVariable;
+import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.demo2.IMostWantedHolder.Operation;
 import pt.iscte.paddle.model.roles.IVariableRole;
 
@@ -11,8 +11,8 @@ public class VariableRoleExplainer {
 	public static String getMostWantedHolderExplanation(IVariableRole role) {
 		MostWantedHolder mostWantedHolder = (MostWantedHolder) role;
 		Operation operator = mostWantedHolder.operator;
-	    IVariable targetVar = mostWantedHolder.targetVar;
-	    IVariable arrayVar = mostWantedHolder.arrayVar;
+	    IVariableDeclaration targetVar = mostWantedHolder.targetVar;
+	    IVariableDeclaration arrayVar = mostWantedHolder.arrayVar;
 		IArrayElement arrayEl = mostWantedHolder.arrayEl;
 		
 		String s1 = "";

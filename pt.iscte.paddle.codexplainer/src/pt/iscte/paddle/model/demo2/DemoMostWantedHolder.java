@@ -4,7 +4,7 @@ import java.io.File;
 import pt.iscte.paddle.javali.translator.Translator;
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
-import pt.iscte.paddle.model.IVariable;
+import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.roles.IVariableRole;
 
 
@@ -18,7 +18,7 @@ public class DemoMostWantedHolder {
 		IProcedure sum = module.getProcedures().iterator().next(); // first procedure
 		System.out.println(sum);
 
-		for (IVariable var : sum.getVariables()) {
+		for (IVariableDeclaration var : sum.getVariables()) {
 			System.out.println(var);
 			if(MostWantedHolder.isMostWantedHolder(var)) {
 				IVariableRole g = new MostWantedHolder(var);

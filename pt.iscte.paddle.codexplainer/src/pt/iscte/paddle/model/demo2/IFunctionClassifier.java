@@ -7,8 +7,7 @@ import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IRecordFieldAssignment;
 import pt.iscte.paddle.model.IRecordFieldExpression;
 import pt.iscte.paddle.model.IReferenceType;
-import pt.iscte.paddle.model.IVariable;
-import pt.iscte.paddle.model.IVariableAssignment;
+import pt.iscte.paddle.model.IVariableDeclaration;
 
 public interface IFunctionClassifier {
 
@@ -17,11 +16,11 @@ public interface IFunctionClassifier {
 	}
 
 	class Visitor implements IBlock.IVisitor {
-		IVariable var;
+		IVariableDeclaration var;
 
 		Boolean isMemoryValueChanged = false;
 
-		Visitor(IVariable var) {
+		Visitor(IVariableDeclaration var) {
 			this.var = var;
 		}
 		
@@ -40,7 +39,7 @@ public interface IFunctionClassifier {
 			IRecordFieldExpression tempTarget = assignment.getTarget();
 			
 			
-			while(tempTarget.getTarget() != null && !(tempTarget.getTarget() instanceof IVariable)) {
+			while(tempTarget.getTarget() != null && !(tempTarget.getTarget() instanceof IVariableDeclaration)) {
 				tempTarget = (IRecordFieldExpression) tempTarget.getTarget();
 			}
 			if (tempTarget.getTarget().equals(var)) {
@@ -52,7 +51,7 @@ public interface IFunctionClassifier {
 	}
 
 	static Status getClassification(IProcedure method) {
-		for(IVariable var: method.getParameters()) {
+		for(IVariableDeclaration var: method.getParameters()) {
 			//System.out.println(var.getType());
 			if(var.getType() instanceof IReferenceType) {
 				//System.out.println(var);

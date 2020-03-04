@@ -21,6 +21,10 @@ Require-Bundle: pt.iscte.paddle.model,
  org.junit.vintage.engine,
  org.hamcrest.core,
  org.opentest4j,
- org.apiguardian
-Import-Package: pt.iscte.paddle.model.roles,
+ org.apiguardian,
+ pt.iscte.paddle.javardise;bundle-version="0.4.0",
+ org.eclipse.swt
+Import-Package: org.eclipse.swt.layout,
+ org.eclipse.swt.widgets,
+ pt.iscte.paddle.model.roles,
  pt.iscte.paddle.model.roles.impl

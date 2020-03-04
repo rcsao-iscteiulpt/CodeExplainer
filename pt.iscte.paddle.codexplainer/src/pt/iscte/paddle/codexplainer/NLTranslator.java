@@ -4,8 +4,12 @@ import java.util.ArrayList;
 
 import java.util.Map;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 
-
+import pt.iscte.paddle.javardise.MarkerService;
+import pt.iscte.paddle.javardise.util.HyperlinkedText;
 import pt.iscte.paddle.model.IArrayElement;
 import pt.iscte.paddle.model.IArrayElementAssignment;
 
@@ -19,7 +23,8 @@ import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IUnaryExpression;
 
-import pt.iscte.paddle.model.IVariable;
+import pt.iscte.paddle.model.IVariableDeclaration;
+import pt.iscte.paddle.model.IVariableExpression;
 import pt.iscte.paddle.model.IVariableAssignment;
 
 public class NLTranslator {
@@ -30,33 +35,40 @@ public class NLTranslator {
 	static class Visitor implements IBlock.IVisitor {
 		
 		ArrayList<String> declaredVariables = new ArrayList<String>(); 
-		Map<IVariable, String> variablesRolesExplanations;
+		Map<IVariableDeclaration, String> variablesRolesExplanations;
+		HyperlinkedText linkedText;
 		StringBuilder explanation = new StringBuilder();
 		int tabLevel = 0;
 		IBlock currentBlock;
 	    boolean alternativeBlock;
 
 
-		public Visitor(Map<IVariable, String> variablesRolesExplanation, IBlock body) {
+		public Visitor(Map<IVariableDeclaration, String> variablesRolesExplanation, IBlock body) {
 			this.variablesRolesExplanations = variablesRolesExplanation;
 			this.currentBlock = body;
+			Color blue = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
+			HyperlinkedText linkedText = new HyperlinkedText(e -> MarkerService.mark(blue, e)); //TESTE
+		}
+		
+		@Override
+		public void visit(IVariableDeclaration variable) {
+			declaredVariables.add(variable.toString());
 		}
 
 		@Override
 		public boolean visit(IVariableAssignment assignment) {
 			checkBranch(assignment.getParent());
-			//System.out.println(assignment);
-			//TODO declaration changes
-			explanation.append(assignment +" : ");
-			if (!declaredVariables.contains(assignment.getTarget().toString())) {
-				declaredVariables.add(assignment.getTarget().toString());
+			addTabs();
+			if (declaredVariables.contains(assignment.getTarget().toString())) {
 				appendLine("A variável " + assignment.getTarget().toString() + " é inicializada com o valor igual ");
 				explainVariableAssignment(assignment);
+				System.out.println(variablesRolesExplanations);
 				if(variablesRolesExplanations.containsKey(assignment.getTarget())) {
 					explanation.append(variablesRolesExplanations.get(assignment.getTarget()));
 				}
+				declaredVariables.remove(assignment.getTarget().toString());
 			} else {
-				
+				explanation.append("Vai ser guardado na variável " + assignment.getTarget() + " ");
 				explainVariableAssignment(assignment);
 			}
 			explanation.append("\n");
@@ -67,8 +79,7 @@ public class NLTranslator {
 		public boolean visit(IArrayElementAssignment assignment) {
 			checkBranch(assignment.getParent());
 			addTabs();
-			//System.out.println(assignment);
-			explanation.append("\n");
+			appendLine("Vai ser guardado na " + ExpressionTranslator.translateArrayElement((IArrayElement)assignment.getTarget()));
 			return false;
 		}
 		
@@ -76,7 +87,7 @@ public class NLTranslator {
 		public boolean visit(ILoop expression) {
 			IExpression guard = expression.getGuard();
 			checkBranch(expression.getParent());	
-			appendLine("while("+guard+"): Este ciclo continuará a repetir-se enquanto ");
+			appendLine("Este ciclo continuará a repetir-se enquanto ");
 			explainGuardCondition(guard);
 			explanation.append("\n");
 			tabLevel++;
@@ -88,9 +99,11 @@ public class NLTranslator {
 		public boolean visit(ISelection expression) {
 			IExpression guard = expression.getGuard();
 			checkBranch(expression.getParent());
-			appendLine("if("+guard+"): ");
+			addTabs();
+			explanation.append("Condição: ");
 			explainGuardCondition(guard);
 			explanation.append("\n");
+			addTabs();
 			appendLine("Caso a condição seja verdadeira:" + "\n");
 			tabLevel++;
 			
@@ -149,7 +162,7 @@ public class NLTranslator {
 				if(expression instanceof IUnaryExpression) {
 					//TODO
 				}
-				if(expression instanceof IVariable) {
+				if(expression instanceof IVariableDeclaration) {
 					explanation.append(expression);
 				}
 				
@@ -158,7 +171,7 @@ public class NLTranslator {
 		
 		void explainVariableAssignment(IVariableAssignment assignment) {
 			//assignment.is
-			IVariable target = assignment.getTarget();
+			IVariableDeclaration target = assignment.getTarget();
 			IExpression expression = assignment.getExpression();
 		
 			
@@ -181,7 +194,7 @@ public class NLTranslator {
 				explanation.append(ExpressionTranslator.translateArrayElement((IArrayElement)expression));
 			}
 			
-			if(expression instanceof ILiteral || expression instanceof IVariable) {
+			if(expression instanceof ILiteral || expression instanceof IVariableExpression) {
 				explanation.append(ExpressionTranslator.translateSimple(expression));
 			}
 			
@@ -213,10 +226,16 @@ public class NLTranslator {
 	}
 	
 	
-	static String getExplanation(IBlock body, Map<IVariable, String> variablesRolesExplanation) {
+	static String getExplanation(IBlock body, Map<IVariableDeclaration, String> variablesRolesExplanation) {
 		Visitor v = new Visitor(variablesRolesExplanation, body);
 		body.getOwnerProcedure().accept(v);
 		return v.explanation.toString();
+	}
+	
+	static HyperlinkedText getHyperLinkedText(IBlock body, Map<IVariableDeclaration, String> variablesRolesExplanation) {
+		Visitor v = new Visitor(variablesRolesExplanation, body);
+		body.getOwnerProcedure().accept(v);
+		return v.linkedText;
 	}
 
 }

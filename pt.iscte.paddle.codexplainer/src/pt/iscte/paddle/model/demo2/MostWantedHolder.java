@@ -9,17 +9,17 @@ import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.ISelection;
-import pt.iscte.paddle.model.IVariable;
+import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.IVariableAssignment;
 
 public class MostWantedHolder implements IMostWantedHolder {
 
 	final Operation operator;
-    final IVariable targetVar;
-	IVariable arrayVar;
+    final IVariableDeclaration targetVar;
+	IVariableDeclaration arrayVar;
 	IArrayElement arrayEl;
 
-	public MostWantedHolder(IVariable targetVar) {
+	public MostWantedHolder(IVariableDeclaration targetVar) {
 		assert isMostWantedHolder(targetVar);
 		Visitor v = new Visitor(targetVar);
 		targetVar.getOwnerProcedure().accept(v);
@@ -30,8 +30,8 @@ public class MostWantedHolder implements IMostWantedHolder {
 	}
 
 	private static class Visitor implements IBlock.IVisitor {
-		final IVariable targetVar;
-		IVariable arrayVar;
+		final IVariableDeclaration targetVar;
+		IVariableDeclaration arrayVar;
 		IArrayElement arrayEl;
 
 		/**
@@ -51,7 +51,7 @@ public class MostWantedHolder implements IMostWantedHolder {
 		boolean isAssignmentCorrect = false;
 		Operation RelOperator = Operation.UNDEFINED;
 
-		Visitor(IVariable var) {
+		Visitor(IVariableDeclaration var) {
 			this.targetVar = var;
 			this.arrayVar = null;
 		}
@@ -62,20 +62,20 @@ public class MostWantedHolder implements IMostWantedHolder {
 				IBinaryExpression guard = (IBinaryExpression) expression.getGuard();
 				VarPosition varPos = VarPosition.NONE;
 				IArrayElement expressionVar = null;
-				IVariable aVar = null;
+				IVariableDeclaration aVar = null;
 
 				try {
 					if (guard.getLeftOperand().equals(targetVar)) {
 						varPos = VarPosition.LEFT;
 						expressionVar = (IArrayElement) guard.getRightOperand();
 						arrayEl = expressionVar;
-						aVar = (IVariable) expressionVar.getTarget();
+						aVar = (IVariableDeclaration) expressionVar.getTarget();
 					}
 					if (guard.getRightOperand().equals(targetVar)) {
 						varPos = VarPosition.RIGHT;
 						expressionVar = (IArrayElement) guard.getLeftOperand();
 						arrayEl = expressionVar;
-						aVar = (IVariable) expressionVar.getTarget();
+						aVar = (IVariableDeclaration) expressionVar.getTarget();
 					}
 
 					if (!varPos.equals(VarPosition.NONE)) {
@@ -106,7 +106,7 @@ public class MostWantedHolder implements IMostWantedHolder {
 		 * @param parent
 		 * @param aVar
 		 */
-		void CheckWhileConditions(IProgramElement parent, IVariable aVar) {
+		void CheckWhileConditions(IProgramElement parent, IVariableDeclaration aVar) {
 			if (parent instanceof ILoop) {
 				isIfInsideWhile = true;
 				IBinaryExpression parentGuard = (IBinaryExpression) ((ILoop) parent).getGuard();
@@ -131,7 +131,7 @@ public class MostWantedHolder implements IMostWantedHolder {
 			for (IBlockElement i : expression.getBlock().getChildren()) {
 				if (i instanceof IVariableAssignment) {
 					IVariableAssignment assignment = (IVariableAssignment) i;
-					IVariable target = assignment.getTarget();
+					IVariableDeclaration target = assignment.getTarget();
 
 					if (assignment.getExpression() instanceof IArrayElement) {
 						IArrayElement ex = (IArrayElement) assignment.getExpression();
@@ -145,7 +145,7 @@ public class MostWantedHolder implements IMostWantedHolder {
 		}
 	}
 
-	public static boolean isMostWantedHolder(IVariable var) {
+	public static boolean isMostWantedHolder(IVariableDeclaration var) {
 		Visitor v = new Visitor(var);
 		var.getOwnerProcedure().accept(v);
 		return v.isIfInsideWhile && v.isArrayVarInWhileGuard && v.isAssignmentCorrect && v.RelOperator != null;
@@ -161,7 +161,7 @@ public class MostWantedHolder implements IMostWantedHolder {
 	}
 
 	@Override
-	public IVariable getTargetArray() {
+	public IVariableDeclaration getTargetArray() {
 		return arrayVar;
 	}
 

@@ -11,8 +11,8 @@ import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.ISelection;
-import pt.iscte.paddle.model.IVariable;
 import pt.iscte.paddle.model.IVariableAssignment;
+import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.roles.IVariableRole;
 
 
@@ -20,7 +20,7 @@ public interface IMostWantedHolder extends IVariableRole {
 
 	Operation getOperation();
 	
-	IVariable getTargetArray();
+	IVariableDeclaration getTargetArray();
 
 	default String getName() {
 		return "MostWantedHolder";

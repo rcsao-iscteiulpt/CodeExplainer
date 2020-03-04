@@ -9,7 +9,6 @@ import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IRecordFieldAssignment;
 import pt.iscte.paddle.model.IRecordType;
 import pt.iscte.paddle.model.IType;
-import pt.iscte.paddle.model.IVariable;
 
 public class DemoRecursive {
 	

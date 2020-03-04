@@ -9,7 +9,7 @@ import pt.iscte.paddle.model.IBinaryOperator;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
-import pt.iscte.paddle.model.IVariable;
+import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.codexplainer.ExpressionTranslator; 
 
 public class ExpressionTranslatorTests {
@@ -22,14 +22,14 @@ public class ExpressionTranslatorTests {
 		IModule module = IModule.create();
 		IProcedure proc = module.addProcedure(INT);
 		
-		IVariable array = proc.addParameter(INT.array().reference());
+		IVariableDeclaration array = proc.addParameter(INT.array().reference());
 		array.setId("array");
 		
 		IBlock body = proc.getBody();
 		
 		IBinaryExpression lastPositionArray = IBinaryOperator.SUB.on(array.length(), INT.literal(1));
 		IBinaryExpression secondtoLastPositionArray = IBinaryOperator.SUB.on(array.length(), INT.literal(2));
-		IVariable c = body.addVariable(INT);
+		IVariableDeclaration c = body.addVariable(INT);
 		c.setId("c");
 		
 		IArrayElement lastElement = array.element(lastPositionArray);

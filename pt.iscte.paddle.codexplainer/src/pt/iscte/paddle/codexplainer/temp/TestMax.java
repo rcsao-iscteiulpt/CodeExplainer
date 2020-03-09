@@ -16,13 +16,5 @@ public class TestMax extends BaseTest {
 	IReturn ra = ifstat.addReturn(a);
 	IReturn rb = ifstat.getAlternativeBlock().addReturn(b);
 	
-	@Case({"10", "8"})
-	public void testFirst(IExecutionData data) {
-		equal(10, data.getReturnValue());
-	}
-	
-	@Case({"-1", "8"})
-	public void testSecond(IExecutionData data) {
-		equal(8, data.getReturnValue());
-	}
+
 }

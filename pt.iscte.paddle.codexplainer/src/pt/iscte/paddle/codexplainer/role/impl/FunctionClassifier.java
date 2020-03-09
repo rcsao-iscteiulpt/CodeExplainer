@@ -1,25 +1,40 @@
-package pt.iscte.paddle.model.demo2;
+package pt.iscte.paddle.codexplainer.role.impl;
+
+import java.util.ArrayList;
 import java.util.List;
 
+import pt.iscte.paddle.codexplainer.roles.IFunctionClassifier;
 import pt.iscte.paddle.model.IArrayElementAssignment;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.IProcedure;
+import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.IRecordFieldAssignment;
 import pt.iscte.paddle.model.IRecordFieldExpression;
 import pt.iscte.paddle.model.IReferenceType;
 import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.IVariableExpression;
 
-public interface IFunctionClassifier {
+public class FunctionClassifier implements IFunctionClassifier {
 
-	enum Status {
-		FUNCTION, PROCEDURE;
+	List<IProgramElement> assignments;
+	
+	public FunctionClassifier(IProcedure proc2) {
+		assignments = new ArrayList<IProgramElement>();
+		for(IVariableDeclaration var: proc2.getParameters()) {
+			Visitor v = new Visitor(var);
+			proc2.accept(v);
+			if(!v.assignments.isEmpty())
+				assignments.addAll(v.assignments);
+		}
+		
 	}
-
+	
+	
 	class Visitor implements IBlock.IVisitor {
 		IVariableExpression var;
 
 		Boolean isMemoryValueChanged = false;
+		List<IProgramElement> assignments = new ArrayList<IProgramElement>();
 
 		Visitor(IVariableDeclaration var) {
 			this.var = var.expression();
@@ -29,6 +44,7 @@ public interface IFunctionClassifier {
 		public boolean visit(IArrayElementAssignment assignment) {
 			//System.out.println(assignment);
 			if (assignment.getTarget().equals(var)) {
+				assignments.add(assignment);
 				isMemoryValueChanged = true;
 			}	
 			return false;
@@ -44,14 +60,17 @@ public interface IFunctionClassifier {
 				tempTarget = (IRecordFieldExpression) tempTarget.getTarget();
 			}
 			if (tempTarget.getTarget().toString().equals(var.toString())) {
+				assignments.add(assignment);
 				isMemoryValueChanged = true;
 			}	
 			return false;
 			
 		}
+		
+		
 	}
-
-	static Status getClassification(IProcedure method) {
+	
+	public Status getClassification(IProcedure method) {
 		for(IVariableDeclaration var: method.getParameters()) {
 			//System.out.println(var.getType());
 			if(var.getType() instanceof IReferenceType) {
@@ -64,8 +83,10 @@ public interface IFunctionClassifier {
 			}	
 		}
 		return Status.FUNCTION;
-		
-
 	}
-
+	
+	public List<IProgramElement> getAssignments() {
+		return assignments;	
+	}
+	
 }

@@ -8,6 +8,7 @@ import java.io.File;
 
 import org.junit.jupiter.api.Test;
 
+import pt.iscte.paddle.codexplainer.role.impl.MostWantedHolder;
 import pt.iscte.paddle.javali.translator.Translator;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
@@ -17,18 +18,17 @@ import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
-import pt.iscte.paddle.model.demo2.MostWantedHolder;
 
 class MostWantedHolderTest {
 
 	@Test
-	void test() {
+	void testGreater() {
 		
 		//True Greater
-		IModule moduleFalseCase = IModule.create();
-		IModule moduleTrueCase = IModule.create();
+		IModule module = IModule.create();
 		
-		IProcedure max = moduleTrueCase.addProcedure(INT);
+		IProcedure max = module.addProcedure(INT);
+		max.setId("max");
 		IVariableDeclaration array = max.addParameter(INT.array().reference());
 		array.setId("v");
 		
@@ -36,66 +36,163 @@ class MostWantedHolderTest {
 		
 		IVariableDeclaration m = body.addVariable(INT);
 		m.setId("m");
-		IVariableAssignment mAss = body.addAssignment(m, array.element(INT.literal(0)));
+		body.addAssignment(m, array.element(INT.literal(0)));
 		
 		IVariableDeclaration i = body.addVariable(INT);
 		i.setId("i");
-		IVariableAssignment iAss = body.addAssignment(i, INT.literal(1));
+		body.addAssignment(i, INT.literal(1));
+		
 		ILoop loop = body.addLoop(SMALLER.on(i, array.length()));
 		ISelection ifstat = loop.addSelection(GREATER.on(array.element(i), m));
-		IVariableAssignment mAss_ = ifstat.addAssignment(m, array.element(i));
-		IVariableAssignment iInc = loop.addIncrement(i);
-		IReturn ret = body.addReturn(m);
+		ifstat.addAssignment(m, array.element(i));
+		loop.addIncrement(i);
+		body.addReturn(m);
 	
-	
-		//True Smaller
-		
-		IProcedure max2 = moduleTrueCase.addProcedure(INT);
-		IVariableDeclaration array2 = max2.addParameter(INT.array().reference());
-		array2.setId("v");
-		
-		IBlock body2 = max2.getBody();
-		
-		IVariableDeclaration m2 = body2.addVariable(INT);
-		m2.setId("m");
-		IVariableAssignment mAss2 = body2.addAssignment(m2, array2.element(INT.literal(0)));
-		IVariableDeclaration i2 = body2.addVariable(INT);
-		i2.setId("i");
-		IVariableAssignment iAss2 = body2.addAssignment(i2, INT.literal(1));
-		ILoop loop2 = body2.addLoop(SMALLER.on(i2, array2.length()));
-		ISelection ifstat2 = loop2.addSelection(SMALLER.on(array2.element(i), m2));
-		IVariableAssignment mAss2_ = ifstat2.addAssignment(m2, array2.element(i));
-		IVariableAssignment iInc2 = loop2.addIncrement(i);
-		IReturn ret2 = body2.addReturn(m2);
-		
-		
-		//False method
-		
-		for(IProcedure proc : moduleFalseCase.getProcedures()) {
-			assertFalse(MostWantedHolder.isMostWantedHolder(proc.getVariable("m")));
-			assertFalse(MostWantedHolder.isMostWantedHolder(proc.getVariable("i")));
-			assertFalse(MostWantedHolder.isMostWantedHolder(proc.getVariable("v")));
-		}
-		
-		for(IProcedure proc : moduleTrueCase.getProcedures()) {
+		for(IProcedure proc : module.getProcedures()) {
 			assertTrue(MostWantedHolder.isMostWantedHolder(proc.getVariable("m")));
 			assertFalse(MostWantedHolder.isMostWantedHolder(proc.getVariable("i")));
 			assertFalse(MostWantedHolder.isMostWantedHolder(proc.getVariable("v")));
 		}
 		
-		IProcedure proc1 = moduleTrueCase.getProcedures().get(0);
-		assertEquals("MostWantedHolder(GREATER)", new MostWantedHolder(proc1.getVariable("m")).toString());
-		IProcedure proc2 = moduleTrueCase.getProcedures().get(1);
-		assertEquals("MostWantedHolder(SMALLER)", new MostWantedHolder(proc2.getVariable("m")).toString());
+		IProcedure proc1 = module.getProcedures().get(0);
 			
+		assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("i")));
+		assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("v")));
+		assertEquals("MostWantedHolder(GREATER)", new MostWantedHolder(proc1.getVariable("m")).toString());
 		
-		
-		
+	}
 	
+	@Test 
+	void testSmaller() {
 		
+	IModule module = IModule.create();
+			
+	IProcedure max = module.addProcedure(INT);
+	max.setId("max");
+	
+	IVariableDeclaration array = max.addParameter(INT.array().reference());
+	array.setId("v");
+	
+	IBlock body = max.getBody();
+	
+	IVariableDeclaration m = body.addVariable(INT);
+	m.setId("m");
+	body.addAssignment(m, array.element(INT.literal(0)));
+	
+	IVariableDeclaration i = body.addVariable(INT);
+	i.setId("i");
+	body.addAssignment(i, INT.literal(1));
+	
+	ILoop loop = body.addLoop(SMALLER.on(i, array.length()));
+	ISelection ifstat = loop.addSelection(SMALLER.on(array.element(i), m));
+    ifstat.addAssignment(m, array.element());
+	loop.addIncrement(i);
+	body.addReturn(m);
 		
+	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("i")));
+	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("v")));
+	assertEquals("MostWantedHolder(SMALLER)", new MostWantedHolder(max.getVariable("m")).toString());		
+	}
+	
+	@Test
+	void testFalseBranches() {
 		
-		//fail("Not yet implemented");
+	IModule module = IModule.create();
+	
+	IProcedure max = module.addProcedure(INT);
+	max.setId("max");
+	
+	IVariableDeclaration array = max.addParameter(INT.array().reference());
+	array.setId("v");
+	
+	IBlock body = max.getBody();
+	
+	IVariableDeclaration m = body.addVariable(INT);
+	m.setId("m");
+	body.addAssignment(m, array.element(INT.literal(0)));
+	
+	IVariableDeclaration i = body.addVariable(INT);
+	i.setId("i");
+	body.addAssignment(i, INT.literal(1));
+	
+	ISelection ifstat = body.addSelection(SMALLER.on(array.element(i), m)); //For m to be a mostWantedHolder the Selection must be inside a Loop
+    ifstat.addAssignment(m, array.element());
+	
+	ILoop loop = body.addLoop(SMALLER.on(i, array.length()));
+	loop.addIncrement(i);
+	body.addReturn(m);	
+	
+	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("m")));
+	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("i")));
+	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("v")));
+	}
+	
+	
+	@Test
+	void testSelectionAssignment() {
+		
+	IModule module = IModule.create();
+	
+	IProcedure max = module.addProcedure(INT);
+	max.setId("max");
+	
+	IVariableDeclaration array = max.addParameter(INT.array().reference());
+	array.setId("v");
+	
+	IBlock body = max.getBody();
+	
+	IVariableDeclaration m = body.addVariable(INT);
+	m.setId("m");
+	body.addAssignment(m, array.element(INT.literal(0)));
+	
+	IVariableDeclaration i = body.addVariable(INT);
+	i.setId("i");
+	body.addAssignment(i, INT.literal(1));
+	
+	ILoop loop = body.addLoop(SMALLER.on(i, array.length()));
+	
+	ISelection ifstat = loop.addSelection(SMALLER.on(array.element(i), m));
+    ifstat.addAssignment(i, array.element()); //This Statement should make m not a mostWantedHolder
+	loop.addIncrement(i);
+	body.addReturn(m);
+	
+	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("m")));
+	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("i")));
+	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("v")));
+	}
+	
+	@Test
+	void testSelectionGuard() {
+		
+	IModule module = IModule.create();
+	
+	IProcedure max = module.addProcedure(INT);
+	max.setId("max");
+	
+	IVariableDeclaration array = max.addParameter(INT.array().reference());
+	array.setId("v");
+	
+	IBlock body = max.getBody();
+	
+	IVariableDeclaration m = body.addVariable(INT);
+	m.setId("m");
+	body.addAssignment(m, array.element(INT.literal(0)));
+	
+	IVariableDeclaration i = body.addVariable(INT);
+	i.setId("i");
+	body.addAssignment(i, INT.literal(1));
+	
+	ILoop loop = body.addLoop(SMALLER.on(i, array.length()));
+	
+	ISelection ifstat = loop.addSelection(SMALLER.on(array.element(i), i));
+    ifstat.addAssignment(m, array.element()); //This Statement should make m not a mostWantedHolder
+	loop.addIncrement(i);
+	body.addReturn(m);
+	
+	System.out.println(max);
+	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("m")));
+	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("i")));
+	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("v")));
 	}
 
 }

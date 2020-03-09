@@ -1,7 +1,7 @@
 package pt.iscte.paddle.codexplainer;
 
 import java.util.ArrayList;
-
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -27,6 +27,9 @@ import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.IVariableExpression;
 import pt.iscte.paddle.model.IVariableAssignment;
 
+import pt.iscte.paddle.codexplainer.components.TextComponent;
+import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;;
+
 public class NLTranslatorTest {
 	
 	//static String explanation = "";
@@ -36,7 +39,8 @@ public class NLTranslatorTest {
 		
 		ArrayList<String> declaredVariables = new ArrayList<String>(); 
 		Map<IVariableDeclaration, String> variablesRolesExplanations;
-		HyperlinkedText linkedText;
+		List<List<TextComponent>> explanationtext = new ArrayList<>();
+		
 		StringBuilder explanation = new StringBuilder();
 		int tabLevel = 0;
 		IBlock currentBlock;
@@ -46,9 +50,7 @@ public class NLTranslatorTest {
 		public Visitor(Map<IVariableDeclaration, String> variablesRolesExplanation, IBlock body) {
 			this.variablesRolesExplanations = variablesRolesExplanation;
 			this.currentBlock = body;
-			Color blue = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
-			linkedText = new HyperlinkedText(e -> MarkerService.mark(blue, e)); //TESTE
-		}
+		}	
 		
 		@Override
 		public void visit(IVariableDeclaration variable) {
@@ -58,68 +60,91 @@ public class NLTranslatorTest {
 
 		@Override
 		public boolean visit(IVariableAssignment assignment) {
+			List<TextComponent> line = new ArrayList<>();
+			
 			checkBranch(assignment.getParent());
 			addTabs();
 			if (declaredVariables.contains(assignment.getTarget().toString())) {
-				linkedText.link("A variável " + assignment.getTarget().toString() + " é inicializada com o valor igual ", assignment);
-				explainVariableAssignment(assignment);
-				System.out.println(variablesRolesExplanations);
-				if(variablesRolesExplanations.containsKey(assignment.getTarget())) {
-					explanation.append(variablesRolesExplanations.get(assignment.getTarget()));
+				line.add(new TextComponent("A variável " + assignment.getTarget() + " é inicializada"
+												, TextType.LINK, assignment));
+				line.add(new TextComponent(" com o valor igual a ", TextType.NORMAL));
+				explainVariableAssignment(assignment, line);
+				if (variablesRolesExplanations.containsKey(assignment.getTarget())) {
+					line.add(new TextComponent(TextType.NEWLINE));
+					line.add(new TextComponent(variablesRolesExplanations.get(assignment.getTarget()), TextType.NORMAL));
 				}
 				declaredVariables.remove(assignment.getTarget().toString());
 			} else {
-				linkedText.link("Vai ser guardado na variável " + assignment.getTarget() + " ");
-				explainVariableAssignment(assignment);
+				line.add(new TextComponent("Vai ser guardado na variável " + assignment.getTarget() + " ", TextType.NORMAL));
+				explainVariableAssignment(assignment, line);
 			}
-			explanation.append("\n");
+			
+			explanationtext.add(line);
 			return false;
 		}
 		
 		@Override
 		public boolean visit(IArrayElementAssignment assignment) {
+			List<TextComponent> line = new ArrayList<>();
+			ExpressionTranslator translator = new ExpressionTranslator(line);
+			
 			checkBranch(assignment.getParent());
 			addTabs();
-			appendLine("Vai ser guardado na " + ExpressionTranslator.translateArrayElement((IArrayElement)assignment.getTarget()));
+			translator.translateArrayElement((IArrayElement)assignment.getTarget());
 			return false;
 		}
 		
 		@Override
 		public boolean visit(ILoop expression) {
+			List<TextComponent> line = new ArrayList<>();
+			
 			IExpression guard = expression.getGuard();
-			checkBranch(expression.getParent());	
-			appendLine("Este ciclo continuará a repetir-se enquanto ");
-			explainGuardCondition(guard);
-			explanation.append("\n");
-			tabLevel++;
+			checkBranch(expression.getParent());
+			
+			line.add(new TextComponent("Este ciclo continuará a repetir-se enquanto ", TextType.NORMAL));
+			explainGuardCondition(guard, line);
 			this.currentBlock = expression.getBlock();
+			
+			explanationtext.add(line);
 			return true;
 		}
 
 		@Override
 		public boolean visit(ISelection expression) {
+			List<TextComponent> line = new ArrayList<>();
+			
 			IExpression guard = expression.getGuard();
 			checkBranch(expression.getParent());
 			addTabs();
-			linkedText.words("Condição: ");
-			explainGuardCondition(guard);
+			
+			line.add(new TextComponent("Condição: ", TextType.LINK, guard));
+			explainGuardCondition(guard, line);
 			explanation.append("\n");
 			addTabs();
-			linkedText.words("Caso a condição seja verdadeira:" + "\n");
+			
+			line.add(new TextComponent("Caso a ", TextType.NORMAL));
+			line.add(new TextComponent("condição", TextType.LINK, guard));
+			line.add(new TextComponent(" seja verdadeira:", TextType.NORMAL));
 			tabLevel++;
 			
 			if(expression.getAlternativeBlock() != null) {
 				alternativeBlock = true;
 			}
 			this.currentBlock = expression.getBlock();
+			
+			explanationtext.add(line);
 			return true;
 		}
 		
 		@Override
 		public boolean visit(IReturn expression) {
+			List<TextComponent> line = new ArrayList<>();
+
 			checkBranch(expression.getParent());
 			addTabs();
-			explainReturn(expression);
+			explainReturn(expression, line);
+			
+			explanationtext.add(line);
 			return false;
 		}
 		
@@ -141,7 +166,7 @@ public class NLTranslatorTest {
 		
 		void addTabs() {
 			for(int i = 0; i <  tabLevel; i++) {
-				linkedText.words("\t");
+				//linkedText.words("\t");
 			}
 		}
 		
@@ -150,82 +175,89 @@ public class NLTranslatorTest {
 			explanation.append(line);
 		}
 		
-		void explainReturn(IReturn ret) {
-			System.out.println(ret.getExpression().getClass());
+		void explainReturn(IReturn ret, List<TextComponent> line) {
+			ExpressionTranslator translator = new ExpressionTranslator(line);
+
+			line.add(new TextComponent("Este ", TextType.NORMAL));
+			line.add(new TextComponent("return", TextType.LINK, ret));
+			//System.out.println(ret.getExpression().getClass());
 			IExpression expression = ret.getExpression();
 			if(ret.isVoid()) {
-				explanation.append("Este return pára a execução do método sem devolver nada");
+				line.add(new TextComponent(" pára a execução do método sem devolver nada", TextType.NORMAL));
 			} else {
-				explanation.append("Este return devolve o valor do/a " + ret.getReturnValueType() + " ");
+				line.add(new TextComponent(" devolve o do tipo ", TextType.LINK, ret));
+				line.add(new TextComponent(ret.getReturnValueType().toString() +" ", TextType.LINK, ret.getReturnValueType()));
+	
 				if(expression instanceof IBinaryExpression) {
-					explanation.append("de " + ExpressionTranslator.translateBinaryExpression((IBinaryExpression) expression));
+					line.add( new TextComponent("o resultado de ", TextType.NORMAL));
+					translator.translateBinaryExpression((IBinaryExpression) expression);
 				}
 				if(expression instanceof IUnaryExpression) {
 					//TODO
 				}
-				if(expression instanceof IVariableDeclaration) {
-					explanation.append(expression);
+				if(expression instanceof IVariableExpression) {
+					line.add( new TextComponent("o valor da variável " + expression, TextType.NORMAL));
 				}
 				
 			}
+			line.add(new TextComponent(TextType.NEWLINE));
+			
+			
 		}
 		
-		void explainVariableAssignment(IVariableAssignment assignment) {
-			//assignment.is
+		void explainVariableAssignment(IVariableAssignment assignment, List<TextComponent> line) {
+			ExpressionTranslator translator = new ExpressionTranslator(line);
+			
 			IVariableDeclaration target = assignment.getTarget();
 			IExpression expression = assignment.getExpression();
 		
 			
 			if(expression instanceof IUnaryExpression) 
-				linkedText.words(ExpressionTranslator.translateUnaryExpression((IUnaryExpression)expression));
+				translator.translateUnaryExpression((IUnaryExpression)expression);
 			
 			if(expression instanceof IBinaryExpression) {
 				IBinaryExpression ex = (IBinaryExpression) expression;
 				IBinaryOperator op = ex.getOperator();
 				if(op.equals(IBinaryOperator.AND) || op.equals(IBinaryOperator.OR)) {
-					explainGuardCondition(ex.getLeftOperand());
-					linkedText.words(ExpressionTranslator.translateOperator(ex.getOperator()));
-					explainGuardCondition(ex.getRightOperand());
+					explainGuardCondition(ex.getLeftOperand(), line);
+					translator.translateOperator(ex.getOperator());
+					explainGuardCondition(ex.getRightOperand(), line);
 				} else {
-					linkedText.words(ExpressionTranslator.translateBinaryExpression(ex));
+					translator.translateBinaryExpression(ex);
 				}
 			}
 			
 			if(expression instanceof IArrayElement) {
-				linkedText.words(ExpressionTranslator.translateArrayElement((IArrayElement)expression));
+				translator.translateArrayElement((IArrayElement)expression);
 			}
 			
 			if(expression instanceof ILiteral || expression instanceof IVariableExpression) {
-				linkedText.words(ExpressionTranslator.translateSimple(expression));
+				translator.translateSimple(expression);
 			}
 			
-			linkedText.newline();
 			
 		}
 
 		
 		
-		void explainGuardCondition(IExpression guard) {
-			String line = "";
+		void explainGuardCondition(IExpression guard, List<TextComponent> line) {	
+			ExpressionTranslator translator = new ExpressionTranslator(line);
 			
 			if(guard instanceof IUnaryExpression) {
-				line +=ExpressionTranslator.translateUnaryExpression((IUnaryExpression)guard);
+				translator.translateUnaryExpression((IUnaryExpression)guard);
 			} else {
 				IBinaryExpression ex = (IBinaryExpression) guard;
 				IBinaryOperator op = ex.getOperator();
 				
 				if(op.equals(IBinaryOperator.AND) || op.equals(IBinaryOperator.OR)) {
-					explainGuardCondition(ex.getLeftOperand());
-					line +=ExpressionTranslator.translateOperator(ex.getOperator());
-					explainGuardCondition(ex.getRightOperand());
+					explainGuardCondition(ex.getLeftOperand(), line);
+					translator.translateOperator(ex.getOperator());
+					explainGuardCondition(ex.getRightOperand(), line);
 				} else {
-					line +=ExpressionTranslator.translateBinaryExpression(ex);
+					translator.translateBinaryExpression(ex);
 				}
 			}
 			
-			linkedText.link(line, guard);
-			
-			linkedText.newline();
 		}
 		
 
@@ -238,10 +270,16 @@ public class NLTranslatorTest {
 		return v.explanation.toString();
 	}
 	
-	static HyperlinkedText getHyperLinkedText(IBlock body, Map<IVariableDeclaration, String> variablesRolesExplanation) {
+//	static HyperlinkedText getHyperLinkedText(IBlock body, Map<IVariableDeclaration, String> variablesRolesExplanation) {
+//		Visitor v = new Visitor(variablesRolesExplanation, body);
+//		body.getOwnerProcedure().accept(v);
+//		return v.expl;
+//	}
+	
+	static List<List<TextComponent>> getExplanationText(IBlock body, Map<IVariableDeclaration, String> variablesRolesExplanation) {
 		Visitor v = new Visitor(variablesRolesExplanation, body);
 		body.getOwnerProcedure().accept(v);
-		return v.linkedText;
+		return v.explanationtext;
 	}
 
 }

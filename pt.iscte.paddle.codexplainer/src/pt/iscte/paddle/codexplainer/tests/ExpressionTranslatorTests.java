@@ -15,7 +15,7 @@ import pt.iscte.paddle.codexplainer.ExpressionTranslator;
 public class ExpressionTranslatorTests {
 	
 	static void TestArrayElement(IArrayElement element) {
-		System.out.println(ExpressionTranslator.translateArrayElement(element));
+		//System.out.println(ExpressionTranslator.translateArrayElement(element));
 	}
 	
 	public static void main(String[] args) {

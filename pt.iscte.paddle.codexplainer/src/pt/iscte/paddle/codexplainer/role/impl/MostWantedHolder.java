@@ -1,5 +1,9 @@
-package pt.iscte.paddle.model.demo2;
+package pt.iscte.paddle.codexplainer.role.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import pt.iscte.paddle.codexplainer.roles.IMostWantedHolder;
 import pt.iscte.paddle.model.IArrayElement;
 import pt.iscte.paddle.model.IArrayLength;
 import pt.iscte.paddle.model.IBinaryExpression;
@@ -17,10 +21,11 @@ import pt.iscte.paddle.model.IVariableAssignment;
 
 public class MostWantedHolder implements IMostWantedHolder {
 
-	final Operation operator;
+    final Operation operator;
     final IVariableExpression targetVar;
 	IVariableExpression arrayVar;
 	IArrayElement arrayEl;
+	List<IProgramElement> expressionList;
 
 	public MostWantedHolder(IVariableDeclaration targetVar) {
 		assert isMostWantedHolder(targetVar);
@@ -30,12 +35,15 @@ public class MostWantedHolder implements IMostWantedHolder {
 		this.targetVar = targetVar.expression();
 		this.arrayVar = v.arrayVar;
 		this.arrayEl = v.arrayEl;
+		expressionList = v.expressionList;
 	}
 
 	private static class Visitor implements IBlock.IVisitor {
 		final IVariableDeclaration targetVar;
 		IVariableExpression arrayVar;
 		IArrayElement arrayEl;
+		List<IProgramElement> expressionList = new ArrayList<IProgramElement>();
+		
 
 		/**
 		 * Checks if the visited If is inside a while
@@ -90,6 +98,7 @@ public class MostWantedHolder implements IMostWantedHolder {
 							RelOperator = op;
 							arrayVar = aVar;
 
+							expressionList.add(guard);
 							IProgramElement parent = expression.getParent().getParent();
 							CheckWhileConditions(parent, aVar);
 							CheckStatementConditions(expression);
@@ -130,7 +139,9 @@ public class MostWantedHolder implements IMostWantedHolder {
 				if (right instanceof IArrayElement 
 						&& ((IVariableExpression)((IArrayElement)right).getTarget()).getVariable().equals(aVar.getVariable()))  
 					isArrayVarInWhileGuard = true;
+				expressionList.add(parentGuard);
 			}
+			
 		}
 
 		/**
@@ -153,6 +164,7 @@ public class MostWantedHolder implements IMostWantedHolder {
 
 						if (target.equals(targetVar.expression().getVariable()) && ((IVariableExpression)ex.getTarget()).getVariable().equals(arrayVar.getVariable())) {
 							isAssignmentCorrect = true;
+							expressionList.add(assignment);
 						}
 					}
 				}
@@ -181,6 +193,11 @@ public class MostWantedHolder implements IMostWantedHolder {
 	@Override
 	public IVariableExpression getTargetArray() {
 		return arrayVar;
+	}
+	
+	@Override
+	public List<IProgramElement> getExpressions() {
+		return expressionList;	
 	}
 
 	static Operation getRelationalOperator(IBinaryExpression assignment, VarPosition varPos) {

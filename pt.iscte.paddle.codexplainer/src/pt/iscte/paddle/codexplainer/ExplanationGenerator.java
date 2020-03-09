@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import pt.iscte.paddle.codexplainer.role.impl.MostWantedHolder;
 import pt.iscte.paddle.javali.translator.Translator;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
@@ -20,7 +21,6 @@ import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IType;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
-import pt.iscte.paddle.model.demo2.MostWantedHolder;
 import pt.iscte.paddle.model.roles.IVariableRole;
 import pt.iscte.paddle.model.demo2.VariableRoleExplainer;
 
@@ -93,8 +93,8 @@ public class ExplanationGenerator {
 		}
 		
 		//System.out.println(localVariables);
-		String explanation = NLTranslator.getExplanation(method.getBody(), variablesRolesExplanation);	
-		System.out.println(explanation);
+		//String explanation = NLTranslator.getExplanation(method.getBody(), variablesRolesExplanation);	
+		//System.out.println(explanation);
 		
 	}
 }

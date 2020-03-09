@@ -1,5 +1,10 @@
 package pt.iscte.paddle.codexplainer;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import pt.iscte.paddle.codexplainer.components.TextComponent;
+import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
 import pt.iscte.paddle.model.IArrayElement;
 import pt.iscte.paddle.model.IArrayLength;
 import pt.iscte.paddle.model.IBinaryExpression;
@@ -16,64 +21,68 @@ import pt.iscte.paddle.model.IType;
 
 public class ExpressionTranslator {
 
+	List<TextComponent> line = new ArrayList<>();
 	
-	static String TranslateDeclaration(IVariableAssignment assignment) {
-		StringBuilder g = new StringBuilder();
-		
-		return g.toString();	
+	public ExpressionTranslator(List<TextComponent> line) {
+		this.line = line;
 	}
 	
-	static String TranslateVariableAssignment(IVariableAssignment assignment) {
-		StringBuilder g = new StringBuilder();
-		
-		
-		return g.toString();	
-	}
+//	static String TranslateVariableAssignment(IVariableAssignment assignment) {
+//		StringBuilder g = new StringBuilder();
+//		// TODOPOSSIBLE
+//		
+//		return g.toString();	
+//	}
 	
-	static String translateBinaryExpression(IBinaryExpression ex) {
-		StringBuilder g = new StringBuilder();
+	void translateBinaryExpression(IBinaryExpression ex) {
+		//StringBuilder g = new StringBuilder();
 		IExpression leftEx = ex.getLeftOperand();
 		IExpression rightEx = ex.getRightOperand();
-		String specialCase = CheckBinaryExpressionSpecialCases(ex);
-		if (!specialCase.equals("")) {
-			g.append(specialCase);
-		} else {
+		
+		
+		Boolean specialCase = CheckBinaryExpressionSpecialCases(ex);
+		if (!specialCase) {
 
 			if (leftEx instanceof IArrayElement) {
 				IArrayElement leftExArray = (IArrayElement) leftEx;
-				g.append(translateArrayElement(leftExArray));
+				translateArrayElement(leftExArray);
 			}	
 			if (leftEx instanceof IArrayLength) {
-				g.append("o valor do tamanho do array " + ((IArrayLength)leftEx).getTarget() + " ");
+				line.add(new TextComponent("o valor do ", TextType.NORMAL));
+				line.add(new TextComponent("tamanho do array " + ((IArrayLength)leftEx).getTarget(), TextType.LINK, leftEx));
+				line.add(new TextComponent(" ", TextType.NORMAL));
 			}
 			if (leftEx instanceof IVariableExpression) {
-				g.append("o valor de " + leftEx.toString() + " ");
+				line.add(new TextComponent("o valor de " + leftEx.toString() + " ", TextType.NORMAL));
 			}
 			if (leftEx instanceof ILiteral) {
-				g.append(leftEx.toString() + " ");
+				line.add(new TextComponent(leftEx.toString() + " ", TextType.NORMAL));
 			}
 
-			g.append(translateOperator(ex.getOperator()));
+			translateOperator(ex.getOperator());
+			
 			if (rightEx instanceof IArrayElement) {
 				IArrayElement rightExArray = (IArrayElement) rightEx;
-				g.append(translateArrayElement(rightExArray));
+				translateArrayElement(rightExArray);
 			}	
 			if (rightEx instanceof IArrayLength) {
-				g.append("o valor do tamanho do array " + ((IArrayLength)rightEx).getTarget() + " ");
+				line.add(new TextComponent("o valor do ", TextType.NORMAL));
+				line.add(new TextComponent("tamanho do array " + ((IArrayLength)rightEx).getTarget(), TextType.LINK, leftEx));
+				line.add(new TextComponent(" ", TextType.NORMAL));
 			}
 			if (rightEx instanceof IVariableExpression) {
-				g.append("o valor de " + rightEx.toString() + " ");
+				line.add(new TextComponent("o valor de " + rightEx.toString() + " ", TextType.NORMAL));
 			}
 			if (rightEx instanceof ILiteral) {
-				g.append(rightEx.toString() + " ");
+				line.add(new TextComponent(rightEx.toString() + " ", TextType.NORMAL));
 			}
 
 		}
 
-		return g.toString();
+		return;
 	}
 	
-	static String CheckBinaryExpressionSpecialCases(IBinaryExpression ex) {
+	Boolean CheckBinaryExpressionSpecialCases(IBinaryExpression ex) {
 		StringBuilder g = new StringBuilder();
 		IExpression leftEx = ex.getLeftOperand();
 		IExpression rightEx = ex.getRightOperand();
@@ -97,16 +106,20 @@ public class ExpressionTranslator {
 		
 		if(l != null) {
 			if(l.getStringValue().equals("1")) {
-				g.append("última posição do vetor " + aLenght.getTarget());
+				line.add(new TextComponent("última posição do vetor " + aLenght.getTarget(), TextType.LINK, ex));
+				line.add(new TextComponent(" ", TextType.NORMAL));
+				return true;
 			}
 			if(l.getStringValue().equals("2")) {
-				g.append("penúltima posição do vetor " + aLenght.getTarget());
+				line.add(new TextComponent("penúltima posição do vetor " + aLenght.getTarget(), TextType.LINK, ex));
+				line.add(new TextComponent(" ", TextType.NORMAL));
+				return true;
 			}
 		}
-		return g.toString();
+		return false;
 	}
 	
-	static String CheckAssignmentsSpecialCases(IVariableAssignment ex) {
+	static Boolean CheckAssignmentsSpecialCases(IVariableAssignment ex) {
 		
 		//TODO
 		return null;
@@ -115,80 +128,94 @@ public class ExpressionTranslator {
 	}
 	
 	
-	public static String translateUnaryExpression(IUnaryExpression ex) {
+	public void translateUnaryExpression(IUnaryExpression ex) {
 		//TODO
-		return null;	
+		return;	
 	}
 	
 	
-	public static String translateArrayElement(IArrayElement element) {
+	public void translateArrayElement(IArrayElement element) {
 		StringBuilder g = new StringBuilder();
 		IExpression e = element.getIndexes().get(0);
 		
 		if(element.getIndexes().get(0) instanceof IBinaryExpression) {
 			IBinaryExpression ex = (IBinaryExpression) e;
-			g.append(translateBinaryExpression(ex));
+			translateBinaryExpression(ex);
 		} else {
 			if(e.equals(IType.INT.literal(0))) {
-				g.append("primeira posição do vetor " + element.getTarget() +" ");
+				line.add(new TextComponent("primeira posição do vetor " + element.getTarget(), TextType.LINK, element));
+				line.add(new TextComponent(" ", TextType.NORMAL));
 			} else {
-				g.append("posição " + element.getIndexes().get(0) + " do vetor " 
-									+ element.getTarget() +" ");
+				line.add(new TextComponent("posição " + element.getIndexes().get(0) + " do vetor " 
+						+ element.getTarget() +" ", TextType.NORMAL));
 			}
 		}
 		
 		
-		return g.toString();
+		return;
 	}
 	
-	static String translateSimple(IExpression ex) {
+	void translateSimple(IExpression ex) {
 		//TODO
-		return ex.toString();
+		line.add(new TextComponent(ex.toString(), TextType.NORMAL));
+		return;
 }
 	
-	static String translateOperator(IBinaryOperator op) {
+	void translateOperator(IBinaryOperator op) {
 		if (op.equals(IBinaryOperator.GREATER)) {
-			return "maior que " ;	
+			line.add(new TextComponent("maior que ", TextType.NORMAL));	
+			return;
 		}
 		if (op.equals(IBinaryOperator.GREATER_EQ)) {
-			return "maior ou igual a "; 		
+			line.add(new TextComponent("maior ou igual a ", TextType.NORMAL));	
+			return; 		
 		}
 		if (op.equals(IBinaryOperator.SMALLER)) {
-			return "menor que "; 
+			line.add(new TextComponent("menor que ", TextType.NORMAL));	
+			return; 
 		}
 		if (op.equals(IBinaryOperator.SMALLER_EQ)) {
-			return "menor ou igual a ";
+			line.add(new TextComponent("menor ou igual a ", TextType.NORMAL));	
+			return;
 		}
 		if (op.equals(IBinaryOperator.EQUAL)) {
-			return "igual a "; 
+			line.add(new TextComponent("igual a ", TextType.NORMAL));	
+			return; 
 		}
 		if (op.equals(IBinaryOperator.DIFFERENT)) {
-			return "diferente de ";
+			line.add(new TextComponent("diferente de ", TextType.NORMAL));	
+			return;
 		}
 		if (op.equals(IBinaryOperator.ADD)) {
-			return "somar com ";
+			line.add(new TextComponent("somar com ", TextType.NORMAL));	
+			return ;
 		}
 		if (op.equals(IBinaryOperator.DIV)) {
-			return "dividir por ";
+			line.add(new TextComponent("dividir por ", TextType.NORMAL));	
+			return;
 		}
 		if (op.equals(IBinaryOperator.SUB)) {
-			return "subtrair por ";
+			line.add(new TextComponent("subtrair por ", TextType.NORMAL));	
+			return;
 		}
 		if (op.equals(IBinaryOperator.MUL)) {
-			return "multiplicar por ";
+			line.add(new TextComponent("multiplicar por ", TextType.NORMAL));	
+			return;
 		}
 		if (op.equals(IBinaryOperator.AND)) {
-			return "e ";
+			line.add(new TextComponent("e ", TextType.NORMAL));	
+			return;
 		}
 		if (op.equals(IBinaryOperator.OR)) {
-			return "ou ";
+			line.add(new TextComponent("ou ", TextType.NORMAL));	
+			return;
 		}
 		/*
 		if (op.equals(IBinaryOperator.MOD)) {
 			return "multiplicar por ";
 		}
 		*/
-		return "";
+		return;
 	}
 	
 	static String translateUnaryOperator(IUnaryOperator op) {

@@ -26,5 +26,4 @@ Require-Bundle: pt.iscte.paddle.model,
  org.eclipse.swt
 Import-Package: org.eclipse.swt.layout,
  org.eclipse.swt.widgets,
- pt.iscte.paddle.model.roles,
- pt.iscte.paddle.model.roles.impl
+ pt.iscte.paddle.model.roles

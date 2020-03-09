@@ -1,5 +1,7 @@
-package pt.iscte.paddle.model.demo2;
+package pt.iscte.paddle.codexplainer.roles;
 
+
+import java.util.List;
 
 import pt.iscte.paddle.model.IArrayElement;
 import pt.iscte.paddle.model.IBinaryExpression;
@@ -22,12 +24,21 @@ public interface IMostWantedHolder extends IVariableRole {
 	Operation getOperation();
 	
 	IVariableExpression getTargetArray();
+	
+	
+	/**
+	 * returns a list containing expressions used to determine whether the variable is or not a MostWantedHolder.
+	 * Useful for expression marking on Javardise.
+	 * Order in List: 1- Selection Guard, 2- Loop Guard, 3- Max/Min value assignment. 
+	 * @return
+	 */
+	List<IProgramElement> getExpressions();
 
 	default String getName() {
 		return "MostWantedHolder";
 	}
 
-	enum Operation {
+	public enum Operation {
 		GREATER, SMALLER, UNDEFINED;
 	}
 

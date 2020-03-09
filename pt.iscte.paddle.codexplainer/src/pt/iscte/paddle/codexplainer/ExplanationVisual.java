@@ -43,9 +43,11 @@ import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.IBlock.IVisitor;
-import pt.iscte.paddle.model.demo2.MostWantedHolder;
 import pt.iscte.paddle.model.demo2.VariableRoleExplainer;
 import pt.iscte.paddle.model.roles.IVariableRole;
+import pt.iscte.paddle.codexplainer.components.TextComponent;
+import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
+import pt.iscte.paddle.codexplainer.role.impl.MostWantedHolder;
 import pt.iscte.paddle.codexplainer.temp.*;
 
 public class ExplanationVisual {
@@ -190,6 +192,8 @@ public class ExplanationVisual {
 
 		// --------------
 
+		
+		//Text 
 		Color blue = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 		
 		Composite textComp = new Composite(comp, 0);
@@ -197,10 +201,17 @@ public class ExplanationVisual {
 		textComp.setLayout(fillLayout);
 		textComp.setBounds(100, 100, 0, 0);
 
+		HyperlinkedText hypertext = new HyperlinkedText(e -> MarkerService.mark(blue, e));
 		
-		Link text = NLTranslatorTest.getHyperLinkedText(proc.getBody(), variablesRolesExplanation).create(textComp, SWT.BORDER); 
+		List<List<TextComponent>> bodyExplanationText;
 		
-		System.out.println(text.toString());
+		bodyExplanationText = NLTranslatorTest.getExplanationText(proc.getBody(), variablesRolesExplanation);
+		
+		convertExplanationtoLinkText(bodyExplanationText, hypertext);
+		
+		Link text = hypertext.create(textComp, SWT.BORDER);
+		
+		//System.out.println(text.toString());
 		//text.setText(text.getText() + g.newline().words("asdasdadsdasd").create(textComp, SWT.BORDER));
 		//text.
 		// --------------
@@ -222,5 +233,27 @@ public class ExplanationVisual {
 
 		dialog.open();
 	}
+	
+	static void convertExplanationtoLinkText(List<List<TextComponent>> explanationText, HyperlinkedText hypertext) {
+		for(List<TextComponent> line: explanationText) {
+			
+			
+			for(TextComponent comp: line) {
+				if(comp.getType().equals(TextType.NORMAL)) {
+					hypertext.words(comp.getText());
+				}
+				if(comp.getType().equals(TextType.LINK)) {
+					hypertext.link(comp.getText(), comp.getElement());		
+				}
+				if(comp.getType().equals(TextType.NEWLINE)) {
+					hypertext.newline();
+				}
+			}
+			
+			hypertext.newline();
+			hypertext.newline();
+		}
+	}
+	
 
 }

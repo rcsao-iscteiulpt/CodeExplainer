@@ -1,8 +1,8 @@
 package pt.iscte.paddle.model.demo2;
 import java.io.File;
 
+import pt.iscte.paddle.codexplainer.role.impl.MostWantedHolder;
 import pt.iscte.paddle.codexplainer.temp.TestMaxArray;
-import pt.iscte.paddle.javali.translator.Translator;
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IVariableDeclaration;
@@ -25,9 +25,9 @@ public class DemoMostWantedHolder {
 			System.out.println(var);
 			if(MostWantedHolder.isMostWantedHolder(var)) {
 				System.out.println("yes");
-				IVariableRole g = new MostWantedHolder(var);
-				IMostWantedHolder g1 = (IMostWantedHolder) g;
-				System.out.println(var + ": " + g);
+				//IVariableRole g = new MostWantedHolder(var);
+				IVariableRole g = IVariableRole.match(var);
+				System.out.println(g);
 			}
 		}
 

@@ -18,8 +18,12 @@ public interface IFunctionClassifier {
 		FUNCTION, PROCEDURE;
 	}
 
-	public Status getClassification(IProcedure method);
+	public Status getClassification();
 	
+	/**
+	 * @return Returns a list containing all assignments which are deemed to be the reason of why the method is considered a procedure
+	 * and returns an empty list if the method is a function.
+	 */
 	public List<IProgramElement> getAssignments();	
 
 }

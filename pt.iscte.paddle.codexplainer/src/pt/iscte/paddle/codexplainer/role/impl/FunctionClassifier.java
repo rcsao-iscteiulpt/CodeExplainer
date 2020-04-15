@@ -18,15 +18,24 @@ public class FunctionClassifier implements IFunctionClassifier {
 
 	List<IProgramElement> assignments;
 	
-	public FunctionClassifier(IProcedure proc2) {
+	Status classification = Status.FUNCTION;
+	
+	public FunctionClassifier(IProcedure method) {
+	
 		assignments = new ArrayList<IProgramElement>();
-		for(IVariableDeclaration var: proc2.getParameters()) {
-			Visitor v = new Visitor(var);
-			proc2.accept(v);
-			if(!v.assignments.isEmpty())
-				assignments.addAll(v.assignments);
-		}
+		for(IVariableDeclaration var: method.getParameters()) {
+			if(var.getType() instanceof IReferenceType) {
+				Visitor v = new Visitor(var);
+				method.accept(v);
+				
+				if (v.isMemoryValueChanged) 
+					classification = Status.PROCEDURE;
+				
+				if(!v.assignments.isEmpty())
+					assignments.addAll(v.assignments);
+			}
 		
+		}
 	}
 	
 	
@@ -42,8 +51,7 @@ public class FunctionClassifier implements IFunctionClassifier {
 		
 		@Override
 		public boolean visit(IArrayElementAssignment assignment) {
-			//System.out.println(assignment);
-			if (assignment.getTarget().equals(var)) {
+			if (assignment.getTarget().isSame(var)) {
 				assignments.add(assignment);
 				isMemoryValueChanged = true;
 			}	
@@ -52,14 +60,12 @@ public class FunctionClassifier implements IFunctionClassifier {
 		}
 		@Override
 		public boolean visit(IRecordFieldAssignment assignment) {
-			//TODO Untested
 			IRecordFieldExpression tempTarget = assignment.getTarget();
-			
 			
 			while(tempTarget.getTarget() != null && !(tempTarget.getTarget() instanceof IVariableExpression)) {
 				tempTarget = (IRecordFieldExpression) tempTarget.getTarget();
 			}
-			if (tempTarget.getTarget().toString().equals(var.toString())) {
+			if (tempTarget.getTarget().isSame(var)) {
 				assignments.add(assignment);
 				isMemoryValueChanged = true;
 			}	
@@ -70,19 +76,8 @@ public class FunctionClassifier implements IFunctionClassifier {
 		
 	}
 	
-	public Status getClassification(IProcedure method) {
-		for(IVariableDeclaration var: method.getParameters()) {
-			//System.out.println(var.getType());
-			if(var.getType() instanceof IReferenceType) {
-				System.out.println(var);
-				Visitor v = new Visitor(var);
-				var.getOwnerProcedure().accept(v);
-				if (v.isMemoryValueChanged) {
-					return Status.PROCEDURE;
-				}
-			}	
-		}
-		return Status.FUNCTION;
+	public Status getClassification() {
+		return classification;
 	}
 	
 	public List<IProgramElement> getAssignments() {

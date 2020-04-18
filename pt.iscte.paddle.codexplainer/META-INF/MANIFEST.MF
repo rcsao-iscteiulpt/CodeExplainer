@@ -6,8 +6,6 @@ Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: pt.iscte.paddle.codexplainer
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: pt.iscte.paddle.model,
- pt.iscte.paddle.javali;bundle-version="1.0.0",
- pt.iscte.paddle.model.semantics;bundle-version="1.0.0",
  org.junit,
  org.junit.jupiter.api,
  org.junit.jupiter.engine,
@@ -26,4 +24,5 @@ Require-Bundle: pt.iscte.paddle.model,
  org.eclipse.swt
 Import-Package: org.eclipse.swt.layout,
  org.eclipse.swt.widgets,
- pt.iscte.paddle.model.roles
+ pt.iscte.paddle.model.roles,
+ pt.iscte.paddle.model.roles.impl

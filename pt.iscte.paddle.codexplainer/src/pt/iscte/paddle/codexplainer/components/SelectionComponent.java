@@ -1,31 +1,25 @@
 package pt.iscte.paddle.codexplainer.components;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import pt.iscte.paddle.javardise.parser.Visitor;
 import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.IExpression;
-import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IOperator;
+import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IUnaryExpression;
-import pt.iscte.paddle.model.IVariableDeclaration;
-import pt.iscte.paddle.model.IVariableExpression;
 
-public class LoopComponent {
+public class SelectionComponent {
 
 	List<IExpression> guardParts = new ArrayList<IExpression>();
-	IBlock loopBlock;
+	IBlock selectionBlock;
 
-	Set<IVariableDeclaration> possibleIterators = new HashSet<IVariableDeclaration>();
+	public SelectionComponent(ISelection selection) {
+		IExpression guard = selection.getGuard();
+		this.selectionBlock = selection.getBlock();
 
-	public LoopComponent(ILoop loop) {
-		IExpression guard = loop.getGuard();
-		this.loopBlock = loop.getBlock();
-
+		
 		if (guard instanceof IUnaryExpression) {
 			// TODO
 			guardParts.add(guard);
@@ -37,25 +31,6 @@ public class LoopComponent {
 			if (!binaryGuard.getOperator().equals(IOperator.AND) && !binaryGuard.getOperator().equals(IOperator.OR))
 				guardParts.add(guard);
 		}
-
-		determinePossibleIteratorsInGuard(guard);
-
-	}
-
-	void determinePossibleIteratorsInGuard(IExpression guard) {
-
-		for (IExpression e : guardParts) {
-			if (e instanceof IBinaryExpression) {
-				IExpression left = ((IBinaryExpression) e).getLeftOperand();
-				IExpression right = ((IBinaryExpression) e).getRightOperand();
-
-				if (left instanceof IVariableExpression)
-					possibleIterators.add((((IVariableExpression) left).getVariable()));
-				if (right instanceof IVariableExpression)
-					possibleIterators.add((((IVariableExpression) right).getVariable()));
-			}
-		}
-
 	}
 
 	void decomposeBinaryExpressionGuard(IBinaryExpression guard) {
@@ -87,7 +62,4 @@ public class LoopComponent {
 		return guardParts;
 	}
 
-	public Set<IVariableDeclaration> getPossibleIterators() {
-		return possibleIterators;
-	}
 }

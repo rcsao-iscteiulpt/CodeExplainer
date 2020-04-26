@@ -5,7 +5,7 @@ import static pt.iscte.paddle.model.IType.INT;
 import org.junit.jupiter.api.Test;
 import pt.iscte.paddle.codexplainer.role.impl.FunctionClassifier;
 import pt.iscte.paddle.codexplainer.roles.IFunctionClassifier;
-import pt.iscte.paddle.codexplainer.roles.IFunctionClassifier.Status;
+import pt.iscte.paddle.codexplainer.roles.IFunctionClassifier.MethodType;
 import pt.iscte.paddle.model.IArrayElementAssignment;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.IModule;
@@ -47,7 +47,7 @@ class FunctionClassifierTest {
 		IFunctionClassifier classifier = new FunctionClassifier(proc);
 		System.out.println(classifier.getClassification());
 		System.out.println(classifier.getAssignments());
-		assertEquals(Status.PROCEDURE, classifier.getClassification());
+		assertEquals(MethodType.PROCEDURE, classifier.getClassification());
 	}
 	
 	@Test
@@ -83,7 +83,7 @@ class FunctionClassifierTest {
 		IFunctionClassifier classifier = new FunctionClassifier(proc);
 		System.out.println(classifier.getClassification());
 		System.out.println(classifier.getAssignments());
-		assertEquals(Status.PROCEDURE, classifier.getClassification());
+		assertEquals(MethodType.PROCEDURE, classifier.getClassification());
 	}
 	
 	@Test
@@ -116,7 +116,7 @@ class FunctionClassifierTest {
 		IFunctionClassifier classifier = new FunctionClassifier(proc);
 		System.out.println(classifier.getClassification());
 		System.out.println(classifier.getAssignments());
-		assertEquals(Status.PROCEDURE, classifier.getClassification());
+		assertEquals(MethodType.PROCEDURE, classifier.getClassification());
 	}
 	
 	@Test
@@ -145,7 +145,7 @@ class FunctionClassifierTest {
 		IFunctionClassifier classifier = new FunctionClassifier(proc);
 		System.out.println(classifier.getClassification());
 		System.out.println(classifier.getAssignments());
-		assertEquals(Status.FUNCTION, classifier.getClassification());
+		assertEquals(MethodType.FUNCTION, classifier.getClassification());
 	}
 
 }

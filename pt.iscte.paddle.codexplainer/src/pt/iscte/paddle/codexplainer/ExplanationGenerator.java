@@ -9,8 +9,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import pt.iscte.paddle.codexplainer.role.impl.MostWantedHolder;
-import pt.iscte.paddle.javali.translator.Translator;
+
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IModule;
@@ -21,7 +20,9 @@ import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IType;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
+import pt.iscte.paddle.model.roles.IMostWantedHolder;
 import pt.iscte.paddle.model.roles.IVariableRole;
+import pt.iscte.paddle.model.roles.impl.MostWantedHolder;
 import pt.iscte.paddle.model.demo2.VariableRoleExplainer;
 
 
@@ -33,8 +34,8 @@ public class ExplanationGenerator {
 
 		if(MostWantedHolder.isMostWantedHolder(var)) {
 			System.out.println(var);
-			IVariableRole role =  new MostWantedHolder(var);
-			variablesRolesExplanation.put(var, VariableRoleExplainer.getMostWantedHolderExplanation(role));
+			MostWantedHolder role =  new MostWantedHolder(var);
+			variablesRolesExplanation.put(var, VariableRoleExplainer.getRoleExplanation(var, role));
 		}
 		
 //		if(IGatherer.isGatherer(var)) {
@@ -91,6 +92,11 @@ public class ExplanationGenerator {
 			//System.out.println(var);	
 			getVariableRole(var);
 		}
+		
+		ComponentsVisitor v = new ComponentsVisitor(method);
+		
+		
+		System.out.println(v.getMethodComponents());
 		
 		//System.out.println(localVariables);
 		//String explanation = NLTranslator.getExplanation(method.getBody(), variablesRolesExplanation);	

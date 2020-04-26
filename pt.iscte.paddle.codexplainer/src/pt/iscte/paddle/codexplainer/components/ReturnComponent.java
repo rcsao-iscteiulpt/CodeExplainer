@@ -9,7 +9,7 @@ import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.IType;
 
 
-public class ReturnComponent {
+public class ReturnComponent extends Component {
 
 	IType returnType;
 	IExpression returnExpression;

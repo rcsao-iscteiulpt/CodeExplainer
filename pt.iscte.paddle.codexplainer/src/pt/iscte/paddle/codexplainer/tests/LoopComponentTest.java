@@ -46,17 +46,18 @@ class LoopComponentTest {
 		IVariableAssignment iInc = loop.addIncrement(i);
 		IReturn ret = body.addReturn(m);
 		
-		System.out.println(max);
+		//System.out.println("Method ==" +max);
 		
 		
 		LoopComponent comp = new LoopComponent(loop);
 		
-		System.out.println(comp.getGuardParts());
-		System.out.println(comp.getPossibleIterators());
+//		System.out.println(comp.getGuardParts());
+//		System.out.println(comp.getPossibleIterators());
 		
 		assertEquals("[i < array.length, max > array.length, max != i]", comp.getGuardParts().toString());
 		assertEquals("[max, i]", comp.getPossibleIterators().toString());
 	}
+	
 	
 	void testManual() {
 		IModule module = IModule.create();
@@ -84,14 +85,14 @@ class LoopComponentTest {
 		IVariableAssignment iInc = loop.addIncrement(i);
 		IReturn ret = body.addReturn(m);
 		
-		System.out.println(max);
+		//System.out.println("Method == " +max);
 		
 		
 		LoopComponent comp = new LoopComponent(loop);
 		
-		System.out.println(comp.getPossibleIterators());
-		System.out.println(comp.getGuardParts());
-		
+//		System.out.println(comp.getPossibleIterators());
+//		System.out.println(comp.getGuardParts());
+	
 	}
 
 

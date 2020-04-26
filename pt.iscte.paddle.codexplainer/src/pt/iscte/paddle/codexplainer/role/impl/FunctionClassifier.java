@@ -18,7 +18,7 @@ public class FunctionClassifier implements IFunctionClassifier {
 
 	List<IProgramElement> assignments;
 	
-	Status classification = Status.FUNCTION;
+	MethodType classification = MethodType.FUNCTION;
 	
 	public FunctionClassifier(IProcedure method) {
 	
@@ -29,7 +29,7 @@ public class FunctionClassifier implements IFunctionClassifier {
 				method.accept(v);
 				
 				if (v.isMemoryValueChanged) 
-					classification = Status.PROCEDURE;
+					classification = MethodType.PROCEDURE;
 				
 				if(!v.assignments.isEmpty())
 					assignments.addAll(v.assignments);
@@ -76,7 +76,7 @@ public class FunctionClassifier implements IFunctionClassifier {
 		
 	}
 	
-	public Status getClassification() {
+	public MethodType getClassification() {
 		return classification;
 	}
 	

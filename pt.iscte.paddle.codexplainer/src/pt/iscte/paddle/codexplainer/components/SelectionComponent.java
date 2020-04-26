@@ -10,7 +10,7 @@ import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IUnaryExpression;
 
-public class SelectionComponent {
+public class SelectionComponent extends Component {
 
 	List<IExpression> guardParts = new ArrayList<IExpression>();
 	IBlock selectionBlock;

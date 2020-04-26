@@ -14,11 +14,11 @@ import pt.iscte.paddle.model.IVariableExpression;
 
 public interface IFunctionClassifier {
 
-	enum Status {
+	public enum MethodType {
 		FUNCTION, PROCEDURE;
 	}
 
-	public Status getClassification();
+	public MethodType getClassification();
 	
 	/**
 	 * @return Returns a list containing all assignments which are deemed to be the reason of why the method is considered a procedure

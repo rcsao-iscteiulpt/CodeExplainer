@@ -5,26 +5,36 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import pt.iscte.paddle.javardise.parser.Visitor;
 import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBlock;
+import pt.iscte.paddle.model.IBlockElement;
 import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IOperator;
+import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.IUnaryExpression;
 import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.IVariableExpression;
 
-public class LoopComponent {
+public class LoopComponent extends Component {
 
 	List<IExpression> guardParts = new ArrayList<IExpression>();
 	IBlock loopBlock;
+	
+	
 
 	Set<IVariableDeclaration> possibleIterators = new HashSet<IVariableDeclaration>();
+	
+	ArrayElementType collectionType;
+	enum ArrayElementType {
+		INT, BOOLEAN, RECORD
+	}
 
 	public LoopComponent(ILoop loop) {
 		IExpression guard = loop.getGuard();
 		this.loopBlock = loop.getBlock();
+		
+		
 
 		if (guard instanceof IUnaryExpression) {
 			// TODO

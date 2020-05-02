@@ -21,7 +21,7 @@ import pt.iscte.paddle.model.IVariableAssignment;
 
 public class MostWantedHolder implements IMostWantedHolder {
 
-    final Operation operator;
+    final Objective operator;
     final IVariableExpression targetVar;
 	IVariableExpression arrayVar;
 	IArrayElement arrayEl;
@@ -60,7 +60,7 @@ public class MostWantedHolder implements IMostWantedHolder {
 		 * ArrayVar[Variable].
 		 */
 		boolean isAssignmentCorrect = false;
-		Operation RelOperator = Operation.UNDEFINED;
+		Objective RelOperator = Objective.UNDEFINED;
 
 		Visitor(IVariableDeclaration var) {
 			this.targetVar = var;
@@ -92,8 +92,8 @@ public class MostWantedHolder implements IMostWantedHolder {
 					}
 
 					if (!varPos.equals(VarPosition.NONE)) {
-						Operation op = getRelationalOperator(guard, varPos);
-						if (!op.equals(Operation.UNDEFINED) && op != RelOperator) {
+						Objective op = getRelationalOperator(guard, varPos);
+						if (!op.equals(Objective.UNDEFINED) && op != RelOperator) {
 
 							RelOperator = op;
 							arrayVar = aVar;
@@ -182,7 +182,7 @@ public class MostWantedHolder implements IMostWantedHolder {
 	}
 
 	@Override
-	public Operation getOperation() {
+	public Objective getOperation() {
 		return operator;
 	}
 
@@ -200,7 +200,7 @@ public class MostWantedHolder implements IMostWantedHolder {
 		return expressionList;	
 	}
 
-	static Operation getRelationalOperator(IBinaryExpression assignment, VarPosition varPos) {
+	static Objective getRelationalOperator(IBinaryExpression assignment, VarPosition varPos) {
 		if (assignment.getOperator().equals(IBinaryOperator.GREATER)
 				|| assignment.getOperator().equals(IBinaryOperator.SMALLER)) {
 			if (varPos.equals(VarPosition.RIGHT))
@@ -208,20 +208,20 @@ public class MostWantedHolder implements IMostWantedHolder {
 			else
 				return match(assignment.getOperator(), true);
 		}
-		return Operation.UNDEFINED;
+		return Objective.UNDEFINED;
 	}
 
-	static Operation match(IBinaryOperator op, boolean inverse) {
+	static Objective match(IBinaryOperator op, boolean inverse) {
 		if (!inverse)
 			if (op == IOperator.GREATER)
-				return Operation.GREATER;
+				return Objective.GREATER;
 		if (op == IOperator.SMALLER)
-			return Operation.SMALLER;
+			return Objective.SMALLER;
 		else if (op == IOperator.GREATER)
-			return Operation.SMALLER;
+			return Objective.SMALLER;
 		if (op == IOperator.SMALLER)
-			return Operation.GREATER;
+			return Objective.GREATER;
 
-		return Operation.UNDEFINED;
+		return Objective.UNDEFINED;
 	}
 }

@@ -1,22 +1,20 @@
 package pt.iscte.paddle.codexplainer.tests;
+
+import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import static pt.iscte.paddle.model.IOperator.AND;
+import static pt.iscte.paddle.model.IOperator.DIFFERENT;
 import static pt.iscte.paddle.model.IOperator.GREATER;
 import static pt.iscte.paddle.model.IOperator.SMALLER;
 import static pt.iscte.paddle.model.IType.INT;
 
-import java.io.File;
-
-import org.junit.jupiter.api.Test;
 
 import pt.iscte.paddle.codexplainer.role.impl.MostWantedHolder;
-import pt.iscte.paddle.javali.translator.Translator;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
-import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;
-import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
 
 class MostWantedHolderTest {
@@ -193,6 +191,43 @@ class MostWantedHolderTest {
 	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("m")));
 	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("i")));
 	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("v")));
+	}
+	
+	
+	@Test
+	void testWhileGuard() {		
+		IModule module = IModule.create();
+		
+		IProcedure max = module.addProcedure(INT);
+		max.setId("max");
+		
+		IVariableDeclaration array = max.addParameter(INT.array().reference());
+		array.setId("v");
+		
+		IBlock body = max.getBody();
+		
+		IVariableDeclaration m = body.addVariable(INT);
+		m.setId("m");
+		body.addAssignment(m, array.element(INT.literal(0)));
+		
+		IVariableDeclaration i = body.addVariable(INT);
+		i.setId("i");
+		body.addAssignment(i, INT.literal(1));
+		
+		ILoop loop = body.addLoop(AND.on(SMALLER.on(i, m), 
+				AND.on(GREATER.on(m, m), DIFFERENT.on(m.expression(), i.expression()))));
+		
+		
+		ISelection ifstat = loop.addSelection(SMALLER.on(array.element(i), i));
+	    ifstat.addAssignment(m, array.element()); //This Statement should make m not a mostWantedHolder
+		loop.addIncrement(i);
+		body.addReturn(m);
+		
+		System.out.println(max);
+		assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("m")));
+		assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("i")));
+		assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("v")));
+		
 	}
 
 }

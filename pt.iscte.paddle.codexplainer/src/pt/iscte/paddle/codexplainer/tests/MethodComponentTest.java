@@ -6,9 +6,7 @@ import static pt.iscte.paddle.model.IType.*;
 
 import org.junit.jupiter.api.Test;
 
-import pt.iscte.paddle.codexplainer.components.LoopComponent;
 import pt.iscte.paddle.codexplainer.components.MethodComponent;
-import pt.iscte.paddle.codexplainer.translator.TranslatorLoopComponentPT;
 import pt.iscte.paddle.codexplainer.translator.TranslatorMethodComponentPT;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;

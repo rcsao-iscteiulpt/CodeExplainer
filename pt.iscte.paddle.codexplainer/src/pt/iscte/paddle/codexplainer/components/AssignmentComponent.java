@@ -6,7 +6,6 @@ import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.ILiteral;
 import pt.iscte.paddle.model.IStatement;
 import pt.iscte.paddle.model.IVariableAssignment;
-import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.IVariableExpression;
 import pt.iscte.paddle.model.roles.IArrayIndexIterator;
 import pt.iscte.paddle.model.roles.IGatherer;

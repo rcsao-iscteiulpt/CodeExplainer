@@ -9,9 +9,7 @@ import static pt.iscte.paddle.model.IType.INT;
 
 import org.junit.jupiter.api.Test;
 
-import pt.iscte.paddle.codexplainer.components.LoopComponent;
 import pt.iscte.paddle.codexplainer.components.SelectionComponent;
-import pt.iscte.paddle.codexplainer.translator.TranslatorLoopComponentPT;
 import pt.iscte.paddle.codexplainer.translator.TranslatorSelectionComponentPT;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;

@@ -1,29 +1,19 @@
 package pt.iscte.paddle.codexplainer.components;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import pt.iscte.paddle.codexplainer.ComponentsVisitor;
-import pt.iscte.paddle.model.IArrayElementAssignment;
 import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBlock;
-import pt.iscte.paddle.model.IBlockElement;
 import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.IProgramElement;
-import pt.iscte.paddle.model.IRecordFieldAssignment;
-import pt.iscte.paddle.model.ISelection;
-import pt.iscte.paddle.model.IStatement;
 import pt.iscte.paddle.model.IUnaryExpression;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.IVariableExpression;
-import pt.iscte.paddle.model.roles.IArrayIndexIterator;
-import pt.iscte.paddle.model.roles.IVariableRole;
-import pt.iscte.paddle.model.roles.impl.Stepper;
 
 public class LoopComponent extends Component {
 
@@ -42,7 +32,7 @@ public class LoopComponent extends Component {
 	public LoopComponent(List<VariableRoleComponent> list, ILoop loop) {
 		IExpression guard = loop.getGuard();
 		this.loopBlock = loop.getBlock();
-		ComponentsVisitor v = new ComponentsVisitor(loop.getBlock(),branchComponents, list);
+		new ComponentsVisitor(loop.getBlock(),branchComponents, list);
 		
 		//Decompose Guard
 		if (guard instanceof IUnaryExpression) {

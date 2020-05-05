@@ -1,12 +1,8 @@
 package pt.iscte.paddle.codexplainer.translator;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import pt.iscte.paddle.codexplainer.components.Component;
-import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
-import pt.iscte.paddle.model.IType;
 
 public interface TranslatorPT {
  

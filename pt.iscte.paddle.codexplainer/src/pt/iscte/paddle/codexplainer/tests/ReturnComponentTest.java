@@ -7,17 +7,14 @@ import static pt.iscte.paddle.model.IType.*;
 
 import org.junit.jupiter.api.Test;
 
-import pt.iscte.paddle.codexplainer.components.LoopComponent;
+
 import pt.iscte.paddle.codexplainer.components.ReturnComponent;
 import pt.iscte.paddle.model.IBlock;
-import pt.iscte.paddle.model.ILiteral;
 import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IModule;
-import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;
-import pt.iscte.paddle.model.IType;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
 

@@ -18,7 +18,6 @@ import pt.iscte.paddle.model.IRecordFieldExpression;
 import pt.iscte.paddle.model.IStatement;
 import pt.iscte.paddle.model.IUnaryExpression;
 import pt.iscte.paddle.model.IUnaryOperator;
-import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.IVariableExpression;
 import pt.iscte.paddle.model.impl.ArithmeticOperator;
 import pt.iscte.paddle.model.impl.RelationalOperator;

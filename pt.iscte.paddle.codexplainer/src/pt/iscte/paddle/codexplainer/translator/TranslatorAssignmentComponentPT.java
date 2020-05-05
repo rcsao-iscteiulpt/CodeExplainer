@@ -7,16 +7,12 @@ import pt.iscte.paddle.codexplainer.components.AssignmentComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
 import pt.iscte.paddle.codexplainer.components.VariableRoleComponent;
-import pt.iscte.paddle.model.IArrayElementAssignment;
-import pt.iscte.paddle.model.IRecordFieldAssignment;
 import pt.iscte.paddle.model.IStatement;
-import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.roles.IArrayIndexIterator;
 import pt.iscte.paddle.model.roles.IGatherer;
 import pt.iscte.paddle.model.roles.IGatherer.Operation;
 import pt.iscte.paddle.model.roles.IMostWantedHolder;
 import pt.iscte.paddle.model.roles.IMostWantedHolder.Objective;
-import pt.iscte.paddle.model.roles.IVariableRole;
 
 public class TranslatorAssignmentComponentPT implements TranslatorPT {
 

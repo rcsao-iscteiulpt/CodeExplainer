@@ -42,10 +42,7 @@ import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IBlock.IVisitor;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
-import pt.iscte.paddle.codexplainer.temp.TestMax;
 import pt.iscte.paddle.codexplainer.temp.TestMaxArray;
-import pt.iscte.paddle.codexplainer.temp.TestNaturals;
-import pt.iscte.paddle.codexplainer.temp.TestSum;;
 
 
 public class ExplanationVisual {
@@ -103,8 +100,6 @@ public class ExplanationVisual {
 		
 		HyperlinkedText hypertext = new HyperlinkedText(e -> e.forEach(e2 -> IJavardiseService.getWidget(e2).addMark(blue)));
 		
-		
-		List<List<TextComponent>> bodyExplanationText;
 
 
 		convertExplanationtoLinkText(gen.getExplanation(), hypertext);

@@ -3,12 +3,11 @@ package pt.iscte.paddle.codexplainer.translator;
 import java.util.ArrayList;
 import java.util.List;
 
-import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.components.ReturnComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
 import pt.iscte.paddle.model.IType;
-import pt.iscte.paddle.model.IVariableDeclaration;
+
 import pt.iscte.paddle.model.roles.IGatherer;
 import pt.iscte.paddle.model.roles.IMostWantedHolder;
 import pt.iscte.paddle.model.roles.IStepper;

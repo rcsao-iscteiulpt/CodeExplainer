@@ -52,7 +52,6 @@ public class TranslatorLoopComponentPT implements TranslatorPT {
 		//ArrayIndexIterator
 		if (comp.getIteratorComponent().getRole() instanceof IArrayIndexIterator) {
 			IArrayIndexIterator it = (IArrayIndexIterator) comp.getIteratorComponent().getRole();
-			String g = "";
 
 			explanationByComponents.add(new TextComponent(TextType.NEWLINE));
 			explanationByComponents.add(new TextComponent(

@@ -2,21 +2,16 @@ package pt.iscte.paddle.codexplainer;
 	
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import pt.iscte.paddle.codexplainer.components.AssignmentComponent;
 import pt.iscte.paddle.codexplainer.components.Component;
-import pt.iscte.paddle.codexplainer.components.DeclarationComponent;
 import pt.iscte.paddle.codexplainer.components.LoopComponent;
-import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.components.ReturnComponent;
 import pt.iscte.paddle.codexplainer.components.SelectionComponent;
 import pt.iscte.paddle.codexplainer.components.VariableRoleComponent;
 import pt.iscte.paddle.model.IArrayElementAssignment;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
-import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IRecordFieldAssignment;
 import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;

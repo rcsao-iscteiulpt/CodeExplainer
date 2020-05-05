@@ -1,12 +1,8 @@
 package pt.iscte.paddle.codexplainer.tests;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 
 import pt.iscte.paddle.codexplainer.components.VariableRoleComponent;

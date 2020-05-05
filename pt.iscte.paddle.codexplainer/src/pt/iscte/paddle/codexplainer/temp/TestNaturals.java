@@ -2,13 +2,10 @@ package pt.iscte.paddle.codexplainer.temp;
 
 
 
-import static org.junit.Assert.assertEquals;
 import static pt.iscte.paddle.model.IOperator.ADD;
 import static pt.iscte.paddle.model.IOperator.SMALLER;
 import static pt.iscte.paddle.model.IType.INT;
 
-import pt.iscte.paddle.interpreter.IArray;
-import pt.iscte.paddle.interpreter.IExecutionData;
 import pt.iscte.paddle.model.IArrayElementAssignment;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;

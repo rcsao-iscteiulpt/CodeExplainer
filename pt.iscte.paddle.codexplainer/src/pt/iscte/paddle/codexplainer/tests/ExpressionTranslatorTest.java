@@ -3,7 +3,6 @@ package pt.iscte.paddle.codexplainer.tests;
 
 import static pt.iscte.paddle.model.IType.INT;
 
-import pt.iscte.paddle.codexplainer.translator.ExpressionTranslatorPT;
 import pt.iscte.paddle.model.IArrayElement;
 import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBinaryOperator;

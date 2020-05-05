@@ -10,7 +10,6 @@ import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IUnaryExpression;
 import pt.iscte.paddle.codexplainer.ComponentsVisitor;
-import pt.iscte.paddle.codexplainer.role.*;
 import pt.iscte.paddle.model.roles.impl.MostWantedHolder;
 
 public class SelectionComponent extends Component {

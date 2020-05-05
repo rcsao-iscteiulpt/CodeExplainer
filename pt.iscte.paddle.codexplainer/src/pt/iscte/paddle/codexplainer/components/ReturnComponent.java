@@ -7,6 +7,9 @@ import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.IType;
+import pt.iscte.paddle.model.IUnaryExpression;
+import pt.iscte.paddle.model.IVariableExpression;
+import pt.iscte.paddle.model.roles.IVariableRole;
 
 
 public class ReturnComponent extends Component {
@@ -15,8 +18,10 @@ public class ReturnComponent extends Component {
 	IExpression returnExpression;
 	List<IExpression> returnExpressionParts = new ArrayList<IExpression>();
 	
+	IVariableRole varReturnRole = IVariableRole.NONE;
 	
-	public ReturnComponent(IReturn returnEx) {
+	
+	public ReturnComponent(List<VariableRoleComponent> variableList, IReturn returnEx) {
 		this.returnExpression = (IExpression) returnEx.getExpression();
 		this.returnType = returnEx.getReturnValueType();
 		
@@ -24,10 +29,25 @@ public class ReturnComponent extends Component {
 			decomposeBinaryExpression((IBinaryExpression) returnExpression);
 		} else {
 			returnExpressionParts.add(returnExpression);
+			
+			for(VariableRoleComponent v: variableList) {
+				if(returnExpression instanceof IVariableExpression) {
+					if(v.getVar().expression().isSame(returnExpression)) {
+						varReturnRole = v.getRole();
+					}
+				}
+				if(returnExpression instanceof IUnaryExpression) {
+					IUnaryExpression uExpression = (IUnaryExpression) returnExpression;
+					//TODO UnaryExpression Return Component
+				}
+				
+			}
 		}
 		
 	}
 	
+
+
 	void decomposeBinaryExpression(IBinaryExpression expression) {
 		IExpression left = expression.getLeftOperand();
 		IExpression right = expression.getRightOperand();
@@ -51,6 +71,10 @@ public class ReturnComponent extends Component {
 
 	public List<IExpression> getReturnExpressionParts() {
 		return returnExpressionParts;
+	}
+	
+	public IVariableRole getVarReturnRole() {
+		return varReturnRole;
 	}
 	
 	

@@ -1,14 +1,9 @@
 package pt.iscte.paddle.codexplainer;
 
-import static pt.iscte.paddle.model.IOperator.GREATER;
-import static pt.iscte.paddle.model.IOperator.SMALLER;
-import static pt.iscte.paddle.model.IType.INT;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -31,7 +26,6 @@ import org.eclipse.swt.widgets.Text;
 
 import pt.iscte.paddle.javardise.ClassWidget;
 import pt.iscte.paddle.javardise.Constants;
-import pt.iscte.paddle.javardise.MethodWidget;
 import pt.iscte.paddle.javardise.service.IClassWidget;
 import pt.iscte.paddle.javardise.service.ICodeDecoration;
 import pt.iscte.paddle.javardise.service.IDeclarationWidget;
@@ -41,44 +35,22 @@ import pt.iscte.paddle.javardise.util.HyperlinkedText;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.IBlockElement;
 import pt.iscte.paddle.model.IExpression;
-import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
-import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.IReturn;
-import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IVariableAssignment;
-import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.IBlock.IVisitor;
-import pt.iscte.paddle.model.demo2.VariableRoleExplainer;
-import pt.iscte.paddle.model.roles.IMostWantedHolder;
-import pt.iscte.paddle.model.roles.IVariableRole;
-import pt.iscte.paddle.model.roles.impl.MostWantedHolder;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
+import pt.iscte.paddle.codexplainer.temp.TestMax;
+import pt.iscte.paddle.codexplainer.temp.TestMaxArray;
+import pt.iscte.paddle.codexplainer.temp.TestNaturals;
+import pt.iscte.paddle.codexplainer.temp.TestSum;;
 
-import pt.iscte.paddle.codexplainer.temp.*;
 
 public class ExplanationVisual {
 
 	private static Shell shell;
-
-	static Map<IVariableDeclaration, String> variablesRolesExplanation = new HashMap<IVariableDeclaration, String>();
-
-	private static void getVariableRole(IVariableDeclaration var) {
-
-		if (MostWantedHolder.isMostWantedHolder(var)) {
-			System.out.println(var);
-			MostWantedHolder role = new MostWantedHolder(var);
-			variablesRolesExplanation.put(var, VariableRoleExplainer.getRoleExplanation(var, role));
-		}
-
-//		if(IGatherer.isGatherer(var)) {
-//			return IGatherer.createGatherer(var);
-//		}
-//      etc....
-		return;
-	}
 
 	public static void main(String[] args) {
 
@@ -86,11 +58,14 @@ public class ExplanationVisual {
 		t.setup();
 		IModule module = t.getModule();
 		IProcedure proc = module.getProcedure("max");
-
-		for (IVariableDeclaration var : proc.getVariables()) {
-			// System.out.println(var);
-			getVariableRole(var);
-		}
+		
+		
+//		TestSum t = new TestSum();
+//		t.setup();
+//		IModule module = t.getModule();
+//		IProcedure proc = module.getProcedure("summation");
+		
+		
 
 		//Visual
 		Display display = new Display();
@@ -122,15 +97,17 @@ public class ExplanationVisual {
 
 		Color blue = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 		
+		
+		//Explanation 
+		ExplanationGenerator gen = new ExplanationGenerator(proc);
+		
 		HyperlinkedText hypertext = new HyperlinkedText(e -> e.forEach(e2 -> IJavardiseService.getWidget(e2).addMark(blue)));
-
-
+		
+		
 		List<List<TextComponent>> bodyExplanationText;
 
-		bodyExplanationText = NLTranslatorTest.getExplanationText(proc.getBody(), variablesRolesExplanation);
 
-		convertExplanationtoLinkText(bodyExplanationText, hypertext);
-
+		convertExplanationtoLinkText(gen.getExplanation(), hypertext);
 		Link text = hypertext.create(textComp, SWT.BORDER);
 
 		// --------------
@@ -167,8 +144,6 @@ public class ExplanationVisual {
 					hypertext.newline();
 				}
 			}
-
-			hypertext.newline();
 			hypertext.newline();
 		}
 	}

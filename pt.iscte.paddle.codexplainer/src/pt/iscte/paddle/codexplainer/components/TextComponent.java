@@ -1,5 +1,8 @@
 package pt.iscte.paddle.codexplainer.components;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import pt.iscte.paddle.model.IProgramElement;
 
 public class TextComponent {
@@ -7,7 +10,7 @@ public class TextComponent {
 	
 	private String text;
 	private TextType type;
-	private IProgramElement element;
+	private List<IProgramElement> elementList = new ArrayList<IProgramElement>();
 	
 	public enum TextType {
 		LINK, NORMAL, NEWLINE;
@@ -16,7 +19,13 @@ public class TextComponent {
 	public TextComponent(String text, TextType type, IProgramElement element) {
 		this.text = text;
 		this.type = type;
-		this.element = element;
+		this.elementList.add(element);
+	}
+	
+	public TextComponent(String text, TextType type, List<IProgramElement> element) {
+		this.text = text;
+		this.type = type;
+		this.elementList = element;
 	}
 	
 	public TextComponent(String text, TextType type) {
@@ -26,6 +35,7 @@ public class TextComponent {
 	
 	public TextComponent(TextType type) {
 		this.type = type;
+		this.text = "";
 	}
 
 	public String getText() {
@@ -36,8 +46,8 @@ public class TextComponent {
 		return type;
 	}
 	
-	public IProgramElement getElement() {
-		return element;
+	public List<IProgramElement> getElement() {
+		return elementList;
 	}
 	
 	

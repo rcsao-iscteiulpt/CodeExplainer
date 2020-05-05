@@ -5,11 +5,25 @@ import static pt.iscte.paddle.model.IOperator.GREATER;
 import static pt.iscte.paddle.model.IOperator.SMALLER;
 import static pt.iscte.paddle.model.IType.INT;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.swt.widgets.Text;
 
+import pt.iscte.paddle.codexplainer.components.AssignmentComponent;
+import pt.iscte.paddle.codexplainer.components.Component;
+import pt.iscte.paddle.codexplainer.components.LoopComponent;
+import pt.iscte.paddle.codexplainer.components.MethodComponent;
+import pt.iscte.paddle.codexplainer.components.ReturnComponent;
+import pt.iscte.paddle.codexplainer.components.SelectionComponent;
+import pt.iscte.paddle.codexplainer.components.TextComponent;
+import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
+import pt.iscte.paddle.codexplainer.components.VariableRoleComponent;
+import pt.iscte.paddle.codexplainer.translator.TranslatorAssignmentComponentPT;
+import pt.iscte.paddle.codexplainer.translator.TranslatorLoopComponentPT;
+import pt.iscte.paddle.codexplainer.translator.TranslatorMethodComponentPT;
+import pt.iscte.paddle.codexplainer.translator.TranslatorReturnComponentPT;
+import pt.iscte.paddle.codexplainer.translator.TranslatorSelectionComponentPT;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IModule;
@@ -20,33 +34,128 @@ import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IType;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
-import pt.iscte.paddle.model.roles.IMostWantedHolder;
-import pt.iscte.paddle.model.roles.IVariableRole;
 import pt.iscte.paddle.model.roles.impl.MostWantedHolder;
+import pt.iscte.paddle.model.roles.*;
+import pt.iscte.paddle.model.roles.impl.*;
 import pt.iscte.paddle.model.demo2.VariableRoleExplainer;
 
 
 public class ExplanationGenerator {
 	
-    static Map<IVariableDeclaration, String> variablesRolesExplanation = new HashMap<IVariableDeclaration, String>();
 	
-	private static void getVariableRole(IVariableDeclaration var) {
-
-		if(MostWantedHolder.isMostWantedHolder(var)) {
-			System.out.println(var);
-			MostWantedHolder role =  new MostWantedHolder(var);
-			variablesRolesExplanation.put(var, VariableRoleExplainer.getRoleExplanation(var, role));
+	static List<VariableRoleComponent> variablesRolesExplanation = new ArrayList<VariableRoleComponent>();
+	IProcedure method;
+	List<List<TextComponent>> explanation = new ArrayList<>();
+	
+	public ExplanationGenerator(IProcedure method) {
+		this.method = method;
+		generateExplanation(method);
+	}
+	
+	public void generateExplanation(IProcedure proc) {
+		for (IVariableDeclaration var : proc.getVariables()) {
+			getVariableRole(var);
 		}
 		
-//		if(IGatherer.isGatherer(var)) {
-//			return IGatherer.createGatherer(var);
+		List<Component> components = new ArrayList<>(); 
+		components.add(new MethodComponent(proc));
+		new ComponentsVisitor(proc.getBody(), components, variablesRolesExplanation);
+		
+		
+		addTextComponents(components);
+		
+//		for(Component c: components) {
+//			System.out.println(c);
+//			if(c instanceof LoopComponent)
+//				System.out.println(((LoopComponent) c).getBranchComponents());
 //		}
-//      etc....
+		
+		return;	
+	}
+	
+	public List<List<TextComponent>> getExplanation() {
+		return explanation;
+	}
+
+	public void addTextComponents(List<Component> components) {
+		for(Component c: components) {
+			if(c instanceof MethodComponent) {
+				TranslatorMethodComponentPT t = new TranslatorMethodComponentPT((MethodComponent) c);
+				t.translatePT();
+				explanation.add(t.getExplanationByComponents());			
+			}
+			if(c instanceof LoopComponent) {
+				TranslatorLoopComponentPT t = new TranslatorLoopComponentPT((LoopComponent) c);
+				t.translatePT();
+				explanation.add(t.getExplanationByComponents());
+				addTextComponents(((LoopComponent) c).getBranchComponents());
+			}
+			if(c instanceof SelectionComponent) {
+				TranslatorSelectionComponentPT t = new TranslatorSelectionComponentPT((SelectionComponent) c);
+				t.translatePT();
+				explanation.add(t.getExplanationByComponents());
+				addTextComponents(((SelectionComponent) c).getBranchComponents());			
+			}
+			if(c instanceof AssignmentComponent) {
+				TranslatorAssignmentComponentPT t = new TranslatorAssignmentComponentPT((AssignmentComponent) c);
+				t.translatePT();
+				explanation.add(t.getExplanationByComponents());	
+				
+				AssignmentComponent comp = (AssignmentComponent) c;
+				if(comp.isDeclaration()) {
+					for(VariableRoleComponent v: variablesRolesExplanation) {
+						if(comp.getTarget().isSame(v.getVar().expression())) {
+							List<TextComponent> line = new ArrayList<>();
+							line.add(new TextComponent(VariableRoleExplainer.getRoleExplanationPT(v.getVar(), v.getRole()), TextType.NORMAL));
+							explanation.add(line);
+						}
+					}
+				}
+					
+			}
+			
+			if(c instanceof ReturnComponent) {
+				TranslatorReturnComponentPT t = new TranslatorReturnComponentPT((ReturnComponent) c);
+				t.translatePT();
+				explanation.add(t.getExplanationByComponents());	
+			}
+		}
+		
+		return;
+		
+	}
+	
+	
+	private static void getVariableRole(IVariableDeclaration var) {
+		IVariableRole role = IVariableRole.match(var);
+		//System.out.println("Var:  "+ var + "|| role: "+role);
+		
+		if(role instanceof MostWantedHolder) {
+			variablesRolesExplanation.add(new VariableRoleComponent(var, role, VariableRoleExplainer.getRoleExplanationPT(var, (MostWantedHolder) role)));
+		}
+		if(role instanceof ArrayIndexIterator) {
+			variablesRolesExplanation.add(new VariableRoleComponent(var, role, VariableRoleExplainer.getRoleExplanationPT(var, (ArrayIndexIterator) role)));
+		}
+		if(role instanceof Gatherer) {
+			variablesRolesExplanation.add(new VariableRoleComponent(var, role, VariableRoleExplainer.getRoleExplanationPT(var, (Gatherer) role)));
+		}
+		if(role instanceof Stepper) {
+			variablesRolesExplanation.add(new VariableRoleComponent(var, role, VariableRoleExplainer.getRoleExplanationPT(var, (Stepper) role)));
+		}
+		if(role instanceof FixedValue) {
+			variablesRolesExplanation.add(new VariableRoleComponent(var, role, VariableRoleExplainer.getRoleExplanationPT(var, (FixedValue) role)));
+		}
+		//etc....
 		return;
 	}
 	
 	
-
+	
+	
+	
+	
+	
+	//For testing purposes
 	public static void main(String[] args) {
 		IModule module = IModule.create();
 		IProcedure max = module.addProcedure(INT);
@@ -79,28 +188,12 @@ public class ExplanationGenerator {
 		IRecordType objType = module.addRecordType();
 		IVariableDeclaration element = objType.addField(IType.INT);
 		
-
-		//IProcedure method = module.getProcedures().iterator().next(); // first procedure
-		//method.addParameter(objType);
-		//IProcedure max = module.getProcedure();
-		//System.out.println(method);
-		
-		//IControlFlowGraph cfg = IControlFlowGraph.create(method);
-		//CFGGeneration.getControlFlowGraph(cfg, method.getBody());
-		
 		for(IVariableDeclaration var : method.getVariables()) {
 			//System.out.println(var);	
 			getVariableRole(var);
 		}
 		
-		ComponentsVisitor v = new ComponentsVisitor(method);
 		
-		
-		System.out.println(v.getMethodComponents());
-		
-		//System.out.println(localVariables);
-		//String explanation = NLTranslator.getExplanation(method.getBody(), variablesRolesExplanation);	
-		//System.out.println(explanation);
-		
+	
 	}
 }

@@ -61,9 +61,9 @@ class ReturnComponentTest {
 		//System.out.println(max);
 		
 		
-		ReturnComponent comp = new ReturnComponent(ret);
-		ReturnComponent comp1 = new ReturnComponent(ret2);
-		ReturnComponent comp2 = new ReturnComponent(ret3);
+		ReturnComponent comp = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ret);
+		ReturnComponent comp1 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ret2);
+		ReturnComponent comp2 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ret3);
 		
 //		System.out.println(comp.getReturnExpressionParts());	
 //		System.out.println(comp1.getReturnExpressionParts());
@@ -101,9 +101,9 @@ class ReturnComponentTest {
 		
 		
 		
-		ReturnComponent comp = new ReturnComponent(ret1);
-		ReturnComponent comp1 = new ReturnComponent(ret2);
-		ReturnComponent comp2 = new ReturnComponent(ret3);
+		ReturnComponent comp = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(method1.getVariables()),ret1);
+		ReturnComponent comp1 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(method2.getVariables()),ret2);
+		ReturnComponent comp2 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(method3.getVariables()),ret3);
 		
 		System.out.println(comp.getReturnType());
 		System.out.println(comp1.getReturnType());

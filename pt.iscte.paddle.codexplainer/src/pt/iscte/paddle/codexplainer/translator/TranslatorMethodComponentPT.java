@@ -51,23 +51,7 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 			// memória",TextType.NORMAL));
 		}
 		
-		
-		//Recursividade
-		if(comp.getIsRecursive()) {
 	
-			explanationByComponents.add(new TextComponent());
-			explanationByComponents.add(new TextComponent("Est" +s2 ));
-
-			t.translateMethodType(comp.getFunctionClassifier().getClassification());
-			
-			explanationByComponents.add(new TextComponent("é recursiv" + s1));
-			
-			explanationByComponents.add(new TextComponent("porque "));
-			explanationByComponents.add(new TextComponent("se volta a chamar ", comp.getRecursive().getExpressions()));
-			explanationByComponents.add(new TextComponent("a si mesm"+s1+"durante a execução do programa"));
-
-		}
-		
 		
 
 		explanationByComponents.add(new TextComponent("Est" + s2));
@@ -92,6 +76,24 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 			}
 		}
 		//explanationByComponents.add(new TextComponent());
+		
+		
+		//Recursividade
+		if(comp.getIsRecursive()) {
+	
+			explanationByComponents.add(new TextComponent());
+			explanationByComponents.add(new TextComponent("Est" +s2 ));
+
+			t.translateMethodType(comp.getFunctionClassifier().getClassification());
+			
+			explanationByComponents.add(new TextComponent(" é recursiv" + s1));
+			
+			explanationByComponents.add(new TextComponent("porque "));
+			explanationByComponents.add(new TextComponent("se volta a chamar "/*, comp.getRecursive().getExpressions()*/));
+			explanationByComponents.add(new TextComponent("a si mesm"+s1+"durante a execução do programa"));
+
+		}
+		
 
 	}
 

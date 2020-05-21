@@ -105,11 +105,11 @@ public class ExplanationVisual {
 		IProcedure subArray = modSubArray.getProcedure("subArray");
 		
 		
-		openWindow(sum, modSum);
-		openWindow(max, modMaxArray);
-		openWindow(selection, modSelection);
-		openWindow(naturals, modNaturals);
-		openWindow(isPrime, modisPrime);
+//		openWindow(sum, modSum);
+//		openWindow(max, modMaxArray);
+//		openWindow(selection, modSelection);
+//		openWindow(naturals, modNaturals);
+//		openWindow(isPrime, modisPrime);
 		openWindow(factorial, modFactorial);
 		openWindow(arrayFind, modArrayFind);
 		openWindow(abs, modAbs);

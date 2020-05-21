@@ -43,6 +43,14 @@ import pt.iscte.paddle.model.IBlock.IVisitor;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
 import pt.iscte.paddle.codexplainer.temp.TestMaxArray;
+import pt.iscte.paddle.codexplainer.temp.TestAbs;
+import pt.iscte.paddle.codexplainer.temp.TestArrayFind;
+import pt.iscte.paddle.codexplainer.temp.TestFactorialRecursive;
+import pt.iscte.paddle.codexplainer.temp.TestIsPrime;
+import pt.iscte.paddle.codexplainer.temp.TestNaturals;
+import pt.iscte.paddle.codexplainer.temp.TestSelection;
+import pt.iscte.paddle.codexplainer.temp.TestSubArray;
+import pt.iscte.paddle.codexplainer.temp.TestSum;
 
 
 public class ExplanationVisual {
@@ -50,19 +58,69 @@ public class ExplanationVisual {
 	private static Shell shell;
 
 	public static void main(String[] args) {
+		TestMaxArray testMaxArray = new TestMaxArray();
+		testMaxArray.setup();
+		IModule modMaxArray = testMaxArray.getModule();
+		IProcedure max = modMaxArray.getProcedure("max");
+		
+		
+		TestSum testSum = new TestSum();
+		testSum.setup();
+		IModule modSum = testSum.getModule();
+		IProcedure sum = modSum.getProcedure("summation");
+		
+		TestSelection testSelection = new TestSelection();
+		testSelection.setup();
+		IModule modSelection = testSelection.getModule();
+		IProcedure selection = modSelection.getProcedure("max");
+		
+		TestNaturals testNaturals = new TestNaturals();
+		testNaturals.setup();
+		IModule modNaturals = testNaturals.getModule();
+		IProcedure naturals = modNaturals.getProcedure("naturals");
+		
+		TestIsPrime testisPrime = new TestIsPrime();
+		testisPrime.setup();
+		IModule modisPrime = testisPrime.getModule();
+		IProcedure isPrime = modisPrime.getProcedure("isPrime");
+		
+		TestFactorialRecursive testFactorial = new TestFactorialRecursive();
+		testFactorial.setup();
+		IModule modFactorial = testFactorial.getModule();
+		IProcedure factorial = modFactorial.getProcedure("factorial");
+		
+		TestArrayFind testArrayFind = new TestArrayFind();
+		testArrayFind.setup();
+		IModule modArrayFind = testArrayFind.getModule();
+		IProcedure arrayFind = modArrayFind.getProcedure("exists");
+		
+		TestAbs testAbs = new TestAbs();
+		testAbs.setup();
+		IModule modAbs = testAbs.getModule();
+		IProcedure abs = modAbs.getProcedure("abs");
+		
+		TestSubArray testSubArray = new TestSubArray();
+		testSubArray.setup();
+		IModule modSubArray = testSubArray.getModule();
+		IProcedure subArray = modSubArray.getProcedure("subArray");
+		
+		
+		openWindow(sum, modSum);
+		openWindow(max, modMaxArray);
+		openWindow(selection, modSelection);
+		openWindow(naturals, modNaturals);
+		openWindow(isPrime, modisPrime);
+		openWindow(factorial, modFactorial);
+		openWindow(arrayFind, modArrayFind);
+		openWindow(abs, modAbs);
+		openWindow(subArray, modSubArray);
 
-		TestMaxArray t = new TestMaxArray();
-		t.setup();
-		IModule module = t.getModule();
-		IProcedure proc = module.getProcedure("max");
 		
+	}
+
+
 		
-//		TestSum t = new TestSum();
-//		t.setup();
-//		IModule module = t.getModule();
-//		IProcedure proc = module.getProcedure("summation");
-		
-		
+	public static void openWindow(IProcedure proc, IModule module) {
 
 		//Visual
 		Display display = new Display();
@@ -84,8 +142,8 @@ public class ExplanationVisual {
 		// MethodWidget(comp, p), p));
 		widget.setEnabled(false);
 
-		System.out.println(proc.getBody().getChildren());
-		List<IBlockElement> children = proc.getBody().getChildren();
+		//System.out.println(proc.getBody().getChildren());
+		//List<IBlockElement> children = proc.getBody().getChildren();
 
 		Composite textComp = new Composite(comp, 0);
 		FillLayout fillLayout = new FillLayout(SWT.BORDER);
@@ -98,9 +156,16 @@ public class ExplanationVisual {
 		//Explanation 
 		ExplanationGenerator gen = new ExplanationGenerator(proc);
 		
-		HyperlinkedText hypertext = new HyperlinkedText(e -> e.forEach(e2 -> IJavardiseService.getWidget(e2).addMark(blue)));
+		HyperlinkedText hypertext2 = new HyperlinkedText(e -> e.forEach(e2 -> widget.addMark(blue).show()));
 		
-
+		//hypertext2.link(proc.getReturnType().toString(), proc.getReturnType());
+		
+		//hypertext2.link(proc.getParameters().get(0).toString(), proc.getParameters().get(0).getType());
+		
+		//Link text = hypertext2.create(textComp, SWT.BORDER);
+		//text.get
+		
+		HyperlinkedText hypertext = new HyperlinkedText(e -> e.forEach(e2 -> IJavardiseService.getWidget(e2).addMark(blue).show()));
 
 		convertExplanationtoLinkText(gen.getExplanation(), hypertext);
 		Link text = hypertext.create(textComp, SWT.BORDER);

@@ -5,6 +5,7 @@ import java.util.List;
 
 import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IExpression;
+import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.IType;
 import pt.iscte.paddle.model.IUnaryExpression;
@@ -24,6 +25,7 @@ public class ReturnComponent extends Component {
 	public ReturnComponent(List<VariableRoleComponent> variableList, IReturn returnEx) {
 		this.returnExpression = (IExpression) returnEx.getExpression();
 		this.returnType = returnEx.getReturnValueType();
+		super.element = returnEx;
 		
 		if(returnExpression instanceof IBinaryExpression)  {
 			decomposeBinaryExpression((IBinaryExpression) returnExpression);
@@ -76,6 +78,8 @@ public class ReturnComponent extends Component {
 	public IVariableRole getVarReturnRole() {
 		return varReturnRole;
 	}
+	
+
 	
 	
 }

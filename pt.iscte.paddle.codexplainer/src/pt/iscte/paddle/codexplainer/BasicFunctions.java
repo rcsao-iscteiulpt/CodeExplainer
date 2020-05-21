@@ -16,7 +16,7 @@ public class BasicFunctions {
 	        }    
 	        i = i + 1;
 	    }
-    return true;    
+	    return true;    
 	}
 	
 	
@@ -65,7 +65,7 @@ public class BasicFunctions {
 		int i = 0;
 		while(i < matrix.length) {
 			int j = 0;
-			while(j < matrix[0].length) {
+			while(j < matrix[i].length) {
 				if(matrix[i][j] == n) {
 					return true;
 				}
@@ -88,7 +88,7 @@ public class BasicFunctions {
 		//System.out.println(factorial(2));
 		
 		
-		int[] v = naturals(7);
+	//	int[] v = naturals(7);
 //		for(int i = 0; i < v.length; i++) {
 //			System.out.println(v[i]);
 //		}

@@ -16,25 +16,25 @@ public class TextComponent {
 		LINK, NORMAL, NEWLINE;
 	}
 	
-	public TextComponent(String text, TextType type, IProgramElement element) {
+	public TextComponent(String text, IProgramElement element) {
 		this.text = text;
-		this.type = type;
+		this.type = TextType.LINK;
 		this.elementList.add(element);
 	}
 	
-	public TextComponent(String text, TextType type, List<IProgramElement> element) {
+	public TextComponent(String text, List<IProgramElement> element) {
 		this.text = text;
-		this.type = type;
+		this.type = TextType.LINK;
 		this.elementList = element;
 	}
 	
-	public TextComponent(String text, TextType type) {
+	public TextComponent(String text) {
 		this.text = text;
-		this.type = type;
+		this.type = TextType.NORMAL;
 	}
 	
-	public TextComponent(TextType type) {
-		this.type = type;
+	public TextComponent() {
+		this.type = TextType.NEWLINE;
 		this.text = "";
 	}
 

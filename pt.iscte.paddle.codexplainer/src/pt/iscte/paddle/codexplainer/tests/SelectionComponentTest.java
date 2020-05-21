@@ -97,7 +97,7 @@ class SelectionComponentTest {
 				new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat);
 		
 		
-		TranslatorSelectionComponentPT t = new TranslatorSelectionComponentPT(comp);
+		TranslatorSelectionComponentPT t = new TranslatorSelectionComponentPT(comp, 0);
 		t.translatePT();
 		System.out.println("\nExplicaçao Selection:\n");
 		System.out.println(t.getExplanationText());
@@ -145,7 +145,7 @@ class SelectionComponentTest {
 				new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat);
 		
 		
-		TranslatorSelectionComponentPT t = new TranslatorSelectionComponentPT(comp);
+		TranslatorSelectionComponentPT t = new TranslatorSelectionComponentPT(comp, 0);
 		t.translatePT();
 		System.out.println("\nExplicaçao Selection:\n");
 		System.out.println(t.getExplanationText());

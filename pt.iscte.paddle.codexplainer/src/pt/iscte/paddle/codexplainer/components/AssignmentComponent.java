@@ -4,6 +4,7 @@ import java.util.List;
 import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.ILiteral;
+import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.IStatement;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableExpression;
@@ -23,6 +24,7 @@ public class AssignmentComponent extends Component {
 		this.statement = statement;
 		this.isDeclaration = isDeclaration;
 		this.target = target;
+		super.element = statement;
 
 		for (VariableRoleComponent v : list) {
 			if (v.getRole() instanceof IMostWantedHolder) {
@@ -32,30 +34,17 @@ public class AssignmentComponent extends Component {
 				}
 			}
 			if (v.getRole() instanceof IArrayIndexIterator || v.getRole() instanceof IStepper) {
-				if (statement instanceof IVariableAssignment) {
-					IVariableAssignment assign = (IVariableAssignment) statement;
-					if ((assign.isIncrement() || assign.isDecrement()) && target.isSame(assign.getTarget()))
-						statementRole = v;
-				}
+				IStepper iterator = (IStepper) v.getRole();
+				if (iterator.getExpressions().get(0).isSame(statement))
+					statementRole = v;
 			}
 			if (v.getRole() instanceof IGatherer) {
-				if (statement instanceof IVariableAssignment
-						&& v.getVar().isSame(((IVariableAssignment) statement).getTarget())) {
-					IVariableAssignment assign = (IVariableAssignment) statement;
-					if (assign instanceof IBinaryExpression) {
-						IBinaryExpression ex = (IBinaryExpression) assign.getExpression();
-						IExpression left = ex.getLeftOperand();
-						IExpression right = ex.getRightOperand();
-						if (ex.getOperator().isArithmetic() && (left instanceof IVariableExpression
-								&& ((IVariableExpression) left).is(assign.getTarget()) && (right instanceof ILiteral)
-								|| right instanceof IVariableExpression
-										&& ((IVariableExpression) right).is(assign.getTarget())
-										&& (left instanceof ILiteral))) {
-							statementRole = v;
-						}
-					}
-
+				IGatherer gat = (IGatherer) v.getRole();
+				for(IProgramElement e: gat.getExpressions()) {
+					if(e.isSame(statement))
+						statementRole = v;
 				}
+					
 			}
 		}
 
@@ -72,9 +61,10 @@ public class AssignmentComponent extends Component {
 	public IStatement getStatement() {
 		return statement;
 	}
-
+	
 	public VariableRoleComponent getStatementRoleComponent() {
 		return statementRole;
 	}
+	
 
 }

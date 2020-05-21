@@ -19,7 +19,10 @@ public class TestNaturals extends BaseTest  {
 	IVariableDeclaration n = naturals.addParameter(INT);
 	IBlock body = naturals.getBody();
 	IVariableDeclaration array = body.addVariable(INT.array());
+	IVariableDeclaration array2 = body.addVariable(INT.array());
 	IVariableAssignment ass1 = body.addAssignment(array, INT.array().stackAllocation(n));
+	IVariableAssignment ass = body.addAssignment(array2, array);
+	
 	IVariableDeclaration i = body.addVariable(INT, INT.literal(0));
 	ILoop loop = body.addLoop(SMALLER.on(i, n));
 	IArrayElementAssignment ass2 = loop.addArrayElementAssignment(array, ADD.on(i, INT.literal(1)), i);

@@ -95,7 +95,7 @@ class LoopComponentTest {
 				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop);
 		
 		
-		TranslatorLoopComponentPT t = new TranslatorLoopComponentPT(comp);
+		TranslatorLoopComponentPT t = new TranslatorLoopComponentPT(comp,0);
 		t.translatePT();
 		System.out.println("\nExplicaçao loop:\n");
 		System.out.println(t.getExplanationText());

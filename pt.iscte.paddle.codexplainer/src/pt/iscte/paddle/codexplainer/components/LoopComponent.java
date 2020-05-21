@@ -14,12 +14,14 @@ import pt.iscte.paddle.model.IUnaryExpression;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.IVariableExpression;
+import pt.iscte.paddle.model.roles.IArrayIndexIterator;
+import pt.iscte.paddle.model.roles.IStepper;
 
 public class LoopComponent extends Component {
 
 	private List<IProgramElement> guardParts = new ArrayList<IProgramElement>();
 	private IBlock loopBlock;
-	
+	private int depthLevel;
 	private List<Component> branchComponents = new ArrayList<Component>();
 
 	private VariableRoleComponent iteratorComponent;
@@ -32,8 +34,8 @@ public class LoopComponent extends Component {
 	public LoopComponent(List<VariableRoleComponent> list, ILoop loop) {
 		IExpression guard = loop.getGuard();
 		this.loopBlock = loop.getBlock();
+		super.element = loop;
 		new ComponentsVisitor(loop.getBlock(),branchComponents, list);
-		
 		//Decompose Guard
 		if (guard instanceof IUnaryExpression) {
 			// TODO
@@ -53,38 +55,11 @@ public class LoopComponent extends Component {
 		possibleIterators = determinePossibleIteratorsInGuard(guard);
 
 		for (IProgramElement e : loop.getBlock().getChildren()) {
-//			//Loop
-//			if(e instanceof ILoop) {
-//				branchComponents.add(new LoopComponent(list, (ILoop) e));
-//			}
-//			//Selection
-//			if(e instanceof ISelection) {
-//				branchComponents.add(new SelectionComponent(list, (ISelection) e));
-//			}
-//			//Declaration
-//			if(e instanceof IVariableDeclaration ) {
-//				branchComponents.add(new DeclarationComponent());
-//			}	
-//			//Assignments
-//			if(e instanceof IArrayElementAssignment) {
-//			//	branchComponents.add(new AssignmentComponent(list,(IArrayElementAssignment) e));
-//			
-//			}
-//			if(e instanceof IRecordFieldAssignment) {
-//			//	branchComponents.add(new AssignmentComponent(list,(IRecordFieldAssignment)e));
-//			}
-			if (e instanceof IVariableAssignment) {
-			//	branchComponents.add(new AssignmentComponent(list,(IVariableAssignment)e));
-				
-				//Iterator Search
-				IVariableAssignment ass = (IVariableAssignment) e;
-				if ((ass.isIncrement() || ass.isDecrement()) && possibleIterators.contains(ass.getTarget())) {
-					IVariableDeclaration it = ass.getTarget();
-					for (VariableRoleComponent comp : list) {
-						if (comp.getVar().isSame(it)) {
-							iteratorComponent = comp;
-						}		
-					}
+			for (VariableRoleComponent comp : list) {
+				if (comp.getRole() instanceof IStepper || comp.getRole() instanceof IArrayIndexIterator) {
+					IStepper iterator = (IStepper) comp.getRole();
+					if (iterator.getExpressions().get(0).isSame(e))
+						iteratorComponent = comp;
 				}
 			}
 		}
@@ -151,6 +126,7 @@ public class LoopComponent extends Component {
 	public List<Component> getBranchComponents() {
 		return branchComponents;
 	}
+	
 
 
 }

@@ -121,7 +121,7 @@ class FunctionClassifierTest {
 	
 	@Test
 	void testFunction() {
-		System.out.println("\ntestFalse || \n");
+		System.out.println("\ntestFunction || \n");
 		
 		IModule module = IModule.create();
 		

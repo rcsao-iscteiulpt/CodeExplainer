@@ -6,9 +6,8 @@ import java.util.List;
 
 
 import pt.iscte.paddle.codexplainer.components.VariableRoleComponent;
-
+import pt.iscte.paddle.codexplainer.translator.VariableRoleExplainer;
 import pt.iscte.paddle.model.IVariableDeclaration;
-import pt.iscte.paddle.model.demo2.VariableRoleExplainer;
 import pt.iscte.paddle.model.roles.IVariableRole;
 import pt.iscte.paddle.model.roles.impl.ArrayIndexIterator;
 import pt.iscte.paddle.model.roles.impl.FixedValue;
@@ -28,25 +27,19 @@ public class ExplanationGeneratorTest {
 			System.out.println("Var:  " + var + "|| role: " + role);
 			
 			if (role instanceof MostWantedHolder) {
-				IVariableRole m = new MostWantedHolder(var);
-				variablesRolesExplanation.add(new VariableRoleComponent(var, role,
-						VariableRoleExplainer.getRoleExplanationPT(var, (MostWantedHolder) m)));
+				variablesRolesExplanation.add(new VariableRoleComponent(var, role));
 			}
 			if (role instanceof ArrayIndexIterator) {
-				variablesRolesExplanation.add(new VariableRoleComponent(var, role,
-						VariableRoleExplainer.getRoleExplanationPT(var, (ArrayIndexIterator) role)));
+				variablesRolesExplanation.add(new VariableRoleComponent(var, role));
 			}
 			if (role instanceof Gatherer) {
-				variablesRolesExplanation.add(new VariableRoleComponent(var, role,
-						VariableRoleExplainer.getRoleExplanationPT(var, (Gatherer) role)));
+				variablesRolesExplanation.add(new VariableRoleComponent(var, role));
 			}
 			if (role instanceof Stepper) {
-				variablesRolesExplanation.add(new VariableRoleComponent(var, role,
-						VariableRoleExplainer.getRoleExplanationPT(var, (Stepper) role)));
+				variablesRolesExplanation.add(new VariableRoleComponent(var, role));
 			}
 			if (role instanceof FixedValue) {
-				variablesRolesExplanation.add(new VariableRoleComponent(var, role,
-						VariableRoleExplainer.getRoleExplanationPT(var, (FixedValue) role)));
+				variablesRolesExplanation.add(new VariableRoleComponent(var, role));
 			}
 		}
 		// etc....

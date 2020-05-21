@@ -16,38 +16,44 @@ import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.IProcedureCall;
 import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.IUnaryExpression;
+import pt.iscte.paddle.model.IVariableExpression;
 
 public class TranslatorSelectionComponentPT implements TranslatorPT {
 
 	SelectionComponent comp;
 	List<TextComponent> explanationByComponents = new ArrayList<TextComponent>();
+	private int depthLevel;
 
-	public TranslatorSelectionComponentPT(SelectionComponent comp) {
+	public TranslatorSelectionComponentPT(SelectionComponent comp, int depthLevel) {
 		this.comp = comp;
+		this.depthLevel = depthLevel;
 	}
 
 	@Override
 	public void translatePT() {
 		ExpressionTranslatorPT t = new ExpressionTranslatorPT(explanationByComponents);
-		//TODO Alternative Branch
-		explanationByComponents.add(new TextComponent("Se ", TextType.NORMAL));
+		addDepthLevel();
+		explanationByComponents.add(new TextComponent("Se "));
 
 		if (!comp.getListVariablesToExplain().isEmpty()) {
 			for (VariableRoleComponent v : comp.getListVariablesToExplain()) {
 				if (v.getRole() instanceof MostWantedHolder) {
 					String s1 = "menor ";
 					
-					if(((IMostWantedHolder)v.getRole()).getOperation().equals(Objective.GREATER)) {
+					if(((IMostWantedHolder)v.getRole()).getObjective().equals(Objective.GREATER)) {
 						s1 = "maior ";
 					}
 					
 					MostWantedHolder role = (MostWantedHolder) v.getRole();
 					
+					
 					explanationByComponents.add(new TextComponent("o valor da posição do vetor " + role.getTargetArray()
 						+ " for " + s1 + "que o "+ s1 
-							+ "valor encontrado até ao momento guardado na variável "+ v.getVar() , TextType.NORMAL));
-					explanationByComponents.add(new TextComponent(TextType.NEWLINE));
-					explanationByComponents.add(new TextComponent(" então: ",TextType.NORMAL));
+							+ "valor encontrado até ao momento guardado na variável "+ v.getVar()));
+					explanationByComponents.add(new TextComponent());
+					
+					addDepthLevel();
+					explanationByComponents.add(new TextComponent(" então: "));
 				}
 			}
 			
@@ -57,20 +63,24 @@ public class TranslatorSelectionComponentPT implements TranslatorPT {
 			//Basic Explanation
 			for(IProgramElement e: comp.getGuardParts()) {	
 				if(e instanceof IBinaryExpression) {
-					t.translateBinaryExpression((IBinaryExpression) e);
+					t.translateBinaryExpression((IBinaryExpression) e, false);
 				}
 				if(e instanceof IUnaryExpression) {
 					t.translateUnaryExpression((IUnaryExpression) e);		
 				}
 				if(e instanceof IOperator) {
-					t.translateOperator((IBinaryOperator)e);
+					t.translateOperator((IBinaryOperator)e, false);
 				}
+				if(e instanceof IVariableExpression) {
+					t.translateBooleanVariable((IVariableExpression)e, false);
+				}
+				
 				if(e instanceof IProcedureCall) {
 					//TODO Procedure call 
 				}
 			}
 			
-			explanationByComponents.add(new TextComponent("então vai", TextType.NORMAL));
+			explanationByComponents.add(new TextComponent("então: "));
 		}
 
 	}
@@ -89,6 +99,11 @@ public class TranslatorSelectionComponentPT implements TranslatorPT {
 
 	public List<TextComponent> getExplanationByComponents() {
 		return explanationByComponents;
+	}
+	
+	public void addDepthLevel() {
+		for(int i = 0; i < depthLevel; i++)
+			explanationByComponents.add(new TextComponent("--"));
 	}
 
 	

@@ -8,14 +8,19 @@ import static pt.iscte.paddle.model.IOperator.GREATER;
 import static pt.iscte.paddle.model.IOperator.SMALLER;
 import static pt.iscte.paddle.model.IType.INT;
 
+import java.util.List;
 
-import pt.iscte.paddle.codexplainer.role.impl.MostWantedHolder;
+import pt.iscte.paddle.codexplainer.components.TextComponent;
+import pt.iscte.paddle.model.roles.impl.MostWantedHolder;
+import pt.iscte.paddle.codexplainer.translator.VariableRoleExplainer;
+import pt.iscte.paddle.model.IArrayType;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IModule;
 import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IVariableDeclaration;
+import pt.iscte.paddle.model.impl.ReferenceType;
 
 class MostWantedHolderTest {
 
@@ -46,17 +51,10 @@ class MostWantedHolderTest {
 		loop.addIncrement(i);
 		body.addReturn(m);
 	
-		for(IProcedure proc : module.getProcedures()) {
-			assertTrue(MostWantedHolder.isMostWantedHolder(proc.getVariable("m")));
-			assertFalse(MostWantedHolder.isMostWantedHolder(proc.getVariable("i")));
-			assertFalse(MostWantedHolder.isMostWantedHolder(proc.getVariable("v")));
-		}
-		
-		IProcedure proc1 = module.getProcedures().get(0);
-			
+		assertTrue(MostWantedHolder.isMostWantedHolder(max.getVariable("m")));		
 		assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("i")));
 		assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("v")));
-		assertEquals("MostWantedHolder(GREATER)", new MostWantedHolder(proc1.getVariable("m")).toString());
+		assertEquals("MostWantedHolder(GREATER)", new MostWantedHolder(max.getVariable("m")).toString());
 		
 	}
 	
@@ -87,6 +85,7 @@ class MostWantedHolderTest {
 	loop.addIncrement(i);
 	body.addReturn(m);
 		
+	assertTrue(MostWantedHolder.isMostWantedHolder(max.getVariable("m")));		
 	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("i")));
 	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("v")));
 	assertEquals("MostWantedHolder(SMALLER)", new MostWantedHolder(max.getVariable("m")).toString());		
@@ -187,7 +186,7 @@ class MostWantedHolderTest {
 	loop.addIncrement(i);
 	body.addReturn(m);
 	
-	System.out.println(max);
+	//System.out.println(max);
 	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("m")));
 	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("i")));
 	assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("v")));
@@ -223,11 +222,46 @@ class MostWantedHolderTest {
 		loop.addIncrement(i);
 		body.addReturn(m);
 		
-		System.out.println(max);
+		//System.out.println(max);
 		assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("m")));
 		assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("i")));
 		assertFalse(MostWantedHolder.isMostWantedHolder(max.getVariable("v")));
 		
 	}
+	
+	@Test
+	void testExplanation() {
+		IModule module = IModule.create();
+		
+		IProcedure max = module.addProcedure(INT);
+		max.setId("max");
+		IVariableDeclaration array = max.addParameter(INT.array().reference());
+		array.setId("v");
+		
+		IBlock body = max.getBody();
+		
+		IVariableDeclaration m = body.addVariable(INT);
+		m.setId("m");
+		body.addAssignment(m, array.element(INT.literal(0)));
+		
+		IVariableDeclaration i = body.addVariable(INT);
+		i.setId("i");
+		body.addAssignment(i, INT.literal(1));
+		
+		ILoop loop = body.addLoop(SMALLER.on(i, array.length()));
+		ISelection ifstat = loop.addSelection(GREATER.on(array.element(i), m));
+		ifstat.addAssignment(m, array.element(i));
+		loop.addIncrement(i);
+		body.addReturn(m);
+		
+		assertTrue(MostWantedHolder.isMostWantedHolder(max.getVariable("m")));		
+		
+		MostWantedHolder mhw = new MostWantedHolder(m);
+		
+		
+		List<TextComponent> list =VariableRoleExplainer.getRoleExplanationPT(m, mhw);
+	}
+	
+	
 
 }

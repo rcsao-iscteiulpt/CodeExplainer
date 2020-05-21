@@ -6,12 +6,14 @@ import java.util.List;
 import pt.iscte.paddle.codexplainer.components.AssignmentComponent;
 import pt.iscte.paddle.codexplainer.components.Component;
 import pt.iscte.paddle.codexplainer.components.LoopComponent;
+import pt.iscte.paddle.codexplainer.components.ProcedureCallComponent;
 import pt.iscte.paddle.codexplainer.components.ReturnComponent;
 import pt.iscte.paddle.codexplainer.components.SelectionComponent;
 import pt.iscte.paddle.codexplainer.components.VariableRoleComponent;
 import pt.iscte.paddle.model.IArrayElementAssignment;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
+import pt.iscte.paddle.model.IProcedureCall;
 import pt.iscte.paddle.model.IRecordFieldAssignment;
 import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;
@@ -23,6 +25,7 @@ public class ComponentsVisitor implements IBlock.IVisitor {
 	List<Component> components;
 	List<VariableRoleComponent> list;
 	ArrayList<IVariableDeclaration> declaredVariables = new ArrayList<IVariableDeclaration>(); 
+	
 		
 	public ComponentsVisitor(IBlock block, List<Component> components, List<VariableRoleComponent> variablesRolesExplanation) {
 		this.components = components;
@@ -44,7 +47,7 @@ public class ComponentsVisitor implements IBlock.IVisitor {
 			isDeclarationAssignment = true;
 			declaredVariables.remove(assignment.getTarget());
 		}
-		components.add(new AssignmentComponent(list,assignment, assignment.getTarget().expression(), isDeclarationAssignment));
+		components.add(new AssignmentComponent(list, assignment, assignment.getTarget().expression(), isDeclarationAssignment));
 		return false;
 	}
 	
@@ -53,6 +56,13 @@ public class ComponentsVisitor implements IBlock.IVisitor {
 		components.add(new AssignmentComponent(list,assignment, assignment.getTarget().expression(), false));
 		return false;
 	}
+	
+	@Override
+	public boolean visit(IProcedureCall call) {	
+		components.add(new ProcedureCallComponent(list, call));
+		return false;
+	}
+
 
 	@Override
 	public boolean visit(IArrayElementAssignment assignment) {

@@ -13,15 +13,18 @@ import pt.iscte.paddle.model.roles.IGatherer;
 import pt.iscte.paddle.model.roles.IGatherer.Operation;
 import pt.iscte.paddle.model.roles.IMostWantedHolder;
 import pt.iscte.paddle.model.roles.IMostWantedHolder.Objective;
+import pt.iscte.paddle.model.roles.IStepper;
 
 public class TranslatorAssignmentComponentPT implements TranslatorPT {
 
 	
 	AssignmentComponent comp;
 	List<TextComponent> explanationByComponents = new ArrayList<TextComponent>();
+	private int depthLevel;
 
-	public TranslatorAssignmentComponentPT(AssignmentComponent comp) {
+	public TranslatorAssignmentComponentPT(AssignmentComponent comp, int depthLevel) {
 		this.comp = comp;
+		this.depthLevel = depthLevel;
 	}
 
 	@Override
@@ -33,50 +36,68 @@ public class TranslatorAssignmentComponentPT implements TranslatorPT {
 		if(roleComp.getRole() instanceof IMostWantedHolder) {
 			String s1 = "baixo";
 			
-			if(((IMostWantedHolder)roleComp.getRole()).getOperation().equals(Objective.GREATER)) {
+			if(((IMostWantedHolder)roleComp.getRole()).getObjective().equals(Objective.GREATER)) {
 				s1 = "alto";
 			}
 			
-			explanationByComponents.add(new TextComponent("Vai ", TextType.NORMAL));
-			explanationByComponents.add(new TextComponent("guardar o novo valor mais " + s1 + " na variável "
-			+ roleComp.getVar(), TextType.LINK, comp.getStatement()));
-					explanationByComponents.add(new TextComponent(TextType.NEWLINE));
+			addDepthLevel();
+			explanationByComponents.add(new TextComponent("È "));
+			explanationByComponents.add(new TextComponent("guardado o novo valor mais " + s1 + " na variável "
+			+ roleComp.getVar(), comp.getStatement()));
+			//explanationByComponents.add(new TextComponent());
 		} else 
 			
 		//ArrayIndexIterator	
 		if(roleComp.getRole() instanceof IArrayIndexIterator) {
 			IArrayIndexIterator iterator = (IArrayIndexIterator) roleComp.getRole();
 			
-			explanationByComponents.add(new TextComponent("No final de cada iteração a variável ", TextType.NORMAL));
-			explanationByComponents.add(new TextComponent(roleComp.getVar() + " vai ser " + t.translateDirection(iterator.getDirection()),TextType.LINK, comp.getStatement()));
-			explanationByComponents.add(new TextComponent(" para prosseguir para a próxima posição do vetor", TextType.NORMAL)); 
+			addDepthLevel();
+			explanationByComponents.add(new TextComponent("No final da iteração a variável "));
+			explanationByComponents.add(new TextComponent(roleComp.getVar() + " é " + t.translateDirection(iterator.getDirection()), comp.getStatement()));
+			explanationByComponents.add(new TextComponent(" para prosseguir para a próxima posição do vetor")); 
 			
+		} else 
 			
+			//Stepper	
+			if(roleComp.getRole() instanceof IStepper) {
+				IStepper stepper = (IStepper) roleComp.getRole();
+				
+				addDepthLevel();
+				explanationByComponents.add(new TextComponent("A variável "));
+				explanationByComponents.add(new TextComponent(roleComp.getVar() + " é " + t.translateDirection(stepper.getDirection()) + " por " + stepper.getStepSize(), comp.getStatement()));
+				explanationByComponents.add(new TextComponent(" ")); 
+					
 		} else 
 			
 		//Gatherer	
 		if(roleComp.getRole() instanceof IGatherer) {
 			IGatherer gatherer = (IGatherer) roleComp.getRole();
 			
-			String s1 = "adição";
+			String s1 = "adiciona";
 			if(gatherer.getOperation().equals(Operation.SUB)) {
-				s1 = "subtração";
+				s1 = "subtraí";
 			}
 			if(gatherer.getOperation().equals(Operation.MUL)) {
-				s1 = "multiplicação";			
+				s1 = "multiplica";			
 			}
 			if(gatherer.getOperation().equals(Operation.DIV)) {
-				s1 = "divisão";
+				s1 = "divide";
 			}
 			
-			explanationByComponents.add(new TextComponent("A cada iteração a variável ", TextType.NORMAL));
-			explanationByComponents.add(new TextComponent(roleComp.getVar() + "vai acumulando cada valor com uma " + s1, TextType.LINK, comp.getStatement()));
+			addDepthLevel();
+			explanationByComponents.add(new TextComponent("A cada iteração a variável "));
+			explanationByComponents.add(new TextComponent(roleComp.getVar() +" "+ s1 + " ", gatherer.getExpressions()));
+		    t.translateExpression(gatherer.getAccumulationExpression());
+			explanationByComponents.add(new TextComponent("", comp.getStatement()));
 				
 	    } else {
 	    	//Basic Explanation
+			addDepthLevel();
 	    	t.translateAssignment((IStatement) comp.getStatement(), comp.isDeclaration());
 	    	
 		}
+		
+		explanationByComponents.add(new TextComponent());
 		
 		
 	}
@@ -94,5 +115,10 @@ public class TranslatorAssignmentComponentPT implements TranslatorPT {
 				explanationText += "\n";
 		}
 		return explanationText;
+	}
+
+	public void addDepthLevel() {
+		for(int i = 0; i < depthLevel; i++)
+			explanationByComponents.add(new TextComponent("--"));
 	}
 }

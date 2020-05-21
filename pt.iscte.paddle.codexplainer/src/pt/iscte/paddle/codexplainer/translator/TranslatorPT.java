@@ -5,7 +5,7 @@ import java.util.List;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 
 public interface TranslatorPT {
- 
+	
 	public void translatePT();
 	
 	public List<TextComponent> getExplanationByComponents();

@@ -7,6 +7,7 @@ import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.IOperator;
+import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IUnaryExpression;
 import pt.iscte.paddle.codexplainer.ComponentsVisitor;
@@ -16,8 +17,10 @@ public class SelectionComponent extends Component {
 
 	private List<IExpression> guardParts = new ArrayList<IExpression>();
 	private IBlock selectionBlock;
+	private IBlock alternativeBlock;
 	
 	private List<Component> branchComponents = new ArrayList<Component>();
+	private List<Component> alternativeBranchComponents = new ArrayList<Component>();
 	
 	
 
@@ -26,7 +29,14 @@ public class SelectionComponent extends Component {
 	public SelectionComponent(List<VariableRoleComponent> list, ISelection selection) {
 		IExpression guard = selection.getGuard();
 		this.selectionBlock = selection.getBlock();
+		this.alternativeBlock = selection.getAlternativeBlock();
+		super.element = selection;
+		
 		new ComponentsVisitor(selection.getBlock(),branchComponents, list);
+		
+		if(selection.getAlternativeBlock() != null) {
+			new ComponentsVisitor(selection.getAlternativeBlock(), alternativeBranchComponents, list);
+		}
 
 		for(VariableRoleComponent v: list) {
 			if(v.getRole() instanceof MostWantedHolder) {
@@ -95,5 +105,10 @@ public class SelectionComponent extends Component {
 	public List<Component> getBranchComponents() {
 		return branchComponents;
 	}
+	public List<Component> getAlternativeBranchComponents() {
+		return alternativeBranchComponents;
+	}
+	
+
 
 }

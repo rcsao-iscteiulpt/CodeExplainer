@@ -24,81 +24,77 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 
 	@Override
 	public void translatePT() {
+		ExpressionTranslatorPT t = new ExpressionTranslatorPT(explanationByComponents);
 		List<IVariableDeclaration> parameters = comp.getParameters();
+		MethodType classifyType = comp.getFunctionClassifier().getClassification();
 		
-		explanationByComponents.add(new TextComponent("Este método devolve um " + comp.getReturnType() + ". ", TextType.NORMAL));
-		if(!parameters.isEmpty()) {
-			explanationByComponents.add(new TextComponent("Como parametros recebe um", TextType.NORMAL));
-			for(int i = 0; i < parameters.size(); i++) {
+		
+		String s1 = "o ";
+		String s2 = "e ";
+		if(classifyType.equals(MethodType.FUNCTION)) {
+			s1 = "a ";
+			s2 = "a ";
+		}
+		
+		//explanationByComponents.add(new TextComponent());
+		if (classifyType.equals(MethodType.FUNCTION)) {
+			// explanationByComponents.add(new TextComponent("Este método é considerado uma
+			// função porque não são executadas instruções que alterem o valor da memória",
+			// TextType.NORMAL));
+		} else {
+			
+			// explanationByComponents.add(new TextComponent("Este método é considerado um
+			// procedimento porque são executadas ", TextType.NORMAL));
+			// explanationByComponents.add(new TextComponent("instruções " , TextType.LINK,
+			// comp.getFunctionClassifier().getAssignments()));
+			// explanationByComponents.add(new TextComponent("que alteram o valor da
+			// memória",TextType.NORMAL));
+		}
+		
+		
+		//Recursividade
+		if(comp.getIsRecursive()) {
+	
+			explanationByComponents.add(new TextComponent());
+			explanationByComponents.add(new TextComponent("Est" +s2 ));
+
+			t.translateMethodType(comp.getFunctionClassifier().getClassification());
+			
+			explanationByComponents.add(new TextComponent("é recursiv" + s1));
+			
+			explanationByComponents.add(new TextComponent("porque "));
+			explanationByComponents.add(new TextComponent("se volta a chamar ", comp.getRecursive().getExpressions()));
+			explanationByComponents.add(new TextComponent("a si mesm"+s1+"durante a execução do programa"));
+
+		}
+		
+		
+
+		explanationByComponents.add(new TextComponent("Est" + s2));
+		t.translateMethodType(classifyType);
+		explanationByComponents.add(new TextComponent(" devolve um "));
+		t.translateIType(comp.getReturnType());
+		//explanationByComponents.add(new TextComponent( + " ", comp.getReturnType()));
+		if (!parameters.isEmpty()) {
+			explanationByComponents.add(new TextComponent("e recebe um "));
+			for (int i = 0; i < parameters.size(); i++) {
 				IVariableDeclaration v = parameters.get(i);
 				IType type = v.getType();
-				if(type.equals(IType.INT)) {
-					explanationByComponents.add(new TextComponent("inteiro ", TextType.NORMAL));
-				}
-				if(type.equals(IType.BOOLEAN)) {
-					explanationByComponents.add(new TextComponent("booleano ", TextType.NORMAL));
-				}
-				if(type.equals(IType.DOUBLE)) {
-					explanationByComponents.add(new TextComponent("double ", TextType.NORMAL));
-				}
+				t.translateIType(type);
 				
-				//Arrays
-				if(type instanceof IReferenceType) {
-					IReferenceType refType = (IReferenceType) type;
-					if(refType.getTarget() instanceof IArrayType) {
-						explanationByComponents.add(new TextComponent(" vetor de ", TextType.NORMAL));
-						
-						IType compType = ((IArrayType) refType.getTarget()).getComponentType();
-						System.out.println(compType);
-						if(compType.equals(IType.INT)) {
-							explanationByComponents.add(new TextComponent("inteiros ",TextType.NORMAL));
-						}
-						if(compType.equals(IType.DOUBLE)) {
-							explanationByComponents.add(new TextComponent("doubles ",TextType.NORMAL));
-						}
-						if(compType.equals(IType.BOOLEAN)) {
-							explanationByComponents.add(new TextComponent("booleanos ",TextType.NORMAL));
-						}
-					
-					}
+				if (i < parameters.size() - 2) {
+					explanationByComponents.add(new TextComponent(", um "));
 				}
-				
-				if(type instanceof IRecordType) {
-					//TODO paremeters record types
+
+				if (i == parameters.size() - 2) {
+					explanationByComponents.add(new TextComponent("e um "));
 				}
-				
-				if(i < parameters.size() - 2) {
-					explanationByComponents.add(new TextComponent(", um ", TextType.NORMAL));
-				}
-				
-				if(i == parameters.size() - 2) {
-					explanationByComponents.add(new TextComponent("e um ", TextType.NORMAL));
-				}
-				
 			}
-			
-			
 		}
-		
-		//Classify
-		explanationByComponents.add(new TextComponent(TextType.NEWLINE));
-		if(comp.getFunctionClassifier().getClassification().equals(MethodType.FUNCTION)) {
-			explanationByComponents.add(new TextComponent("Este método é considerado uma função porque não são executadas instruções que alterem o valor da memória", TextType.NORMAL));
-		} else {
-			explanationByComponents.add(new TextComponent("Este método é considerado um procedimento porque são executadas ", TextType.NORMAL));
-			explanationByComponents.add(new TextComponent("instruções " , TextType.LINK, comp.getFunctionClassifier().getAssignments()));
-			explanationByComponents.add(new TextComponent("que alteram o valor da memória",TextType.NORMAL));
-		}
-		
-		explanationByComponents.add(new TextComponent(TextType.NEWLINE));
-			
-		
+		//explanationByComponents.add(new TextComponent());
+
 	}
 
-	
-	
-	
-	
 	@Override
 	public List<TextComponent> getExplanationByComponents() {
 		return explanationByComponents;
@@ -116,4 +112,5 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 		return explanationText;
 	}
 	
+
 }

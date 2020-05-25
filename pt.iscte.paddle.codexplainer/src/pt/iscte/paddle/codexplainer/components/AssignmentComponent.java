@@ -20,12 +20,14 @@ public class AssignmentComponent extends Component {
 	private boolean isDeclaration;
 	private IExpression target;
 
-	public AssignmentComponent(List<VariableRoleComponent> list, IStatement statement, IExpression target,boolean isDeclaration) {
+	public AssignmentComponent(List<VariableRoleComponent> list, IStatement statement, IExpression target,boolean isDeclaration, MethodComponent mc) {
 		this.statement = statement;
 		this.isDeclaration = isDeclaration;
 		this.target = target;
+		super.mc = mc;
 		super.element = statement;
 
+		
 		for (VariableRoleComponent v : list) {
 			if (v.getRole() instanceof IMostWantedHolder) {
 				IMostWantedHolder role = (IMostWantedHolder) v.getRole();
@@ -45,6 +47,11 @@ public class AssignmentComponent extends Component {
 						statementRole = v;
 				}
 					
+			}
+			
+			if(isDeclaration) {
+				if(v.getVar().expression().isSame(target))
+					statementRole = v;
 			}
 		}
 

@@ -31,7 +31,7 @@ public class TranslatorSelectionComponentPT implements TranslatorPT {
 
 	@Override
 	public void translatePT() {
-		ExpressionTranslatorPT t = new ExpressionTranslatorPT(explanationByComponents);
+		ExpressionTranslatorPT t = new ExpressionTranslatorPT(explanationByComponents, comp.getMethodComponent());
 		addDepthLevel();
 		explanationByComponents.add(new TextComponent("Se "));
 
@@ -47,13 +47,11 @@ public class TranslatorSelectionComponentPT implements TranslatorPT {
 					MostWantedHolder role = (MostWantedHolder) v.getRole();
 					
 					
-					explanationByComponents.add(new TextComponent("o valor da posição do vetor " + role.getTargetArray()
-						+ " for " + s1 + "que o "+ s1 
-							+ "valor encontrado até ao momento guardado na variável "+ v.getVar()));
-					explanationByComponents.add(new TextComponent());
+					explanationByComponents.add(new TextComponent("o valor da posição do vetor " + role.getTargetArray()));
+					explanationByComponents.add(new TextComponent(" for " + s1 + "que o "+ s1 
+							+ "valor encontrado até ao momento", role.getExpressions().get(0))); 
+					explanationByComponents.add(new TextComponent(" guardado na variável "+ v.getVar()));
 					
-					addDepthLevel();
-					explanationByComponents.add(new TextComponent(" então: "));
 				}
 			}
 			
@@ -61,26 +59,7 @@ public class TranslatorSelectionComponentPT implements TranslatorPT {
 			
 		} else {
 			//Basic Explanation
-			for(IProgramElement e: comp.getGuardParts()) {	
-				if(e instanceof IBinaryExpression) {
-					t.translateBinaryExpression((IBinaryExpression) e, false);
-				}
-				if(e instanceof IUnaryExpression) {
-					t.translateUnaryExpression((IUnaryExpression) e);		
-				}
-				if(e instanceof IOperator) {
-					t.translateOperator((IBinaryOperator)e, false);
-				}
-				if(e instanceof IVariableExpression) {
-					t.translateBooleanVariable((IVariableExpression)e, false);
-				}
-				
-				if(e instanceof IProcedureCall) {
-					//TODO Procedure call 
-				}
-			}
-			
-			explanationByComponents.add(new TextComponent("então: "));
+			t.translateExpression(comp.getGuard());
 		}
 
 	}

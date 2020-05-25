@@ -7,6 +7,8 @@ import pt.iscte.paddle.codexplainer.components.LoopComponent;
 import pt.iscte.paddle.codexplainer.components.ProcedureCallComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
+import pt.iscte.paddle.codexplainer.roles.IFunctionClassifier.MethodType;
+import pt.iscte.paddle.model.IProcedureCallExpression;
 
 public class TranslatorProcedureCallComponentPT implements TranslatorPT {
 
@@ -24,8 +26,9 @@ public class TranslatorProcedureCallComponentPT implements TranslatorPT {
 	
 	@Override
 	public void translatePT() {
-		
-		
+		ExpressionTranslatorPT t = new ExpressionTranslatorPT(explanationByComponents, comp.getMethodComponent());
+		addDepthLevel();
+		t.translateProcedureCall((IProcedureCallExpression) comp.getElement());
 	}
 
 	public List<TextComponent> getExplanationByComponents() {

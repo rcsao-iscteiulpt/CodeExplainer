@@ -41,7 +41,7 @@ public class ExpressionTranslatorTest {
 
 		List<TextComponent> comp = new ArrayList<>();
 		ExpressionTranslatorPT t = new ExpressionTranslatorPT(comp);
-		t.translateAssignment(ass2, false);
+		t.translateAssignment(ass2);
 	}
 	
 //	public static void main(String[] args) {

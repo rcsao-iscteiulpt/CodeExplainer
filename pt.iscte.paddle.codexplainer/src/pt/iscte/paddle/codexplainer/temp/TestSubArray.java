@@ -14,7 +14,7 @@ import pt.iscte.paddle.model.IVariableDeclaration;
 
 public class TestSubArray extends BaseTest {
 	IProcedure subArray = getModule().addProcedure(INT.array());
-	IVariableDeclaration array = subArray.addParameter(INT.array());
+	IVariableDeclaration array = subArray.addParameter(INT.array().reference());
 	IVariableDeclaration from = subArray.addParameter(INT);
 	IVariableDeclaration to = subArray.addParameter(INT);
 	

@@ -24,9 +24,9 @@ public class VariableRoleExplainer {
 			IMostWantedHolder role = (IMostWantedHolder) varRole;
 		
 			line.add(new TextComponent("\nA variável "+ var +" vai guardar o valor mais "
-					+ t.translateMostWantedholderObjective(role.getObjective()) +" de um "));
+					+ t.translateMostWantedholderObjective(role.getObjective()) +"de um "));
 					t.translateIType(role.getTargetArray().getType());
-					line.add(new TextComponent(".\n"));	
+					line.add(new TextComponent("."));	
 		}
 		if(varRole instanceof IGatherer) {
 			IGatherer role = (IGatherer) varRole;
@@ -47,28 +47,33 @@ public class VariableRoleExplainer {
 		if(varRole instanceof IArrayIndexIterator)	{
 			IArrayIndexIterator role = (IArrayIndexIterator) varRole;
 			line.add(new TextComponent("\nA variável "+ var +" é usada para iterar e "));
-			line.add(new TextComponent("aceder"));
+			line.add(new TextComponent("aceder "));
+			line.add(new TextComponent("a cada " + Math.abs(role.getStepSize()) + " posições", role.getExpressions()));	
+			line.add(new TextComponent(" "));
+			
 			for(int i = 0; i != role.getArrayVariables().size(); i++) {
 				if(i == 0) {
-					line.add(new TextComponent(" ao vetor " + role.getArrayVariables().get(i), 
+					line.add(new TextComponent("ao vetor " + role.getArrayVariables().get(i), 
 							role.getArrayExpressionsMap().get(role.getArrayVariables().get(i))));
 				} else 
-				if(i != 0 && i == role.getArrayVariables().size() - 1) {
-					line.add(new TextComponent(",ao vetor " + role.getArrayVariables().get(i), 
+				if(i != 0 && i != role.getArrayVariables().size() - 1) {
+					line.add(new TextComponent(","));
+					line.add(new TextComponent("ao vetor " + role.getArrayVariables().get(i), 
 							role.getArrayExpressionsMap().get(role.getArrayVariables().get(i))));
 				} else {
-					line.add(new TextComponent("e ao vetor " + role.getArrayVariables().get(i), 
+					line.add(new TextComponent(" e "));
+					line.add(new TextComponent("ao vetor " + role.getArrayVariables().get(i), 
 							role.getArrayExpressionsMap().get(role.getArrayVariables().get(i))));
 				}
 			}
-			line.add(new TextComponent(" "));
-			line.add(new TextComponent("a cada " + Math.abs(role.getStepSize()) + " posições ", role.getExpressions()));		
+		
+			
 		}
 		if(varRole instanceof IStepper && !(varRole instanceof IArrayIndexIterator)) {
 			IStepper role = (IStepper) varRole;
 			int stepSize = Math.abs(role.getStepSize());
 			line.add(new TextComponent("\nA variável "+ var +" vai ser incrementada " 
-					+ stepSize +" a "+ stepSize+ " ao longo deste método.")); 
+					+ stepSize +" a "+ stepSize+ " ao longo desta execução.")); 
 		}
 		return line; 
 	}

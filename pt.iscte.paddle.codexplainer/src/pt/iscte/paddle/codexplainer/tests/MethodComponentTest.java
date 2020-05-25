@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static pt.iscte.paddle.model.IOperator.*;
 import static pt.iscte.paddle.model.IType.*;
 
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.Test;
 
 import pt.iscte.paddle.codexplainer.components.MethodComponent;
+import pt.iscte.paddle.codexplainer.components.ReturnComponent;
 import pt.iscte.paddle.codexplainer.translator.TranslatorMethodComponentPT;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
@@ -56,10 +59,10 @@ public class MethodComponentTest {
 		MethodComponent comp = new MethodComponent(max);
 		
 		System.out.println(comp.getReturnType());
-		System.out.println(comp.getIsRecursive());
+		System.out.println(comp.IsRecursive());
 		
 		assertEquals(IType.INT, comp.getReturnType());
-		assertEquals(false, comp.getIsRecursive());
+		assertEquals(false, comp.IsRecursive());
 	}
 	
 	@Test
@@ -97,20 +100,22 @@ public class MethodComponentTest {
 		
 		//System.out.println("Method == " +max);
 	
+		//ReturnComponent retComp = new ReturnComponent(null, ret, null);
+		
 		MethodComponent comp = 
 				new MethodComponent(max);
 		
 		
-		TranslatorMethodComponentPT t = new TranslatorMethodComponentPT(comp);
+		TranslatorMethodComponentPT t = new TranslatorMethodComponentPT(comp, new ArrayList<>());
 		t.translatePT();
 		System.out.println("\nExplicaçao método:\n");
 		System.out.println(t.getExplanationText());
 		
 		System.out.println(comp.getReturnType());
-		System.out.println(comp.getIsRecursive());
+		System.out.println(comp.IsRecursive());
 		
 		assertEquals(IType.INT, comp.getReturnType());
-		assertEquals(false, comp.getIsRecursive());
+		assertEquals(false, comp.IsRecursive());
 	
 	}
 	

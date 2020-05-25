@@ -17,11 +17,10 @@ import pt.iscte.paddle.model.IVariableExpression;
 public class FunctionClassifier implements IFunctionClassifier {
 
 	List<IProgramElement> assignments;
-	
+	List<IVariableDeclaration> variables;
 	MethodType classification = MethodType.FUNCTION;
 	
 	public FunctionClassifier(IProcedure method) {
-	
 		assignments = new ArrayList<IProgramElement>();
 		for(IVariableDeclaration var: method.getParameters()) {
 			if(var.getType() instanceof IReferenceType) {
@@ -40,19 +39,23 @@ public class FunctionClassifier implements IFunctionClassifier {
 	
 	
 	class Visitor implements IBlock.IVisitor {
-		IVariableExpression var;
+		IVariableDeclaration var;
 
 		Boolean isMemoryValueChanged = false;
 		List<IProgramElement> assignments = new ArrayList<IProgramElement>();
+		List<IVariableDeclaration> variables = new ArrayList<IVariableDeclaration>();
 
 		Visitor(IVariableDeclaration var) {
-			this.var = var.expression();
+			this.var = var;
 		}
 		
 		@Override
 		public boolean visit(IArrayElementAssignment assignment) {
-			if (assignment.getTarget().isSame(var)) {
+			if (assignment.getTarget().isSame(var.expression())) {
 				assignments.add(assignment);
+				if(!variables.contains(var)) {
+					variables.add(var);
+				}
 				isMemoryValueChanged = true;
 			}	
 			return false;
@@ -65,8 +68,11 @@ public class FunctionClassifier implements IFunctionClassifier {
 			while(tempTarget.getTarget() != null && !(tempTarget.getTarget() instanceof IVariableExpression)) {
 				tempTarget = (IRecordFieldExpression) tempTarget.getTarget();
 			}
-			if (tempTarget.getTarget().isSame(var)) {
+			if (tempTarget.getTarget().isSame(var.expression())) {
 				assignments.add(assignment);
+				if(!variables.contains(var)) {
+					variables.add(var);
+				}
 				isMemoryValueChanged = true;
 			}	
 			return false;
@@ -82,6 +88,11 @@ public class FunctionClassifier implements IFunctionClassifier {
 	
 	public List<IProgramElement> getAssignments() {
 		return assignments;	
+	}
+
+	@Override
+	public List<IVariableDeclaration> getVariables() {
+		return variables;
 	}
 	
 }

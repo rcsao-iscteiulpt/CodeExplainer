@@ -3,6 +3,7 @@ import java.util.List;
 
 
 import pt.iscte.paddle.model.IProgramElement;
+import pt.iscte.paddle.model.IVariableDeclaration;
 
 
 public interface IFunctionClassifier {
@@ -18,5 +19,11 @@ public interface IFunctionClassifier {
 	 * and returns an empty list if the method is a function.
 	 */
 	public List<IProgramElement> getAssignments();	
+	
+	/**
+	 * Returns a list of the modified variables.
+	 * @return
+	 */
+	public List<IVariableDeclaration> getVariables();
 
 }

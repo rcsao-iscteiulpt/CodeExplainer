@@ -31,32 +31,15 @@ public class TranslatorLoopComponentPT implements TranslatorPT {
 
 	@Override
 	public void translatePT() {
-		ExpressionTranslatorPT t = new ExpressionTranslatorPT(explanationByComponents);
+		ExpressionTranslatorPT t = new ExpressionTranslatorPT(explanationByComponents, comp.getMethodComponent());
 
 		addDepthLevel();
 		explanationByComponents.add(new TextComponent("Este "));
 		explanationByComponents.add(new TextComponent("ciclo ", comp.getLoopBlock().getParent()));
-		explanationByComponents.add(new TextComponent("continua a repetir-se enquanto "));
+		explanationByComponents.add(new TextComponent("repete-se enquanto "));
 		explanationByComponents.add(new TextComponent());
-
-		for (IProgramElement e : comp.getGuardParts()) {
-
-			if (e instanceof IBinaryExpression) {
-				t.translateBinaryExpression((IBinaryExpression) e, false);
-			}
-			if (e instanceof IUnaryExpression) {
-				t.translateUnaryExpression((IUnaryExpression) e);
-			}
-			if (e instanceof IOperator) {
-				t.translateOperator((IBinaryOperator) e, false);
-			}
-			if (e instanceof IVariableExpression) {
-				t.translateBooleanVariable((IVariableExpression)e, false);
-			}
-			if (e instanceof IProcedureCallExpression) {
-				t.translateProcedureCallInExpression((IProcedureCallExpression) e);
-			}
-		}
+		
+		t.translateExpression(comp.getGuard());
 
 		//ArrayIndexIterator
 		if (comp.getIteratorComponent().getRole() instanceof IArrayIndexIterator) {
@@ -65,7 +48,7 @@ public class TranslatorLoopComponentPT implements TranslatorPT {
 			//explanationByComponents.add(new TextComponent(TextType.NEWLINE));
 			addDepthLevel();
 			explanationByComponents.add(new TextComponent(
-					"e percorre as posições do vetor " + it.getArrayVariables().get(0)
+					"\nPercorre as posições do vetor " + it.getArrayVariables().get(0)
 							+ " através da variável " + comp.getIteratorComponent().getVar()));
 		}
 
@@ -75,11 +58,10 @@ public class TranslatorLoopComponentPT implements TranslatorPT {
 
 			explanationByComponents.add(new TextComponent());
 			addDepthLevel();
-			explanationByComponents
-					.add(new TextComponent("O número de iterações deste ciclo é controlado através da variável "
-							+ comp.getIteratorComponent().getVar() + " que é "));
-			t.translateDirection(it.getDirection());
-			explanationByComponents.add(new TextComponent(" por "+ it.getStepSize() + "em cada iteração "));
+			explanationByComponents.add(new TextComponent("As iterações deste ciclo "));
+			explanationByComponents.add(new TextComponent("são controladas através da variável "+ comp.getIteratorComponent().getVar(), comp.getIteratorCondition()));
+			explanationByComponents.add(new TextComponent(" que é "));	
+			explanationByComponents.add(new TextComponent(t.translateDirection(it.getDirection())+" por "+ it.getStepSize() + " em cada iteração "));
 		}
 
 		explanationByComponents.add(new TextComponent());

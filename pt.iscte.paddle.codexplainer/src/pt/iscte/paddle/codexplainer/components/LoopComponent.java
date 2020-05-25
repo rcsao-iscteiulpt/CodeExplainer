@@ -11,34 +11,36 @@ import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.IUnaryExpression;
-import pt.iscte.paddle.model.IVariableAssignment;
-import pt.iscte.paddle.model.IVariableDeclaration;
-import pt.iscte.paddle.model.IVariableExpression;
+import pt.iscte.paddle.model.impl.RelationalOperator;
 import pt.iscte.paddle.model.roles.IArrayIndexIterator;
 import pt.iscte.paddle.model.roles.IStepper;
 
 public class LoopComponent extends Component {
 
 	private List<IProgramElement> guardParts = new ArrayList<IProgramElement>();
+	private IExpression guard;
+	
 	private IBlock loopBlock;
 	private int depthLevel;
 	private List<Component> branchComponents = new ArrayList<Component>();
 
 	private VariableRoleComponent iteratorComponent;
+	private IProgramElement iteratorCondition;
 
 //	ArrayElementType arrayType;
 //	enum ArrayElementType {
 //		INT, BOOLEAN, RECORD
 //	}
 
-	public LoopComponent(List<VariableRoleComponent> list, ILoop loop) {
-		IExpression guard = loop.getGuard();
+	public LoopComponent(List<VariableRoleComponent> list, ILoop loop, MethodComponent mc) {
+		this.guard = loop.getGuard();
 		this.loopBlock = loop.getBlock();
 		super.element = loop;
-		new ComponentsVisitor(loop.getBlock(),branchComponents, list);
+		super.mc = mc;
+		
+		new ComponentsVisitor(loop.getBlock(),branchComponents, list, super.mc);
 		//Decompose Guard
 		if (guard instanceof IUnaryExpression) {
-			// TODO
 			guardParts.add(guard);
 		}
 		if (guard instanceof IBinaryExpression) {
@@ -49,11 +51,6 @@ public class LoopComponent extends Component {
 				guardParts.add(guard);
 		}
 
-		
-		//Add components to list and Search Possible Iterator Role 
-		List<IVariableDeclaration> possibleIterators = new ArrayList<>();
-		possibleIterators = determinePossibleIteratorsInGuard(guard);
-
 		for (IProgramElement e : loop.getBlock().getChildren()) {
 			for (VariableRoleComponent comp : list) {
 				if (comp.getRole() instanceof IStepper || comp.getRole() instanceof IArrayIndexIterator) {
@@ -63,23 +60,28 @@ public class LoopComponent extends Component {
 				}
 			}
 		}
-	}
+		
+		for(IProgramElement e : guardParts) {
+			System.out.println(e);
 
-
-	List<IVariableDeclaration> determinePossibleIteratorsInGuard(IExpression guard) {
-		List<IVariableDeclaration> possibleIterators = new ArrayList<>();
-		for (IProgramElement e : guardParts) {
-			if (e instanceof IBinaryExpression) {
-				IExpression left = ((IBinaryExpression) e).getLeftOperand();
-				IExpression right = ((IBinaryExpression) e).getRightOperand();
-				if (left instanceof IVariableExpression)
-					possibleIterators.add((((IVariableExpression) left).getVariable()));
-				if (right instanceof IVariableExpression)
-					possibleIterators.add((((IVariableExpression) right).getVariable()));
+			if(e instanceof IBinaryExpression) {
+				IBinaryExpression ex = (IBinaryExpression) e;
+				IExpression left = ex.getLeftOperand();
+				IExpression right = ex.getRightOperand();
+				
+				if(ex.getOperator().getOperationType().equals(IOperator.OperationType.RELATIONAL)) {
+					if(left.isSame(iteratorComponent.getVar().expression()) || right.isSame(iteratorComponent.getVar().expression())) {
+						iteratorCondition = ex;
+					}
+				} 
 			}
 		}
-		return possibleIterators;
+		
 	}
+
+
+
+
 
 	void decomposeBinaryExpressionGuard(IBinaryExpression guard) {
 		IExpression left = guard.getLeftOperand();
@@ -125,6 +127,15 @@ public class LoopComponent extends Component {
 	
 	public List<Component> getBranchComponents() {
 		return branchComponents;
+	}
+
+
+	public IProgramElement getIteratorCondition() {
+		return iteratorCondition;
+	}
+	
+	public IExpression getGuard() {
+		return guard;
 	}
 	
 

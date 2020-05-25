@@ -16,6 +16,8 @@ import pt.iscte.paddle.model.roles.impl.MostWantedHolder;
 public class SelectionComponent extends Component {
 
 	private List<IExpression> guardParts = new ArrayList<IExpression>();
+	private IExpression guard;
+	
 	private IBlock selectionBlock;
 	private IBlock alternativeBlock;
 	
@@ -26,16 +28,17 @@ public class SelectionComponent extends Component {
 
 	private List<VariableRoleComponent> listVariablesToExplain = new ArrayList<VariableRoleComponent>();
 
-	public SelectionComponent(List<VariableRoleComponent> list, ISelection selection) {
-		IExpression guard = selection.getGuard();
+	public SelectionComponent(List<VariableRoleComponent> list, ISelection selection, MethodComponent mc) {
+		this.guard = selection.getGuard();
 		this.selectionBlock = selection.getBlock();
 		this.alternativeBlock = selection.getAlternativeBlock();
 		super.element = selection;
+		super.mc = mc;
 		
-		new ComponentsVisitor(selection.getBlock(),branchComponents, list);
+		new ComponentsVisitor(selection.getBlock(),branchComponents, list, super.mc);
 		
 		if(selection.getAlternativeBlock() != null) {
-			new ComponentsVisitor(selection.getAlternativeBlock(), alternativeBranchComponents, list);
+			new ComponentsVisitor(selection.getAlternativeBlock(), alternativeBranchComponents, list, mc);
 		}
 
 		for(VariableRoleComponent v: list) {
@@ -107,6 +110,9 @@ public class SelectionComponent extends Component {
 	}
 	public List<Component> getAlternativeBranchComponents() {
 		return alternativeBranchComponents;
+	}
+	public IExpression getGuard() {
+		return guard;
 	}
 	
 

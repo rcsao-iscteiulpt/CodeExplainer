@@ -4,10 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static pt.iscte.paddle.model.IOperator.*;
 import static pt.iscte.paddle.model.IType.*;
 
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
-
+import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.components.ReturnComponent;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
@@ -57,10 +58,10 @@ class ReturnComponentTest {
 		
 		//System.out.println(max);
 		
-		
-		ReturnComponent comp = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ret);
-		ReturnComponent comp1 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ret2);
-		ReturnComponent comp2 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ret3);
+		MethodComponent mc = new MethodComponent(max);
+		ReturnComponent comp = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ret, mc);
+		ReturnComponent comp1 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ret2, mc);
+		ReturnComponent comp2 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ret3, mc);
 		
 //		System.out.println(comp.getReturnExpressionParts());	
 //		System.out.println(comp1.getReturnExpressionParts());
@@ -97,10 +98,10 @@ class ReturnComponentTest {
 		
 		
 		
-		
-		ReturnComponent comp = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(method1.getVariables()),ret1);
-		ReturnComponent comp1 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(method2.getVariables()),ret2);
-		ReturnComponent comp2 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(method3.getVariables()),ret3);
+		MethodComponent mc = new MethodComponent(method1);
+		ReturnComponent comp = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(method1.getVariables()),ret1, mc);
+		ReturnComponent comp1 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(method2.getVariables()),ret2, mc);
+		ReturnComponent comp2 = new ReturnComponent(ExplanationGeneratorTest.getVariableRoleTest(method3.getVariables()),ret3, mc);
 		
 		System.out.println(comp.getReturnType());
 		System.out.println(comp1.getReturnType());

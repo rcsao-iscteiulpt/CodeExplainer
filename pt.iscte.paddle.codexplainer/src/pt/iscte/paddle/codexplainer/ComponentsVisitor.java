@@ -6,6 +6,7 @@ import java.util.List;
 import pt.iscte.paddle.codexplainer.components.AssignmentComponent;
 import pt.iscte.paddle.codexplainer.components.Component;
 import pt.iscte.paddle.codexplainer.components.LoopComponent;
+import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.components.ProcedureCallComponent;
 import pt.iscte.paddle.codexplainer.components.ReturnComponent;
 import pt.iscte.paddle.codexplainer.components.SelectionComponent;
@@ -26,9 +27,12 @@ public class ComponentsVisitor implements IBlock.IVisitor {
 	List<VariableRoleComponent> list;
 	ArrayList<IVariableDeclaration> declaredVariables = new ArrayList<IVariableDeclaration>(); 
 	
+	MethodComponent mc;
 		
-	public ComponentsVisitor(IBlock block, List<Component> components, List<VariableRoleComponent> variablesRolesExplanation) {
+	public ComponentsVisitor(IBlock block, List<Component> components, 
+			List<VariableRoleComponent> variablesRolesExplanation, MethodComponent mc) {
 		this.components = components;
+		this.mc = mc;
 		this.list = variablesRolesExplanation;
 		block.accept(this);
 	}
@@ -47,46 +51,45 @@ public class ComponentsVisitor implements IBlock.IVisitor {
 			isDeclarationAssignment = true;
 			declaredVariables.remove(assignment.getTarget());
 		}
-		components.add(new AssignmentComponent(list, assignment, assignment.getTarget().expression(), isDeclarationAssignment));
+		components.add(new AssignmentComponent(list, assignment, assignment.getTarget().expression(), isDeclarationAssignment, mc));
 		return false;
 	}
 	
 	@Override
 	public boolean visit(IRecordFieldAssignment assignment) {	
-		components.add(new AssignmentComponent(list,assignment, assignment.getTarget().expression(), false));
+		components.add(new AssignmentComponent(list,assignment, assignment.getTarget().expression(), false, mc));
 		return false;
 	}
 	
 	@Override
 	public boolean visit(IProcedureCall call) {	
-		components.add(new ProcedureCallComponent(list, call));
+		components.add(new ProcedureCallComponent(list, call, mc));
 		return false;
 	}
 
 
 	@Override
 	public boolean visit(IArrayElementAssignment assignment) {
-		components.add(new AssignmentComponent(list,assignment, assignment.getTarget().expression(), false));
+		components.add(new AssignmentComponent(list,assignment, assignment.getTarget().expression(), false, mc));
 		return false;
 	}
 
 	@Override
 	public boolean visit(ILoop expression) {
-		components.add(new LoopComponent(list, expression));
+		components.add(new LoopComponent(list, expression, mc));
 		return false;
 	}
 
 	@Override
 	public boolean visit(ISelection expression) {
 		
-		components.add(new SelectionComponent(list, expression));
+		components.add(new SelectionComponent(list, expression, mc));
 		return false;
 	}
 
 	@Override
-	public boolean visit(IReturn expression) {
-		
-		components.add(new ReturnComponent(list, expression));
+	public boolean visit(IReturn expression) {		
+		components.add(new ReturnComponent(list, expression, mc));
 		return false;
 	}
 	

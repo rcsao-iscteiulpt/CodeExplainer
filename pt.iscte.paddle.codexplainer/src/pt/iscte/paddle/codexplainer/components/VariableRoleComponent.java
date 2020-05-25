@@ -16,9 +16,7 @@ public class VariableRoleComponent {
 		this.var = var;
 	}
 	
-	public VariableRoleComponent() {
-		
-	}
+	public VariableRoleComponent() {}
 	
 	public IVariableDeclaration getVar() {
 		return var;

@@ -46,8 +46,12 @@ import pt.iscte.paddle.codexplainer.temp.TestMaxArray;
 import pt.iscte.paddle.codexplainer.temp.TestAbs;
 import pt.iscte.paddle.codexplainer.temp.TestArrayFind;
 import pt.iscte.paddle.codexplainer.temp.TestFactorialRecursive;
+import pt.iscte.paddle.codexplainer.temp.TestFactorialRecursive2;
 import pt.iscte.paddle.codexplainer.temp.TestIsPrime;
 import pt.iscte.paddle.codexplainer.temp.TestNaturals;
+import pt.iscte.paddle.codexplainer.temp.TestProcedure;
+import pt.iscte.paddle.codexplainer.temp.TestProcedureCall;
+import pt.iscte.paddle.codexplainer.temp.TestRecord;
 import pt.iscte.paddle.codexplainer.temp.TestSelection;
 import pt.iscte.paddle.codexplainer.temp.TestSubArray;
 import pt.iscte.paddle.codexplainer.temp.TestSum;
@@ -89,6 +93,16 @@ public class ExplanationVisual {
 		IModule modFactorial = testFactorial.getModule();
 		IProcedure factorial = modFactorial.getProcedure("factorial");
 		
+		TestFactorialRecursive2 testFactorial2 = new TestFactorialRecursive2();
+		testFactorial2.setup();
+		IModule modFactorial2 = testFactorial2.getModule();
+		IProcedure factorial2 = modFactorial2.getProcedure("factorial");
+		
+		TestProcedureCall testProcedureCall = new TestProcedureCall();
+		testProcedureCall.setup();
+		IModule modProcedureCall = testProcedureCall.getModule();
+		IProcedure procedureCall = modProcedureCall.getProcedure("factorial");
+		
 		TestArrayFind testArrayFind = new TestArrayFind();
 		testArrayFind.setup();
 		IModule modArrayFind = testArrayFind.getModule();
@@ -104,16 +118,33 @@ public class ExplanationVisual {
 		IModule modSubArray = testSubArray.getModule();
 		IProcedure subArray = modSubArray.getProcedure("subArray");
 		
+		TestProcedure testProcedure = new TestProcedure();
+		testProcedure.setup();
+		IModule modProcedure = testProcedure.getModule();
+		IProcedure procedure = modProcedure.getProcedure("proc");
 		
-//		openWindow(sum, modSum);
-//		openWindow(max, modMaxArray);
-//		openWindow(selection, modSelection);
-//		openWindow(naturals, modNaturals);
-//		openWindow(isPrime, modisPrime);
-		openWindow(factorial, modFactorial);
+		TestRecord testRecord = new TestRecord();
+		testRecord.setup();
+		IModule modRecord = testRecord.getModule();
+		IProcedure record = modRecord.getProcedure("recordTest");
+		
+		
+		openWindow(sum, modSum);
+		openWindow(max, modMaxArray);
+		openWindow(selection, modSelection);
+		openWindow(naturals, modNaturals);
+		openWindow(isPrime, modisPrime);
 		openWindow(arrayFind, modArrayFind);
 		openWindow(abs, modAbs);
 		openWindow(subArray, modSubArray);
+		
+		openWindow(factorial, modFactorial);
+		openWindow(factorial2, modFactorial2);
+		openWindow(procedureCall, modProcedureCall);
+//		
+//		//Test method classification
+		openWindow(procedure, modProcedure);
+//		openWindow(record, modRecord);
 
 		
 	}
@@ -137,10 +168,8 @@ public class ExplanationVisual {
 		RowLayout rLayout = new RowLayout();
 		comp.setLayout(rLayout);
 
-		ClassWidget widget = new ClassWidget(comp, module);
-		// module.getProcedures().forEach(p -> body.addElement(comp -> new
-		// MethodWidget(comp, p), p));
-		widget.setEnabled(false);
+		IClassWidget widget = IJavardiseService.createClassWidget(comp, module);
+		widget.setReadOnly(true);
 
 		//System.out.println(proc.getBody().getChildren());
 		//List<IBlockElement> children = proc.getBody().getChildren();

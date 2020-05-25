@@ -9,6 +9,7 @@ import static pt.iscte.paddle.model.IType.INT;
 
 import org.junit.jupiter.api.Test;
 
+import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.components.SelectionComponent;
 import pt.iscte.paddle.codexplainer.translator.TranslatorSelectionComponentPT;
 import pt.iscte.paddle.model.IBlock;
@@ -52,9 +53,10 @@ class SelectionComponentTest {
 			
 			System.out.println(max);
 			
-			
+			MethodComponent mc = new MethodComponent(max);
+
 			SelectionComponent comp = 
-					new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat);
+					new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat, mc);
 			
 			System.out.println(comp.getGuardParts());
 			
@@ -92,9 +94,9 @@ class SelectionComponentTest {
 		
 		//System.out.println("Method == " +max);
 		
-		
+		MethodComponent mc = new MethodComponent(max);
 		SelectionComponent comp = 
-				new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat);
+				new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat, mc);
 		
 		
 		TranslatorSelectionComponentPT t = new TranslatorSelectionComponentPT(comp, 0);
@@ -140,9 +142,9 @@ class SelectionComponentTest {
 		
 		//System.out.println("Method == " +max);
 		
-		
+		MethodComponent mc = new MethodComponent(max);
 		SelectionComponent comp = 
-				new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat);
+				new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat, mc);
 		
 		
 		TranslatorSelectionComponentPT t = new TranslatorSelectionComponentPT(comp, 0);

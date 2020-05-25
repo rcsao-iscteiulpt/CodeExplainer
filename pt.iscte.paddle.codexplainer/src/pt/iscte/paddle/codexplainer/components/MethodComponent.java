@@ -8,31 +8,28 @@ import pt.iscte.paddle.codexplainer.role.impl.Recursive;
 import pt.iscte.paddle.codexplainer.roles.IFunctionClassifier;
 import pt.iscte.paddle.codexplainer.roles.IRecursive;
 import pt.iscte.paddle.model.IProcedure;
+import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.IType;
 import pt.iscte.paddle.model.IVariableDeclaration;
 
-public class MethodComponent extends Component{
+public class MethodComponent{
 	
-    IType returnType;
-    IFunctionClassifier c;
-	Boolean isRecursive;
-	IRecursive recursive;
+    private IType returnType;
+    private IFunctionClassifier c;
+	private Boolean isRecursive;
+	private IRecursive recursive;
+	private IProgramElement method;
 	
-	List<IVariableDeclaration> parameters = new ArrayList<>();
-
-
-
+	private List<IVariableDeclaration> parameters = new ArrayList<>();
+	
 
 	public MethodComponent(IProcedure method) {
 		c = new FunctionClassifier(method);
 		returnType = method.getReturnType();
 		isRecursive = method.isRecursive();
-		System.out.println(method.isRecursive());
 		parameters = method.getParameters();
-		super.element = method;
-		
+		this.method = method;
 		this.recursive = new Recursive(method);
-		System.out.println(recursive.getExpressions());
 		
 	}
 	
@@ -41,7 +38,7 @@ public class MethodComponent extends Component{
 		return returnType;
 	}
 
-	public Boolean getIsRecursive() {
+	public Boolean IsRecursive() {
 		return isRecursive;
 	}
 	

@@ -19,13 +19,19 @@ public class ReturnComponent extends Component {
 	IExpression returnExpression;
 	List<IExpression> returnExpressionParts = new ArrayList<IExpression>();
 	
-	IVariableRole varReturnRole = IVariableRole.NONE;
+	private IVariableRole varReturnRole = IVariableRole.NONE;
+	
+	/**
+	 * Will only be true when the return expression is a single variable and it is a parameter
+	 */
+	private boolean isParameter = false;
 	
 	
-	public ReturnComponent(List<VariableRoleComponent> variableList, IReturn returnEx) {
+	public ReturnComponent(List<VariableRoleComponent> variableList, IReturn returnEx, MethodComponent mc) {
 		this.returnExpression = (IExpression) returnEx.getExpression();
 		this.returnType = returnEx.getReturnValueType();
 		super.element = returnEx;
+		super.mc = mc;
 		
 		if(returnExpression instanceof IBinaryExpression)  {
 			decomposeBinaryExpression((IBinaryExpression) returnExpression);
@@ -36,19 +42,19 @@ public class ReturnComponent extends Component {
 				if(returnExpression instanceof IVariableExpression) {
 					if(v.getVar().expression().isSame(returnExpression)) {
 						varReturnRole = v.getRole();
+						
+						if(mc.getParameters().contains(v.getVar())) {
+							isParameter = true;
+						}
 					}
 				}
 				if(returnExpression instanceof IUnaryExpression) {
 					IUnaryExpression uExpression = (IUnaryExpression) returnExpression;
 					//TODO UnaryExpression Return Component
-				}
-				
+				}		
 			}
-		}
-		
+		}		
 	}
-	
-
 
 	void decomposeBinaryExpression(IBinaryExpression expression) {
 		IExpression left = expression.getLeftOperand();
@@ -67,6 +73,10 @@ public class ReturnComponent extends Component {
 		}
 	}
 	
+	public boolean isParameter() {
+		return isParameter;
+	}
+	
 	public IType getReturnType() {
 		return returnType;
 	}
@@ -77,6 +87,10 @@ public class ReturnComponent extends Component {
 	
 	public IVariableRole getVarReturnRole() {
 		return varReturnRole;
+	}
+
+	public IExpression getReturnExpression() {
+		return returnExpression;
 	}
 	
 

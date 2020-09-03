@@ -17,8 +17,8 @@ import pt.iscte.paddle.model.IVariableExpression;
 public class FunctionClassifier implements IFunctionClassifier {
 
 	List<IProgramElement> assignments;
-	List<IVariableDeclaration> variables;
 	MethodType classification = MethodType.FUNCTION;
+	List<IVariableDeclaration> modifiedVariables;
 	
 	public FunctionClassifier(IProcedure method) {
 		assignments = new ArrayList<IProgramElement>();
@@ -92,7 +92,7 @@ public class FunctionClassifier implements IFunctionClassifier {
 
 	@Override
 	public List<IVariableDeclaration> getVariables() {
-		return variables;
+		return modifiedVariables;
 	}
 	
 }

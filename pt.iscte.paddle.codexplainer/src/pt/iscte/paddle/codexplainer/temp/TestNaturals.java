@@ -15,13 +15,10 @@ import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
 
 public class TestNaturals extends BaseTest  {
-	IProcedure naturals = module.addProcedure(INT.array());
+	IProcedure naturals = module.addProcedure(INT.array().reference());
 	IVariableDeclaration n = naturals.addParameter(INT);
 	IBlock body = naturals.getBody();
-	IVariableDeclaration array = body.addVariable(INT.array());
-	IVariableDeclaration array2 = body.addVariable(INT.array());
-	IVariableAssignment ass1 = body.addAssignment(array, INT.array().stackAllocation(n));
-	IVariableAssignment ass = body.addAssignment(array2, array);
+	IVariableDeclaration array = body.addVariable(INT.array().reference(), INT.array().heapAllocation(n));
 	
 	IVariableDeclaration i = body.addVariable(INT, INT.literal(0));
 	ILoop loop = body.addLoop(SMALLER.on(i, n));

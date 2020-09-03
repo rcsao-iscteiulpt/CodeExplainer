@@ -12,7 +12,7 @@ import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
 
-public class TestMaxArray extends BaseTest {
+public class TestLink extends BaseTest {
 
 	IProcedure max = module.addProcedure(INT);
 	IVariableDeclaration array = max.addParameter(INT.array().reference());

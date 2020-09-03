@@ -5,11 +5,8 @@ import java.util.List;
 
 import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
-import pt.iscte.paddle.codexplainer.role.impl.FunctionClassifier;
-import pt.iscte.paddle.codexplainer.role.impl.Recursive;
-import pt.iscte.paddle.codexplainer.roles.IFunctionClassifier;
-import pt.iscte.paddle.codexplainer.roles.IFunctionClassifier.MethodType;
-import pt.iscte.paddle.codexplainer.roles.IRecursive;
+import pt.iscte.paddle.model.roles.impl.FunctionClassifier;
+import pt.iscte.paddle.model.roles.IFunctionClassifier.MethodType;
 import pt.iscte.paddle.model.roles.IMostWantedHolder.Objective;
 import pt.iscte.paddle.model.IArrayAllocation;
 import pt.iscte.paddle.model.IArrayElement;
@@ -20,6 +17,7 @@ import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBinaryOperator;
 import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.ILiteral;
+import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IProcedureCall;
 import pt.iscte.paddle.model.IProcedureCallExpression;
@@ -29,7 +27,6 @@ import pt.iscte.paddle.model.IRecordType;
 import pt.iscte.paddle.model.IReferenceType;
 import pt.iscte.paddle.model.IStatement;
 import pt.iscte.paddle.model.IType;
-import pt.iscte.paddle.model.IType.*;
 import pt.iscte.paddle.model.IUnaryExpression;
 import pt.iscte.paddle.model.IUnaryOperator;
 import pt.iscte.paddle.model.IVariableExpression;
@@ -46,39 +43,54 @@ public class ExpressionTranslatorPT {
 	public ExpressionTranslatorPT(List<TextComponent> line) {
 		this.line = line;
 	}
-	
+
 	public ExpressionTranslatorPT(List<TextComponent> line, MethodComponent mc) {
 		this.line = line;
 		this.mc = mc;
 	}
 
-	void translateExpression(IExpression expression) {
+	void translateExpression(IExpression expression, boolean isCondition) {
 		// System.out.println(expression.getClass());
 		if (expression instanceof IBinaryExpression) {
-			translateBinaryExpression((IBinaryExpression) expression, false);
+			translateBinaryExpression((IBinaryExpression) expression, false, isCondition);
 		}
 
 		if (expression instanceof IUnaryExpression)
 			translateUnaryExpression((IUnaryExpression) expression);
 
-		if (expression instanceof IArrayElement)
-			translateArrayElement((IArrayElement) expression);
+		if (expression instanceof IArrayElement) {
+			IArrayElement el = (IArrayElement) expression;
+			if (el.getIndexes().size() == 1) {
+				translateArrayElement(el.getTarget(), el.getIndexes().get(0));
+			} else if (el.getIndexes().size() == 2) {
+				translateMatrixElement(el.getTarget(), el.getIndexes());
+			}
+		}
+
+		if (expression instanceof IProcedureCall)
+			translateProcedureCall((IProcedureCallExpression) expression);
 
 		if (expression instanceof IRecordFieldExpression)
 			translateRecordFieldExpression((IRecordFieldExpression) expression);
 
-		if (expression instanceof IVariableExpression)
-			translateVariableExpression((IVariableExpression) expression, false);
-
+		if (expression instanceof IVariableExpression) {
+			if (expression.getType().equals(IType.BOOLEAN) && isCondition) {
+				translateBooleanVariableCondition((IVariableExpression) expression, false);
+			} else {
+				translateVariableExpression((IVariableExpression) expression, false);
+			}
+		}
 		if (expression instanceof ILiteral)
 			translateLiteral((ILiteral) expression);
 
 		if (expression instanceof IArrayAllocation) {
 			line.add(new TextComponent(""));
 		}
+		if (expression instanceof IArrayLength)
+			translateArrayLength((IArrayLength) expression);
 	}
 
-	void translateBinaryExpression(IBinaryExpression ex, boolean isNegative) {
+	void translateBinaryExpression(IBinaryExpression ex, boolean isNegative, boolean isCondition) {
 		// StringBuilder g = new StringBuilder();
 		IExpression leftEx = ex.getLeftOperand();
 		IExpression rightEx = ex.getRightOperand();
@@ -86,17 +98,35 @@ public class ExpressionTranslatorPT {
 		Boolean specialCase = CheckBinaryExpressionSpecialCases(ex);
 		if (!specialCase) {
 
+			
+			if(ex.getOperator().equals(IOperator.MOD)) {
+				translateOperator(ex.getOperator(), isNegative);
+			}
+			
 			if (leftEx instanceof IBinaryExpression)
-				translateBinaryExpression((IBinaryExpression) leftEx, isNegative);
+				translateBinaryExpression((IBinaryExpression) leftEx, isNegative, isCondition);
 
-			if (leftEx instanceof IArrayElement)
-				translateArrayElement((IArrayElement) leftEx);
+			if (leftEx instanceof IArrayElement) {
+				IArrayElement el = (IArrayElement) leftEx;
+				IArrayType t = (IArrayType) ((IReferenceType) ((IVariableExpression) el.getTarget()).getVariable()
+						.getType()).getTarget();
+				if (t.getDimensions() == 1) {
+					translateArrayElement(el.getTarget(), el.getIndexes().get(0));
+				} else if (t.getDimensions() == 2) {
+					translateMatrixElement(el.getTarget(), el.getIndexes());
+				}
+			}
 
 			if (leftEx instanceof IArrayLength)
 				translateArrayLength((IArrayLength) leftEx);
 
-			if (leftEx instanceof IVariableExpression)
-				translateVariableExpression((IVariableExpression) leftEx, false);
+			if (leftEx instanceof IVariableExpression) {
+				if (leftEx.getType().equals(IType.BOOLEAN) && isCondition) {
+					translateBooleanVariableCondition((IVariableExpression) leftEx, false);
+				} else {
+					translateVariableExpression((IVariableExpression) leftEx, false);
+				}
+			}
 
 			if (leftEx instanceof ILiteral)
 				translateLiteral((ILiteral) leftEx);
@@ -106,21 +136,40 @@ public class ExpressionTranslatorPT {
 
 			if (leftEx instanceof IUnaryExpression)
 				translateUnaryExpression((IUnaryExpression) leftEx);
+			
+			if (leftEx instanceof IRecordFieldExpression)
+				translateRecordFieldExpression((IRecordFieldExpression) leftEx);
 
-			translateOperator(ex.getOperator(), isNegative);
+			if(!ex.getOperator().equals(IOperator.MOD)) {
+				translateOperator(ex.getOperator(), isNegative);
+			} else {
+				line.add(new TextComponent("por "));
+			}
 
 			if (rightEx instanceof IBinaryExpression)
-				translateBinaryExpression((IBinaryExpression) rightEx, isNegative);
+				translateBinaryExpression((IBinaryExpression) rightEx, isNegative, isCondition);
 
-			if (rightEx instanceof IArrayElement)
-				translateArrayElement((IArrayElement) rightEx);
+			if (rightEx instanceof IArrayElement) {
+				IArrayElement el = (IArrayElement) rightEx;
+				IArrayType t = (IArrayType) ((IReferenceType) ((IVariableExpression) el.getTarget()).getVariable()
+						.getType()).getTarget();
+				if (t.getDimensions() == 1) {
+					translateArrayElement(el.getTarget(), el.getIndexes().get(0));
+				} else if (t.getDimensions() == 2) {
+					translateMatrixElement(el.getTarget(), el.getIndexes());
+				}
 
+			}
 			if (rightEx instanceof IArrayLength)
 				translateArrayLength((IArrayLength) rightEx);
 
-			if (rightEx instanceof IVariableExpression)
-				translateVariableExpression((IVariableExpression) rightEx, false);
-
+			if (rightEx instanceof IVariableExpression) {
+				if (rightEx.getType().equals(IType.BOOLEAN) && isCondition) {
+					translateBooleanVariableCondition((IVariableExpression) rightEx, false);
+				} else {
+					translateVariableExpression((IVariableExpression) rightEx, false);
+				}
+			}
 			if (rightEx instanceof ILiteral)
 				translateLiteral((ILiteral) rightEx);
 
@@ -129,58 +178,98 @@ public class ExpressionTranslatorPT {
 
 			if (rightEx instanceof IUnaryExpression)
 				translateUnaryExpression((IUnaryExpression) rightEx);
+			
+			if (rightEx instanceof IRecordFieldExpression)
+				translateRecordFieldExpression((IRecordFieldExpression) rightEx);
+
+			
 		}
 		return;
 	}
 
 	void translateProcedureCall(IProcedureCallExpression expression) {
+		boolean isRecursive = false;
 		String s1 = "função ";
 		String s2 = "a ";
-		if(mc.getFunctionClassifier().getClassification().equals(MethodType.PROCEDURE)) {
+		if (mc.getFunctionClassifier().getClassification().equals(MethodType.PROCEDURE)) {
 			s1 = "procedimento ";
 			s2 = "o ";
 		}
-		
-		if(mc.IsRecursive() && mc.getRecursive().getExpressions().contains(expression)) {
-			line.add(new TextComponent(s2.toUpperCase() + s1 + "volta a chamar-se", expression));
-			line.add(new TextComponent(" com os argumentos:"));
+
+		if (mc.IsRecursive() && mc.getRecursive().getExpressions().contains(expression)) {
+			isRecursive = true;
+			line.add(new TextComponent(s2.toUpperCase() + s1 + "é sucessivamente invocada ", expression));
+			line.add(new TextComponent("com "));
 		} else {
 			String pattern = "\\(.*\\)";
 			String procName = expression.toString().replaceAll(pattern, "");
 			line.add(new TextComponent(s2.toUpperCase() + s1));
-			line.add(new TextComponent("chama o método " + procName, expression));
+			line.add(new TextComponent("invoca o método " + procName, expression));
 			line.add(new TextComponent(" com os argumentos: "));
 		}
 
-		for (IExpression e : expression.getArguments()) {
-			translateExpression(e);
-			line.add(new TextComponent(""));
+		if (isRecursive && expression.getArguments().size() == 1
+				&& expression.getArguments().get(0) instanceof IBinaryExpression) {
+			IBinaryExpression ex = (IBinaryExpression) expression.getArguments().get(0);
+			IExpression left = ex.getLeftOperand();
+			IExpression right = ex.getRightOperand();
+
+			if (ex.getOperator().equals(IOperator.ADD)) {
+				if (left.isSame(IType.INT.literal(1).expression()) && right instanceof IVariableExpression) {
+					line.add(new TextComponent("um valor superior a "));
+					linkVariable(right);
+				}	
+				if (right.isSame(IType.INT.literal(1).expression()) && left instanceof IVariableExpression) {
+					line.add(new TextComponent("um valor superior a "));
+					linkVariable(left);
+				}
+			} else if (ex.getOperator().equals(IOperator.SUB)) {
+				if (right.isSame(IType.INT.literal(1).expression()) && left instanceof IVariableExpression) {
+					line.add(new TextComponent("um valor inferior a "));
+					linkVariable(left);
+				}
+			} else {
+				line.add(new TextComponent(" com os argumentos:"));
+				for (IExpression e : expression.getArguments()) {
+					//translateExpression(e, false);
+					line.add(new TextComponent(e.toString()));
+				}
+			}
+		} else {
+			for (IExpression e : expression.getArguments()) {
+				//translateExpression(e, false);
+				line.add(new TextComponent(e.toString()));
+			}
 		}
 
 	}
 
 	void translateProcedureCallInExpression(IProcedureCallExpression expression) {
-		String s1 = "função ";
+		String s1 = "função";
 		String s2 = "a ";
-		if(mc.getFunctionClassifier().getClassification().equals(MethodType.PROCEDURE)) {
-			s1 = "procedimento ";
+		String s3 = "a ";
+		if (mc.getFunctionClassifier().getClassification().equals(MethodType.PROCEDURE)) {
+			s1 = "procedimento";
 			s2 = "o ";
-		}
-		
-		if(mc.IsRecursive() && mc.getRecursive().getExpressions().contains(expression)) {
-			line.add(new TextComponent("o resultado da "));
-			line.add(new TextComponent("chamada recursiva d" + s2 +"mesm"+s2, expression)); 
-			line.add(new TextComponent("com os argumentos: "));
-		} else {
-			IFunctionClassifier c = new FunctionClassifier((IProcedure) expression.getProcedure());
-			line.add(new TextComponent("o resultado da "));
-			line.add(new TextComponent("chamada d"+s2 + s1 + expression, expression));
-			line.add(new TextComponent("com os argumentos: "));
+			s3 = "e ";
 		}
 
+		if (mc.IsRecursive() && mc.getRecursive().getExpressions().contains(expression)) {
+			line.add(new TextComponent("o resultado da "));
+			line.add(new TextComponent("invocação recursiva dest" + s3 + s1, expression));
+			line.add(new TextComponent(" de "));
+		} else {
+			FunctionClassifier c = new FunctionClassifier((IProcedure) expression.getProcedure());
+			line.add(new TextComponent("o resultado da "));
+			line.add(new TextComponent("invocação d" + s2 + s1 + expression, expression));
+			line.add(new TextComponent(" com os argumentos: "));
+		}
+		
+		//TODO Robustez Varios argumentos
+
 		for (IExpression e : expression.getArguments()) {
-			translateExpression(e);
-			line.add(new TextComponent(""));
+			//translateExpression(e, false);
+			line.add(new TextComponent(e.toString()));
 		}
 
 	}
@@ -210,14 +299,13 @@ public class ExpressionTranslatorPT {
 		if (l != null) {
 			if (l.getStringValue().equals("1")) {
 				line.add(new TextComponent("a "));
-				line.add(new TextComponent("última posição do vetor " + aLenght.getTarget(), ex));
+				line.add(new TextComponent("última posição do vetor " + aLenght.getTarget()+ " ", ex));
 				line.add(new TextComponent(" "));
 				return true;
 			}
 			if (l.getStringValue().equals("2")) {
 				line.add(new TextComponent("a "));
-				line.add(new TextComponent("penúltima posição do vetor " + aLenght.getTarget(), ex));
-				line.add(new TextComponent(" "));
+				line.add(new TextComponent("penúltima posição do vetor " + aLenght.getTarget() + " ", ex));	
 				return true;
 			}
 		}
@@ -227,7 +315,7 @@ public class ExpressionTranslatorPT {
 	void translateUnaryExpression(IUnaryExpression ex) {
 		if (ex.getOperator().equals(IUnaryOperator.NOT)) {
 			if (ex.getOperand() instanceof IBinaryExpression)
-				translateBinaryExpression((IBinaryExpression) ex.getOperand(), true);
+				translateBinaryExpression((IBinaryExpression) ex.getOperand(), true, true);
 			if (ex.getOperand() instanceof IVariableExpression)
 				translateBooleanVariableCondition((IVariableExpression) ex.getOperand(), true);
 			if (ex.getOperand() instanceof IUnaryExpression)
@@ -242,17 +330,46 @@ public class ExpressionTranslatorPT {
 	}
 
 	void translateArrayLength(IArrayLength length) {
-		line.add(new TextComponent("o valor do "));
-		line.add(new TextComponent("tamanho do vetor " + length.getTarget() + " ", length));
+		IArrayType t = (IArrayType) ((IReferenceType) ((IVariableExpression) length.getTarget()).getVariable()
+				.getType()).getTarget();
+
+		if (t.getDimensions() == 1) {
+			line.add(new TextComponent("o valor do "));
+			line.add(new TextComponent("tamanho do vetor " + length.getTarget(), length));
+			line.add(new TextComponent(" "));
+		} else if (t.getDimensions() == 2) {
+			if (length.getIndexes().size() == 0) {
+				line.add(new TextComponent("o valor do "));
+				line.add(new TextComponent("número de linhas da matriz " + length.getTarget(), length));
+				line.add(new TextComponent(" "));
+			} else {
+				if (length.getIndexes().get(0).isSame(IType.INT.literal(0).expression())) {
+					line.add(new TextComponent("o valor do "));
+					line.add(new TextComponent("tamanho da primeira linha da matriz " + length.getTarget(),
+							length));
+					line.add(new TextComponent(" "));
+				} else if (length.getIndexes().get(0).isSame(IType.INT.literal(1).expression())) {
+					line.add(new TextComponent("o valor do "));
+					line.add(new TextComponent("tamanho da segunda linha da matriz " + length.getTarget(),
+							length));
+					line.add(new TextComponent(" "));
+				} else {
+					line.add(new TextComponent("o valor do "));
+					line.add(new TextComponent(
+							"tamanho da linha " + length.getIndexes().get(0) + " da matriz " + length.getTarget(),
+							length));
+					line.add(new TextComponent(" "));
+				}
+			}
+		}
+
 	}
 
 	void translateRecordFieldExpression(IRecordFieldExpression expression) {
-		// IRecordFieldExpression tempTarget = (IRecordFieldExpression)
-		// expression.getTarget();
-		System.out.println(expression.getParts());
-		System.out.println(expression.getTarget());
-		
-		line.add(new TextComponent("o valor do campo " + expression.getField() + " do objecto "+ expression.getTarget(), expression));
+		line.add(new TextComponent(
+				"o valor do campo " + expression.getField(), expression.expression()));
+		line.add(new TextComponent(" do objecto "));
+		linkVariable(expression.getTarget());
 	}
 
 	void translateVariableExpression(IVariableExpression expression, boolean isNegative) {
@@ -261,12 +378,18 @@ public class ExpressionTranslatorPT {
 			if (isNegative)
 				line.add(new TextComponent("negativo "));
 		}
-		line.add(new TextComponent("de " + expression.toString() + " "));
+		line.add(new TextComponent("de "));
+		linkVariable(expression);
+		line.add(new TextComponent(" "));
+	}
+	
+	void linkVariable(IExpression e) {
+		line.add(new TextComponent(((IVariableExpression)e).toString(), ((IVariableExpression)e).getVariable()));
 	}
 
 	void translateLiteral(ILiteral expression) {
-		if(expression.getType().equals(IType.BOOLEAN)) {
-			if(expression.getStringValue().equals("true")) {
+		if (expression.getType().equals(IType.BOOLEAN)) {
+			if (expression.getStringValue().equals("true")) {
 				line.add(new TextComponent("verdadeiro "));
 			} else {
 				line.add(new TextComponent("falso "));
@@ -274,63 +397,113 @@ public class ExpressionTranslatorPT {
 		} else {
 			line.add(new TextComponent(expression.toString() + " "));
 		}
+
 	}
 
-	void translateArrayElement(IArrayElement element) {
-		IExpression e = element.getIndexes().get(0);
-		line.add(new TextComponent("o valor da "));
-		if (e instanceof IBinaryExpression) {
-			IBinaryExpression ex = (IBinaryExpression) e;
-			translateBinaryExpression(ex, false);
-		} else {
-			if (e instanceof ILiteral) {
-				ILiteral l = (ILiteral) e;
-				if (l.getStringValue().equals("0")) {
-					line.add(new TextComponent("primeira posição do vetor " + element.getTarget(), element));
-					line.add(new TextComponent(" "));
-				} else if (l.getStringValue().equals("1")) {
-					line.add(new TextComponent("segunda posição do vetor " + element.getTarget(), element));
-					line.add(new TextComponent(" "));
-				} else if (l.getStringValue().equals("2")) {
-					line.add(new TextComponent("terceira posição do vetor " + element.getTarget(), element));
-					line.add(new TextComponent(" "));
-				} else {
-					line.add(new TextComponent(
-							"posição " + element.getIndexes().get(0) + " do vetor " + element.getTarget() + " "));
-				}
-			} else {
-				line.add(new TextComponent(
-						"posição " + element.getIndexes().get(0) + " do vetor " + element.getTarget() + " "));
-			}
-		}
-
-		return;
-	}
-
-	void translateArrayElement(IExpression array, IExpression index) {
+	void translateArrayElement(IExpression target, IExpression index) {
 		line.add(new TextComponent("o valor da "));
 		if (index instanceof IBinaryExpression) {
 			line.add(new TextComponent("posição "));
 			IBinaryExpression ex = (IBinaryExpression) index;
-			translateBinaryExpression(ex, false);
+			translateBinaryExpression(ex, false, false);
 		} else {
-			if (index.equals(IType.INT.literal(0))) {
-				line.add(new TextComponent("primeira posição do vetor " + array, index));
+			if (index.isSame(IType.INT.literal(0).expression())) {
+				line.add(new TextComponent("primeira posição", index));
+				line.add(new TextComponent(" do vetor "));
+				linkVariable(target);
+				line.add(new TextComponent(" "));
+			} else if (index.isSame(IType.INT.literal(1).expression())) {
+				line.add(new TextComponent("segunda posição", index));
+				line.add(new TextComponent(" do vetor "));
+				linkVariable(target);
+				line.add(new TextComponent(" "));
+			} else if (index.isSame(IType.INT.literal(2).expression())) {
+				line.add(new TextComponent("terceira posição", index));
+				line.add(new TextComponent(" do vetor "));
+				linkVariable(target);
 				line.add(new TextComponent(" "));
 			} else {
-				line.add(new TextComponent("posição " + index + " do vetor " + array + " "));
+				if(index instanceof IVariableExpression) {
+					line.add(new TextComponent("posição "));
+					linkVariable(index);
+					line.add(new TextComponent(" do vetor "));
+					linkVariable(target);
+					line.add(new TextComponent(" "));
+				} else {
+					line.add(new TextComponent("posição", index));
+					line.add(new TextComponent(" do vetor "));
+					linkVariable(target);
+					line.add(new TextComponent(" "));
+				}
+			}
+		}
+		return;
+	}
+
+	void translateMatrixElement(IExpression target, List<IExpression> list) {
+
+		if (list.size() == 2) {
+			line.add(new TextComponent("o valor da "));
+			if (list.get(1) instanceof IBinaryExpression) {
+				line.add(new TextComponent("posição "));
+				IBinaryExpression ex = (IBinaryExpression) list.get(0);
+				translateBinaryExpression(ex, false, false);
+			} else {
+				if (list.get(1).isSame(IType.INT.literal(0).expression())) {
+					line.add(new TextComponent("primeira posição", list.get(1)));
+					line.add(new TextComponent(" da "));
+				} else {
+					if(list.get(0) instanceof IVariableExpression) {
+						line.add(new TextComponent("posição "));
+						linkVariable(list.get(1));
+						line.add(new TextComponent(" da "));
+					} else {
+						line.add(new TextComponent("posição "));
+						linkVariable(list.get(1));
+						line.add(new TextComponent(" da "));
+					}	
+				}
+			}
+
+			if (list.get(0) instanceof IBinaryExpression) {
+				line.add(new TextComponent("linha "));
+				IBinaryExpression ex = (IBinaryExpression) list.get(0);
+				translateBinaryExpression(ex, false, false);
+			} else {
+				if (list.get(0).isSame(IType.INT.literal(0).expression())) {
+					line.add(new TextComponent("primeira linha", list.get(0)));
+					line.add(new TextComponent(" da matriz "));
+					linkVariable(target);
+					line.add(new TextComponent(" "));
+				} else {
+					line.add(new TextComponent("linha " + list.get(0), list.get(0)));
+					line.add(new TextComponent(" da matriz "));
+					linkVariable(target);
+					line.add(new TextComponent(" "));
+				}
+			}
+		} else {
+			if (list.get(0).isSame(IType.INT.literal(0).expression())) {
+				line.add(new TextComponent("primeira linha", list.get(0)));
+				line.add(new TextComponent(" da matriz "));
+				linkVariable(target);
+				line.add(new TextComponent(" "));
+			} else {
+				line.add(new TextComponent("linha " + list.get(0), list.get(0)));
+				line.add(new TextComponent(" da matriz "));
+				linkVariable(target);
+				line.add(new TextComponent(" "));
 			}
 		}
 
-		return;
 	}
 
 	String translateDirection(Direction direction) {
 		if (direction.equals(Direction.INC)) {
-			return "incrementada ";
+			return "incrementado";
 		}
 		if (direction.equals(Direction.DEC)) {
-			return "decrementada ";
+			return "decrementado";
 		}
 		return "";
 	}
@@ -400,7 +573,7 @@ public class ExpressionTranslatorPT {
 
 		if (op instanceof ArithmeticOperator) {
 			if (op.equals(IBinaryOperator.MOD)) {
-				line.add(new TextComponent("resto de "));
+				line.add(new TextComponent("o resto da divisão de "));
 				return;
 			}
 
@@ -428,34 +601,45 @@ public class ExpressionTranslatorPT {
 
 	String translateMostWantedholderObjective(Objective o) {
 		if (o.equals(Objective.GREATER)) {
-			return "alto ";
+			return "maior ";
 		}
 		if (o.equals(Objective.SMALLER)) {
-			return "baixo ";
+			return "menor ";
 		}
 		return "";
 	}
 
-	void translateUnaryOperator(IUnaryOperator op) {
-		if (op.equals(IUnaryOperator.NOT)) {
-			// TODO TranslateUnaryOperator
+	void translateBooleanPrimitive(IExpression ex) {
+		if (ex.isSame(IType.BOOLEAN.literal(true))) {
+			line.add(new TextComponent("verdadeiro "));
+		} else {
+			line.add(new TextComponent("falso "));
 		}
-		return;
 	}
 
-	void translateIType(IType type) {
+	void translateIType(IType type, boolean listswithType) {
 		if (type instanceof IReferenceType) {
 			IReferenceType ref = (IReferenceType) type;
 			if (ref.getTarget() instanceof IArrayType) {
-				line.add(new TextComponent("vetor de "));
+				IArrayType t = (IArrayType) ref.getTarget();
+				IType compType;
+				if (t.getComponentType() instanceof IArrayType) {
+					line.add(new TextComponent("matriz"));
+					compType = ((IArrayType) t.getComponentType()).getComponentType();
+				} else {
+					line.add(new TextComponent("vetor"));
+					compType = t.getComponentType();
+				}
 
-				IType compType = ((IArrayType) ref.getTarget()).getComponentType();
-				if (compType.equals(IType.BOOLEAN))
-					line.add(new TextComponent("booleanos "));
-				if (compType.equals(IType.INT))
-					line.add(new TextComponent("inteiros "));
-				if (compType.equals(IType.DOUBLE))
-					line.add(new TextComponent("doubles "));
+				if (listswithType) {
+					line.add(new TextComponent(" de "));
+					if (compType.equals(IType.BOOLEAN))
+						line.add(new TextComponent("booleanos "));
+					if (compType.equals(IType.INT))
+						line.add(new TextComponent("inteiros "));
+					if (compType.equals(IType.DOUBLE))
+						line.add(new TextComponent("doubles "));
+				}
 				// TODO test Record and matrixes
 			}
 			if (ref.getTarget() instanceof IRecordType)
@@ -467,21 +651,7 @@ public class ExpressionTranslatorPT {
 				line.add(new TextComponent("inteiro "));
 			if (type.equals(IType.DOUBLE))
 				line.add(new TextComponent("double "));
-
-			if (type instanceof IArrayType) {
-				line.add(new TextComponent("vetor de "));
-
-				IType compType = ((IArrayType) type).getComponentType();
-				if (compType.equals(IType.BOOLEAN))
-					line.add(new TextComponent("booleanos "));
-				if (compType.equals(IType.INT))
-					line.add(new TextComponent("inteiros "));
-				if (compType.equals(IType.DOUBLE))
-					line.add(new TextComponent("doubles "));
-
-			}
 		}
-
 	}
 
 	void translateMethodType(MethodType type) {
@@ -490,37 +660,71 @@ public class ExpressionTranslatorPT {
 		} else {
 			line.add(new TextComponent("procedimento"));
 		}
-
 	}
 
 	public void translateAssignment(IStatement assignment) {
 
 		if (assignment instanceof IVariableAssignment) {
 			IVariableAssignment vAssign = (IVariableAssignment) assignment;
-			line.add(new TextComponent("A variável " + vAssign.getTarget() + " "));
+			linkVariable(vAssign.getTarget().expression()); 
+			line.add(new TextComponent(" "));
 
 			if (vAssign.getExpression() instanceof IUnaryExpression) {
-				line.add(new TextComponent("é alterada para "));
+				line.add(new TextComponent("é alterado para "));
 				translateUnaryExpression((IUnaryExpression) vAssign.getExpression());
-			} else 
-			if (vAssign.getExpression() instanceof IBinaryExpression) {
-				line.add(new TextComponent("é alterada para "));
-				line.add(new TextComponent(" o resultado d"));
-				translateBinaryExpression((IBinaryExpression) vAssign.getExpression(), false);
-			} else
-			if (vAssign.getExpression() instanceof IArrayAllocation) {
+				
+			} else if (vAssign.getExpression() instanceof IBinaryExpression) {
+				line.add(new TextComponent("é alterado para "));
+				// line.add(new TextComponent(" o resultado d"));
+				
+				translateBinaryExpression((IBinaryExpression) vAssign.getExpression(), false, false);
+			} else if (vAssign.getExpression() instanceof IArrayElement) {
+				line.add(new TextComponent("é alterado para "));
+				IArrayElement el = (IArrayElement) vAssign.getExpression();
+				IArrayType t = (IArrayType) ((IReferenceType) ((IVariableExpression) el.getTarget()).getVariable()
+						.getType()).getTarget();
+				if (t.getDimensions() == 1) {
+					translateArrayElement(el.getTarget(), el.getIndexes().get(0));
+				} else if (t.getDimensions() == 2) {
+					translateMatrixElement(el.getTarget(), el.getIndexes());
+				}
+				
+			} else if (vAssign.getExpression() instanceof IArrayAllocation) {
 				IArrayAllocation all = (IArrayAllocation) vAssign.getExpression();
-				// TODO dimensions fix
-				line.add(new TextComponent("é alterada para "));
-				line.add(new TextComponent("um vetor vazio com tamanho igual a "));
-				translateExpression(all.getDimensions().get(0));
-			} else
-			if (vAssign.getExpression() instanceof IArrayType) {
-				line.add(new TextComponent("aponta para o vetor " + vAssign.getExpression(), assignment));
-			} else 
-			if (vAssign.getExpression() instanceof ILiteral) {
-				line.add(new TextComponent("é alterada para "));
-				translateExpression(vAssign.getExpression());
+				if (all.getDimensions().size() == 1) {
+					line.add(new TextComponent("é alterado para "));
+					line.add(new TextComponent("um vetor vazio com tamanho igual a "));
+					translateExpression(all.getDimensions().get(0), false);
+				} else if (all.getDimensions().size() == 2) {
+					line.add(new TextComponent("é alterado para uma matriz vazia"));
+					if (all.getDimensions().get(0).isSame(all.getDimensions().get(1))) {
+						line.add(new TextComponent(" com o número de linhas e comprimento das mesmas igual a "));
+						translateExpression(all.getDimensions().get(0), false);
+					} else {
+						line.add(new TextComponent(" com o número de linhas igual a "));
+						translateExpression(all.getDimensions().get(0), false);
+						line.add(new TextComponent("e comprimento das linhas igual a "));
+						translateExpression(all.getDimensions().get(1), false);
+					}
+				}
+
+			} else if (vAssign.getExpression() instanceof IVariableExpression) {
+				IVariableExpression v = (IVariableExpression) vAssign.getExpression();
+				if (v.getType() instanceof IReferenceType) {
+					if (((IReferenceType) v.getType()).getTarget() instanceof IArrayType) {
+						IArrayType t = (IArrayType) ((IReferenceType) v.getType()).getTarget();
+						if (t.getDimensions() == 1) {
+							line.add(new TextComponent("é alterado para "));
+							line.add(new TextComponent("apontar para o vetor " + vAssign.getExpression(), assignment));
+						} else if (t.getDimensions() == 2) {
+							line.add(new TextComponent("é alterado para "));
+							line.add(new TextComponent("apontar para a matriz" + vAssign.getExpression(), assignment));
+						}
+					}
+				}
+			} else if (vAssign.getExpression() instanceof ILiteral) {
+				line.add(new TextComponent("é alterado para "));
+				translateExpression(vAssign.getExpression(), false);
 			}
 		}
 
@@ -530,11 +734,16 @@ public class ExpressionTranslatorPT {
 		}
 		if (assignment instanceof IArrayElementAssignment) {
 			IArrayElementAssignment aAssign = (IArrayElementAssignment) assignment;
-			translateArrayElement(aAssign.getTarget(), aAssign.getIndexes().get(0));
-			line.add(new TextComponent("é alterado para "));
-			translateExpression(aAssign.getExpression());
 
-			// TODO ArrayElementAssignment Assignments translations
+			if (aAssign.getDimensions() == 1) {
+				translateArrayElement(aAssign.getTarget(), aAssign.getIndexes().get(0));
+				line.add(new TextComponent("é alterado para "));
+				translateExpression(aAssign.getExpression(), false);
+			} else if (aAssign.getDimensions() == 2) {
+				translateMatrixElement(aAssign.getTarget(), aAssign.getIndexes());
+				line.add(new TextComponent("é alterado para "));
+				translateExpression(aAssign.getExpression(), false);
+			}
 
 		}
 	}
@@ -542,48 +751,101 @@ public class ExpressionTranslatorPT {
 	public void translateDeclarationAssignment(IStatement assignment) {
 		if (assignment instanceof IVariableAssignment) {
 			IVariableAssignment vAssign = (IVariableAssignment) assignment;
-			line.add(new TextComponent("A variável " + vAssign.getTarget() + " "));
-
+			
+			line.add(new TextComponent("A variável "));
+			linkVariable(vAssign.getTarget().expression());
+			line.add(new TextComponent(" é "));
+			line.add(new TextComponent("inicializada", assignment));
+			line.add(new TextComponent(" "));
 			if (vAssign.getExpression() instanceof IUnaryExpression) {
-				line.add(new TextComponent("é inicializada com"));
+				line.add(new TextComponent("com "));
 				translateUnaryExpression((IUnaryExpression) vAssign.getExpression());
-			}
-			if (vAssign.getExpression() instanceof IBinaryExpression) {
-				line.add(new TextComponent("é inicializada com"));
-				line.add(new TextComponent(" o resultado d"));
-				translateBinaryExpression((IBinaryExpression) vAssign.getExpression(), false);
+			} else if (vAssign.getExpression() instanceof IBinaryExpression) {
+				line.add(new TextComponent("com "));
+//				line.add(new TextComponent(" o resultado d"));
+				translateBinaryExpression((IBinaryExpression) vAssign.getExpression(), false, false);
 
 			} else if (vAssign.getExpression() instanceof IArrayAllocation) {
 				IArrayAllocation all = (IArrayAllocation) vAssign.getExpression();
-				// TODO dimensions fix
-				line.add(new TextComponent("é inicializada como um vetor vazio com tamanho igual a "));
-				translateExpression(all.getDimensions().get(0));
+				if (all.getDimensions().size() == 1) {
+					line.add(new TextComponent("como um vetor com tamanho igual a "));
+					translateExpression(all.getDimensions().get(0), false);
+					System.out.println(all.getType().getClass());
+					IArrayType aType = (IArrayType) ((IReferenceType)all.getType()).getTarget();
+					if(aType.getComponentType().equals(IType.INT)) 
+						line.add(new TextComponent("(elementos a 0)"));
+					if(aType.getComponentType().equals(IType.DOUBLE)) 
+						line.add(new TextComponent("(elementos a 0.0)"));	
+					if(aType.getComponentType().equals(IType.BOOLEAN)) 
+						line.add(new TextComponent("(elementos a false)"));		
+						
+					
+						
+				} else if (all.getDimensions().size() == 2) {
+					line.add(new TextComponent("como uma matriz "));
+					if (all.getDimensions().get(0).isSame(all.getDimensions().get(1))) {
+						line.add(new TextComponent(" com o número de linhas e comprimento das mesmas igual a "));
+						translateExpression(all.getDimensions().get(0), false);
+					} else {
+						line.add(new TextComponent(" com o número de linhas igual a "));
+						translateExpression(all.getDimensions().get(0), false);
+						line.add(new TextComponent("e comprimento das linhas igual a "));
+						translateExpression(all.getDimensions().get(1), false);
+					}
+				}
+			} else if (vAssign.getExpression() instanceof IArrayElement) {
+				IArrayElement el = (IArrayElement) vAssign.getExpression();
+				IArrayType t = (IArrayType) ((IReferenceType) ((IVariableExpression) el.getTarget()).getVariable()
+						.getType()).getTarget();
+				if (t.getDimensions() == 1) {
+					line.add(new TextComponent("com "));
+					translateArrayElement(el.getTarget(), el.getIndexes().get(0));
+				} else if (t.getDimensions() == 2) {
+					if (el.getIndexes().size() == 1) {
+						line.add(new TextComponent("a apontar para a "));
+						translateMatrixElement(el.getTarget(), el.getIndexes());
+					} else {
+						line.add(new TextComponent("com "));
+						translateMatrixElement(el.getTarget(), el.getIndexes());
+					}
+
+				}
+
 			} else if (vAssign.getExpression() instanceof IVariableExpression) {
 				IVariableExpression v = (IVariableExpression) vAssign.getExpression();
-				if (v.getType() instanceof IArrayType) {
-					line.add(new TextComponent("é inicializada a "));
-					line.add(new TextComponent("apontar para o vetor " + vAssign.getExpression(), assignment));
+				if (v.getType() instanceof IReferenceType) {
+					if (((IReferenceType) v.getType()).getTarget() instanceof IArrayType) {
+						IArrayType t = (IArrayType) ((IReferenceType) v.getType()).getTarget();
+						if (t.getDimensions() == 1) {
+							line.add(new TextComponent("a "));
+							line.add(new TextComponent("apontar para o vetor " + vAssign.getExpression()));
+						} else if (t.getDimensions() == 2) {
+							line.add(new TextComponent("a "));
+							line.add(new TextComponent("apontar para a matriz" + vAssign.getExpression()));
+						}
+					}
 				} else {
-					line.add(new TextComponent("é inicializada com"));
-					translateExpression(vAssign.getExpression());
+					line.add(new TextComponent("com"));
+					translateExpression(vAssign.getExpression(), false);
 				}
 			} else {
-				line.add(new TextComponent("é inicializada a "));
-				translateExpression(vAssign.getExpression());
+				line.add(new TextComponent("com "));
+				translateExpression(vAssign.getExpression(), false);
 			}
 		}
 		if (assignment instanceof IRecordFieldAssignment) {
 			IRecordFieldAssignment rAssign = (IRecordFieldAssignment) assignment;
 			// TODO RecordField Assignments translations
 		}
-
 	}
 
 	void translateBooleanVariableCondition(IVariableExpression varExpression, boolean isNegative) {
-		if (!isNegative) {
-			line.add(new TextComponent("o valor do booleano " + varExpression.getVariable() + " for verdadeiro "));
+		line.add(new TextComponent("o valor da variável "));
+		linkVariable(varExpression.getVariable().expression());
+		if (!isNegative) {	
+			line.add(new TextComponent(" for verdadeiro "));
 		} else {
-			line.add(new TextComponent("o valor do booleano " + varExpression.getVariable() + " for falso "));
+			line.add(new TextComponent(" for falso "));
 		}
 
 	}

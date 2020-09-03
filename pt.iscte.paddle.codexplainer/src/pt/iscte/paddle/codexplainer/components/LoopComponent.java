@@ -21,12 +21,11 @@ public class LoopComponent extends Component {
 	private IExpression guard;
 	
 	private IBlock loopBlock;
-	private int depthLevel;
 	private List<Component> branchComponents = new ArrayList<Component>();
 
 	private VariableRoleComponent iteratorComponent;
 	private IProgramElement iteratorCondition;
-
+	
 //	ArrayElementType arrayType;
 //	enum ArrayElementType {
 //		INT, BOOLEAN, RECORD
@@ -64,7 +63,7 @@ public class LoopComponent extends Component {
 		for(IProgramElement e : guardParts) {
 			System.out.println(e);
 
-			if(e instanceof IBinaryExpression) {
+			if(e instanceof IBinaryExpression && iteratorComponent != null) {
 				IBinaryExpression ex = (IBinaryExpression) e;
 				IExpression left = ex.getLeftOperand();
 				IExpression right = ex.getRightOperand();
@@ -75,8 +74,7 @@ public class LoopComponent extends Component {
 					}
 				} 
 			}
-		}
-		
+		}	
 	}
 
 

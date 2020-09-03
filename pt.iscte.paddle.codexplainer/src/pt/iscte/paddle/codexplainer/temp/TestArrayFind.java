@@ -28,7 +28,7 @@ public class TestArrayFind extends BaseTest {
 	IVariableAssignment foundAss = body.addAssignment(found, BOOLEAN.literal(false));
 	IVariableDeclaration i = body.addVariable(INT);
 	IVariableAssignment iAss = body.addAssignment(i, INT.literal(0));
-	ILoop loop = body.addLoop(AND.on(NOT.on(found), SMALLER.on(i, array.length())));
+	ILoop loop = body.addLoop(AND.on(found, SMALLER.on(i, array.length())));
 	ISelection ifstat = loop.addSelection(EQUAL.on(array.element(i), e));
 	IVariableAssignment foundAss_ = ifstat.addAssignment(found, BOOLEAN.literal(true));
 	IVariableAssignment iInc = loop.addIncrement(i);

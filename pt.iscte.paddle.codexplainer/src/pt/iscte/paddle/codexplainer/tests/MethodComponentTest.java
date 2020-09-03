@@ -56,7 +56,7 @@ public class MethodComponentTest {
 		System.out.println("Method ==" +max);
 		
 		
-		MethodComponent comp = new MethodComponent(max);
+		MethodComponent comp = new MethodComponent(max,  new ArrayList());
 		
 		System.out.println(comp.getReturnType());
 		System.out.println(comp.IsRecursive());
@@ -102,14 +102,14 @@ public class MethodComponentTest {
 	
 		//ReturnComponent retComp = new ReturnComponent(null, ret, null);
 		
+		//TODO FIX
 		MethodComponent comp = 
-				new MethodComponent(max);
+				new MethodComponent(max,  new ArrayList());
 		
 		
 		TranslatorMethodComponentPT t = new TranslatorMethodComponentPT(comp, new ArrayList<>());
 		t.translatePT();
 		System.out.println("\nExplicaçao método:\n");
-		System.out.println(t.getExplanationText());
 		
 		System.out.println(comp.getReturnType());
 		System.out.println(comp.IsRecursive());

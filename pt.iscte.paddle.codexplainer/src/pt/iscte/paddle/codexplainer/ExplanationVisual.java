@@ -43,18 +43,25 @@ import pt.iscte.paddle.model.IBlock.IVisitor;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
 import pt.iscte.paddle.codexplainer.temp.TestMaxArray;
+import pt.iscte.paddle.codexplainer.temp.TestMaxMatrix;
 import pt.iscte.paddle.codexplainer.temp.TestAbs;
 import pt.iscte.paddle.codexplainer.temp.TestArrayFind;
+import pt.iscte.paddle.codexplainer.temp.TestBoolean;
 import pt.iscte.paddle.codexplainer.temp.TestFactorialRecursive;
 import pt.iscte.paddle.codexplainer.temp.TestFactorialRecursive2;
 import pt.iscte.paddle.codexplainer.temp.TestIsPrime;
+import pt.iscte.paddle.codexplainer.temp.TestMatrix;
+import pt.iscte.paddle.codexplainer.temp.TestMatrixFind;
 import pt.iscte.paddle.codexplainer.temp.TestNaturals;
 import pt.iscte.paddle.codexplainer.temp.TestProcedure;
 import pt.iscte.paddle.codexplainer.temp.TestProcedureCall;
+import pt.iscte.paddle.codexplainer.temp.TestProcedureObjects;
 import pt.iscte.paddle.codexplainer.temp.TestRecord;
 import pt.iscte.paddle.codexplainer.temp.TestSelection;
 import pt.iscte.paddle.codexplainer.temp.TestSubArray;
 import pt.iscte.paddle.codexplainer.temp.TestSum;
+import pt.iscte.paddle.codexplainer.temp.TestSumMatrix;
+import pt.iscte.paddle.codexplainer.temp.TestSumMatrixLine;
 
 
 public class ExplanationVisual {
@@ -67,16 +74,20 @@ public class ExplanationVisual {
 		IModule modMaxArray = testMaxArray.getModule();
 		IProcedure max = modMaxArray.getProcedure("max");
 		
-		
+		TestSelection testSelection = new TestSelection();
+		testSelection.setup();
+		IModule modSelection = testSelection.getModule();
+		IProcedure selection = modSelection.getProcedure("max");
+			
 		TestSum testSum = new TestSum();
 		testSum.setup();
 		IModule modSum = testSum.getModule();
 		IProcedure sum = modSum.getProcedure("summation");
 		
-		TestSelection testSelection = new TestSelection();
-		testSelection.setup();
-		IModule modSelection = testSelection.getModule();
-		IProcedure selection = modSelection.getProcedure("max");
+//		TestMaxMatrix testMaxMatrix = new TestMaxMatrix();
+//		testMaxMatrix.setup();
+//		IModule modMaxMatrix = testMaxMatrix.getModule();
+//		IProcedure maxMatrix = modMaxMatrix.getProcedure("max");
 		
 		TestNaturals testNaturals = new TestNaturals();
 		testNaturals.setup();
@@ -108,6 +119,11 @@ public class ExplanationVisual {
 		IModule modArrayFind = testArrayFind.getModule();
 		IProcedure arrayFind = modArrayFind.getProcedure("exists");
 		
+		TestMatrixFind testMatrixFind = new TestMatrixFind();
+		testMatrixFind.setup();
+		IModule modMatrixFind = testMatrixFind.getModule();
+		IProcedure matrixFind = modMatrixFind.getProcedure("contains");
+		
 		TestAbs testAbs = new TestAbs();
 		testAbs.setup();
 		IModule modAbs = testAbs.getModule();
@@ -121,32 +137,69 @@ public class ExplanationVisual {
 		TestProcedure testProcedure = new TestProcedure();
 		testProcedure.setup();
 		IModule modProcedure = testProcedure.getModule();
-		IProcedure procedure = modProcedure.getProcedure("proc");
+		IProcedure procedure = modProcedure.getProcedure("multiplyArrayValues");
+		
+		TestProcedureObjects testProcedureObj = new TestProcedureObjects();
+		testProcedureObj.setup();
+		IModule modProcedureObj = testProcedureObj.getModule();
+		IProcedure procedureObj = modProcedureObj.getProcedure("enlarge");
 		
 		TestRecord testRecord = new TestRecord();
 		testRecord.setup();
 		IModule modRecord = testRecord.getModule();
 		IProcedure record = modRecord.getProcedure("recordTest");
 		
+		TestBoolean testBoolean = new TestBoolean();
+		testBoolean.setup();
+		IModule modBoolean = testBoolean.getModule();
+		IProcedure booleanCondition = modBoolean.getProcedure("testCondition");
 		
-		openWindow(sum, modSum);
+		TestMatrix testMatrix = new TestMatrix();
+		testMatrix.setup();
+		IModule modMatrixTest = testMatrix.getModule();
+		IProcedure matrix = modMatrixTest.getProcedure("matrixTest");
+		
+		TestSumMatrix testSumMatrix = new TestSumMatrix();
+		testSumMatrix.setup();
+		IModule modSumMatrix = testSumMatrix.getModule();
+		IProcedure sumMatrix = modSumMatrix.getProcedure("sumMatrix");
+		
+		TestSumMatrixLine testSumMatrixLine = new TestSumMatrixLine();
+		testSumMatrixLine.setup();
+		IModule modSumMatrixLine = testSumMatrixLine.getModule();
+		IProcedure sumMatrixLine = modSumMatrixLine.getProcedure("sumMatrixLine");
+		
+		
+		//Recursive
+		openWindow(factorial2, modFactorial2);
+		openWindow(factorial, modFactorial);
+//		
+		//openWindow(sum, modSum);
 		openWindow(max, modMaxArray);
 		openWindow(selection, modSelection);
+		openWindow(procedure, modProcedure);
+		openWindow(booleanCondition, modBoolean);
 		openWindow(naturals, modNaturals);
 		openWindow(isPrime, modisPrime);
+		openWindow(procedureObj, modProcedureObj);
+		openWindow(matrixFind, modMatrixFind);
 		openWindow(arrayFind, modArrayFind);
 		openWindow(abs, modAbs);
+		openWindow(matrix, modMatrixTest);
+		openWindow(sumMatrixLine, modSumMatrixLine);
 		openWindow(subArray, modSubArray);
 		
-		openWindow(factorial, modFactorial);
-		openWindow(factorial2, modFactorial2);
-		openWindow(procedureCall, modProcedureCall);
-//		
-//		//Test method classification
-		openWindow(procedure, modProcedure);
-//		openWindow(record, modRecord);
-
 		
+		openWindow(procedureCall, modProcedureCall);
+		
+		//Test Matrix
+		
+//		openWindow(sumMatrix, modSumMatrix);
+//		openWindow(maxMatrix, modMaxMatrix);		
+//		//Test method classification
+		
+//		openWindow(record, modRecord);
+	
 	}
 
 
@@ -185,19 +238,13 @@ public class ExplanationVisual {
 		//Explanation 
 		ExplanationGenerator gen = new ExplanationGenerator(proc);
 		
-		HyperlinkedText hypertext2 = new HyperlinkedText(e -> e.forEach(e2 -> widget.addMark(blue).show()));
-		
-		//hypertext2.link(proc.getReturnType().toString(), proc.getReturnType());
-		
-		//hypertext2.link(proc.getParameters().get(0).toString(), proc.getParameters().get(0).getType());
-		
-		//Link text = hypertext2.create(textComp, SWT.BORDER);
-		//text.get
+		//HyperlinkedText hypertext2 = new HyperlinkedText(e -> e.forEach(e2 -> widget.addMark(blue).show()));
 		
 		HyperlinkedText hypertext = new HyperlinkedText(e -> e.forEach(e2 -> IJavardiseService.getWidget(e2).addMark(blue).show()));
 
 		convertExplanationtoLinkText(gen.getExplanation(), hypertext);
 		Link text = hypertext.create(textComp, SWT.BORDER);
+		//System.out.println(text.getText());
 
 		// --------------
 
@@ -221,18 +268,22 @@ public class ExplanationVisual {
 
 	static void convertExplanationtoLinkText(List<List<TextComponent>> explanationText, HyperlinkedText hypertext) {
 		for (List<TextComponent> line : explanationText) {
-
 			for (TextComponent comp : line) {
+		
 				if (comp.getType().equals(TextType.NORMAL)) {
 					hypertext.words(comp.getText());
+					System.out.print(comp.getText());
 				}
 				if (comp.getType().equals(TextType.LINK)) {
 					hypertext.link(comp.getText(), comp.getElement());
+					System.out.print(comp.getText());
 				}
 				if (comp.getType().equals(TextType.NEWLINE)) {
 					hypertext.newline();
+					System.out.print(comp.getText());
 				}
 			}
+			System.out.print("\n");
 			hypertext.newline();
 		}
 	}

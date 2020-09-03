@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static pt.iscte.paddle.model.IOperator.*;
 import static pt.iscte.paddle.model.IType.*;
 
+import java.awt.List;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import pt.iscte.paddle.codexplainer.components.LoopComponent;
 import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.translator.TranslatorLoopComponentPT;
 import pt.iscte.paddle.model.IOperator;
+import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IModule;
@@ -53,7 +55,7 @@ class LoopComponentTest {
 		System.out.println(loop);
 			
 		LoopComponent comp = 
-				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max));
+				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max, new ArrayList()));
 		
 		System.out.println(comp.getGuardParts());
 		System.out.println(comp.getIteratorComponent().getVar());
@@ -95,16 +97,18 @@ class LoopComponentTest {
 		//TODO test loop component iterator null
 		
 		LoopComponent comp = 
-				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max));
+				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max, new ArrayList()));
 		
 		
 		TranslatorLoopComponentPT t = new TranslatorLoopComponentPT(comp,0);
 		t.translatePT();
 		System.out.println("\nExplicaçao loop:\n");
-		System.out.println(t.getExplanationText());
+		
+		System.out.println(t.getExplanationByComponents());
 		
 		System.out.println(comp.getGuardParts());
 		System.out.println(comp.getIteratorComponent().getVar());
+		
 		
 		assertEquals("[i < v.length, AND, max > v.length, AND, max != i]", comp.getGuardParts().toString());
 		assertEquals(i, comp.getIteratorComponent().getVar());
@@ -142,7 +146,7 @@ class LoopComponentTest {
 		
 		
 		LoopComponent comp = 
-				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max));
+				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max,  new ArrayList()));
 		
 		System.out.println(comp.getGuardParts());
 		System.out.println(comp.getIteratorComponent().getVar());

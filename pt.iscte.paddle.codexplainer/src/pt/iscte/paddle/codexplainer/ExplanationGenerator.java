@@ -5,6 +5,7 @@ import java.util.List;
 
 import pt.iscte.paddle.codexplainer.components.AssignmentComponent;
 import pt.iscte.paddle.codexplainer.components.Component;
+import pt.iscte.paddle.codexplainer.components.FVParameterComponent;
 import pt.iscte.paddle.codexplainer.components.LoopComponent;
 import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.components.ProcedureCallComponent;
@@ -22,6 +23,7 @@ import pt.iscte.paddle.codexplainer.translator.VariableRoleExplainer;
 import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IProgramElement;
+import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IVariableDeclaration;
 import pt.iscte.paddle.model.roles.*;
@@ -36,26 +38,39 @@ public class ExplanationGenerator {
 
 	private int depthLevel = 0;
 	private List<IProgramElement> lastBranchElement = new ArrayList<IProgramElement>();
+	private boolean addElse = false;
 
 	public ExplanationGenerator(IProcedure method) {
 		generateExplanation(method);
 	}
 
 	public void generateExplanation(IProcedure proc) {
+		List<FVParameterComponent> fixedValueParameters = new ArrayList<FVParameterComponent>();
 		if(!proc.getVariables().isEmpty()) {
 			for (IVariableDeclaration var : proc.getVariables()) {
-				getVariableRole(var);
+				IVariableRole role = IVariableRole.match(var);
+				variablesRoles.add(new VariableRoleComponent(var, role));
 			}
 		}
 		if(!proc.getParameters().isEmpty()) {
 			for (IVariableDeclaration var : proc.getParameters()) {
-				getVariableRole(var);
+				IVariableRole role = IVariableRole.match(var);
+				variablesRoles.add(new VariableRoleComponent(var, role));
+				
+				if(role instanceof IFixedValue) {
+					IFixedValue f = (IFixedValue) role;
+					if(!f.isModified()) {
+						FixedValueObjectiveVisitor v = new FixedValueObjectiveVisitor(var);
+						fixedValueParameters.add(v.getParameterComponent());
+					}
+				}
 			}
+			
 		}
 		
 		List<Component> components = new ArrayList<>(); 
 		
-		mc = new MethodComponent(proc);
+		mc = new MethodComponent(proc, fixedValueParameters);
 		
 		new ComponentsVisitor(proc.getBody(), components, variablesRoles, mc);
 		
@@ -63,9 +78,16 @@ public class ExplanationGenerator {
 		
 		TranslatorMethodComponentPT tm = new TranslatorMethodComponentPT(mc,returnList);
 		tm.translatePT();
-		explanation.add(tm.getExplanationByComponents());
+		explanation.addAll(tm.getExplanationByComponents());
+		
+		List<TextComponent> space = new ArrayList<TextComponent>();
+		explanation.add(space);
 		
 		addTextComponents(components);
+		
+		ExplanationTextSmoother smoother = new ExplanationTextSmoother(proc.getVariables());
+		smoother.SmoothText(explanation);
+		
 		return;	
 	}
 
@@ -75,9 +97,11 @@ public class ExplanationGenerator {
 				ILoop loop = (ILoop) c.getElement();
 				lastBranchElement.add(loop.getBlock().getChildren().get(loop.getBlock().getChildren().size() - 1));
 
+				
+				
 				TranslatorLoopComponentPT t = new TranslatorLoopComponentPT((LoopComponent) c, depthLevel);
 				t.translatePT();
-				explanation.add(t.getExplanationByComponents());
+				explanation.addAll(t.getExplanationByComponents());
 
 				depthLevel++;
 				addTextComponents(((LoopComponent) c).getBranchComponents());
@@ -93,13 +117,12 @@ public class ExplanationGenerator {
 							.get(sel.getAlternativeBlock().getChildren().size() - 1));
 				} else {
 					lastBranchElement.add(sel.getBlock().getChildren().get(sel.getBlock().getChildren().size() - 1));
-
 				}
 
 				TranslatorSelectionComponentPT t = new TranslatorSelectionComponentPT((SelectionComponent) c,
 						depthLevel);
 				t.translatePT();
-				explanation.add(t.getExplanationByComponents());
+				explanation.addAll(t.getExplanationByComponents());
 
 				depthLevel++;
 				addTextComponents(((SelectionComponent) c).getBranchComponents());
@@ -111,26 +134,42 @@ public class ExplanationGenerator {
 					explanation.add(line);
 					addTextComponents(((SelectionComponent) c).getAlternativeBranchComponents());
 				}
-
+				
 				CheckBranch(c);
+				
+				if(returnList.size() == 2) {
+					IReturn ret1 = (IReturn) returnList.get(0).getElement();
+					IReturn ret2 = (IReturn) returnList.get(1).getElement();
+					if(ret1.getParent().getParent().equals(c.getElement()) 
+							&& ret2.getParent().getParent().equals(((ISelection)c.getElement()).getParent().getParent()) ) {
+						//addElse = true;
+						List<TextComponent> line = new ArrayList<TextComponent>();
+						line.add(new TextComponent("Caso contrário:"));
+						explanation.add(line);
+					}
+				}
 
 			}
 			if (c instanceof AssignmentComponent) {
 				AssignmentComponent comp = (AssignmentComponent) c;
-
-				if (comp.isDeclaration()) {
-					for (VariableRoleComponent v : variablesRoles) {
-						if (comp.getTarget().isSame(v.getVar().expression())) {
-							explanation.add(VariableRoleExplainer.getRoleExplanationPT(v.getVar(), v.getRole()));
-							break;
-						}
-					}
-				}
+				List<TextComponent> line = new ArrayList<TextComponent>();
+			
 
 				TranslatorAssignmentComponentPT t = new TranslatorAssignmentComponentPT((AssignmentComponent) c,
 						depthLevel);
 				t.translatePT();
-				explanation.add(t.getExplanationByComponents());
+				line.addAll(t.getExplanationByComponents().get(0));
+				explanation.add(line);
+				
+				
+				if (comp.isDeclaration()) {
+					for (VariableRoleComponent v : variablesRoles) {
+						if (comp.getTarget().isSame(v.getVar().expression()) && !(v.getRole() instanceof IArrayIndexIterator)) {
+							line.addAll(VariableRoleExplainer.getRoleExplanationPT(v.getVar(), v.getRole()));
+							break;
+						}
+					}
+				}
 
 				CheckBranch(c);
 			}
@@ -140,18 +179,25 @@ public class ExplanationGenerator {
 				TranslatorProcedureCallComponentPT t = new TranslatorProcedureCallComponentPT(
 						(ProcedureCallComponent) c, depthLevel);
 				t.translatePT();
-				explanation.add(t.getExplanationByComponents());
+				explanation.addAll(t.getExplanationByComponents());
 
 				CheckBranch(c);
 			}
 
 			if (c instanceof ReturnComponent) {
 				ReturnComponent ret = (ReturnComponent) c;
-				returnList.add(ret);
 
-				TranslatorReturnComponentPT t = new TranslatorReturnComponentPT((ReturnComponent) c, depthLevel);
+				
+//				if(addElse && returnList.get(1).equals(ret)) {
+//					List<TextComponent> line = new ArrayList<TextComponent>();
+//					line.add(new TextComponent("Caso contrário:"));
+//					explanation.add(line);
+//					addElse = false;
+//				}
+				
+				TranslatorReturnComponentPT t = new TranslatorReturnComponentPT((ReturnComponent) c, returnList, depthLevel);
 				t.translatePT();
-				explanation.add(t.getExplanationByComponents());
+				explanation.addAll(t.getExplanationByComponents());
 
 				CheckBranch(c);
 			}
@@ -194,33 +240,6 @@ public class ExplanationGenerator {
 		}
 	}
 
-	private static void getVariableRole(IVariableDeclaration var) {
-		IVariableRole role = IVariableRole.match(var);
-		System.out.println("Var:  " + var + "|| role: " + role);
-
-		if (role instanceof IMostWantedHolder) {
-			variablesRoles.add(new VariableRoleComponent(var, role));
-			return;
-		}
-		if (role instanceof IArrayIndexIterator) {
-			variablesRoles.add(new VariableRoleComponent(var, role));
-			return;
-		}
-		if (role instanceof IGatherer) {
-			variablesRoles.add(new VariableRoleComponent(var, role));
-			return;
-		}
-		if (role instanceof IStepper) {
-			variablesRoles.add(new VariableRoleComponent(var, role));
-			return;
-		}
-		if (role instanceof IFixedValue) {
-			variablesRoles.add(new VariableRoleComponent(var, role));
-			return;
-		}
-		// etc....
-		return;
-	}
 
 	public List<List<TextComponent>> getExplanation() {
 		return explanation;

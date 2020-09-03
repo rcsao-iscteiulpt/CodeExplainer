@@ -31,7 +31,7 @@ public class AssignmentComponent extends Component {
 		for (VariableRoleComponent v : list) {
 			if (v.getRole() instanceof IMostWantedHolder) {
 				IMostWantedHolder role = (IMostWantedHolder) v.getRole();
-				if (role.getExpressions().get(2).isSame(statement)) {
+				if (role.getExpressions().get(1).isSame(statement)) {
 					statementRole = v;
 				}
 			}

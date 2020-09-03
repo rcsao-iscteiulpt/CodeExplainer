@@ -37,6 +37,10 @@ public class TextComponent {
 		this.type = TextType.NEWLINE;
 		this.text = "";
 	}
+	
+	public void changeText(String text) {
+		this.text = text;
+	}
 
 	public String getText() {
 		return text;

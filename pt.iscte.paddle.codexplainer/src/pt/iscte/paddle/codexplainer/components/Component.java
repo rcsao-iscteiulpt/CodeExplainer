@@ -15,6 +15,5 @@ public abstract class Component {
 	public IProgramElement getElement() {
 		return element;
 	}
-	
-	
+		
 }

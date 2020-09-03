@@ -21,10 +21,10 @@ public class TestIsPrime extends BaseTest {
 	
 	ILoop loop = body.addLoop(SMALLER.on(i, n));
 	ISelection ifstat = loop.addSelection(EQUAL.on(MOD.on(n, i), INT.literal(0)));
-	IReturn ra = ifstat.addReturn(BOOLEAN.literal(false));
+	IReturn ra = ifstat.addReturn(BOOLEAN.literal(true));
 	
 	IVariableAssignment iInc = loop.addIncrement(i);
-	IReturn rb = body.addReturn(BOOLEAN.literal(true));
+	IReturn rb = body.addReturn(BOOLEAN.literal(false));
 	
 
 }

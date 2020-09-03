@@ -5,8 +5,10 @@ import java.util.List;
 
 import pt.iscte.paddle.model.IBinaryExpression;
 import pt.iscte.paddle.model.IExpression;
+import pt.iscte.paddle.model.ILoop;
 import pt.iscte.paddle.model.IProgramElement;
 import pt.iscte.paddle.model.IReturn;
+import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IType;
 import pt.iscte.paddle.model.IUnaryExpression;
 import pt.iscte.paddle.model.IVariableExpression;
@@ -17,14 +19,18 @@ public class ReturnComponent extends Component {
 
 	IType returnType;
 	IExpression returnExpression;
+	IExpression condition;
 	List<IExpression> returnExpressionParts = new ArrayList<IExpression>();
+	
 	
 	private IVariableRole varReturnRole = IVariableRole.NONE;
 	
+
+
 	/**
 	 * Will only be true when the return expression is a single variable and it is a parameter
 	 */
-	private boolean isParameter = false;
+	private boolean returnsSingleVarAndIsParameter = false;
 	
 	
 	public ReturnComponent(List<VariableRoleComponent> variableList, IReturn returnEx, MethodComponent mc) {
@@ -32,6 +38,12 @@ public class ReturnComponent extends Component {
 		this.returnType = returnEx.getReturnValueType();
 		super.element = returnEx;
 		super.mc = mc;
+		
+		if(returnEx.getParent().getParent() instanceof ILoop) 
+			condition = ((ILoop)returnEx.getParent().getParent()).getGuard();
+		
+		if(returnEx.getParent().getParent() instanceof ISelection) 
+			condition = ((ISelection)returnEx.getParent().getParent()).getGuard();
 		
 		if(returnExpression instanceof IBinaryExpression)  {
 			decomposeBinaryExpression((IBinaryExpression) returnExpression);
@@ -44,7 +56,7 @@ public class ReturnComponent extends Component {
 						varReturnRole = v.getRole();
 						
 						if(mc.getParameters().contains(v.getVar())) {
-							isParameter = true;
+							returnsSingleVarAndIsParameter = true;
 						}
 					}
 				}
@@ -74,7 +86,7 @@ public class ReturnComponent extends Component {
 	}
 	
 	public boolean isParameter() {
-		return isParameter;
+		return returnsSingleVarAndIsParameter;
 	}
 	
 	public IType getReturnType() {
@@ -88,9 +100,18 @@ public class ReturnComponent extends Component {
 	public IVariableRole getVarReturnRole() {
 		return varReturnRole;
 	}
+	
+	public IExpression getCondition() {
+		return condition;
+	}
 
 	public IExpression getReturnExpression() {
 		return returnExpression;
+	}
+
+	public boolean getReturnList() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 

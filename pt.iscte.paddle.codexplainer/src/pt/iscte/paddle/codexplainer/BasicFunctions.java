@@ -8,7 +8,17 @@ public class BasicFunctions {
 		return n;
 	}
 	
-	static boolean isPrime(int n) {
+	double summation(double[] array) {
+		double sum = 0.0;
+		int i = 0;
+		while(i != array.length) {
+			sum = sum + array[i];
+			i = i + 1;
+		}
+		return sum;
+	}
+	
+	boolean isPrime(int n) {
 	    int i = 2;
 	    while(i < n) {	
 	        if(n%i == 0) {
@@ -19,23 +29,24 @@ public class BasicFunctions {
 	    return true;    
 	}
 	
-	
-	static int max(int[] array) {
-		int i = 0;
-		int max = 0;
+	int max(int[] array) {
+	    int m = 0;
+	    int i = 1;
 		while(i < array.length) {
-			if(array[i] > max) 
-				max = array[i];	
+			if(array[i] > m) {
+				m = array[i];
+			}
 			i = i + 1;
 		}
-		return max;	
+		return m;
 	}
 	
 	static int factorial(int n) {     
-		int result = 1;	
-		if(n != 1) 
-			result = n * factorial(n - 1);
-		return result;
+		if(n == 0) {
+			return 1;
+		} else {
+			return n * factorial(n - 1);
+		}
 	}	
 	
 	static int[] naturals(int n) {
@@ -61,7 +72,7 @@ public class BasicFunctions {
 		return subArray;
 	}
 	
-	static boolean contains(int[][] matrix, int n) {
+	boolean contains(int[][] matrix, int n) {
 		int i = 0;
 		while(i < matrix.length) {
 			int j = 0;

@@ -18,11 +18,9 @@ public class TestFactorialRecursive2 extends BaseTest {
 	IProcedure factorial = module.addProcedure(INT);
 	IVariableDeclaration n = factorial.addParameter(INT);
 	IBinaryExpression guard = EQUAL.on(n, INT.literal(0));
-	ISelection sel = factorial.getBody().addSelectionWithAlternative(guard);
+	ISelection sel = factorial.getBody().addSelection(guard);
 	IReturn return1 = sel.addReturn(INT.literal(1));
-	IProcedureCall recCall = sel.getAlternativeBlock().addCall(factorial, SUB.on(n, INT.literal(1)));
-	IBlock elseBlock = sel.getAlternativeBlock();
-	
-	
+	IProcedureCallExpression recCall = factorial.expression(SUB.on(n, INT.literal(1)));
+	IReturn return2 = factorial.getBody().addReturn(recCall);
 
 }

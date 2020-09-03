@@ -8,9 +8,9 @@ public interface TranslatorPT {
 	
 	public void translatePT();
 	
-	public List<TextComponent> getExplanationByComponents();
+	public List<List<TextComponent>> getExplanationByComponents();
 
-	public String getExplanationText();
+//	public String getExplanationText();
 //		this.components = components;
 //		
 //		MethodComponent mc = (MethodComponent) components.get(0);

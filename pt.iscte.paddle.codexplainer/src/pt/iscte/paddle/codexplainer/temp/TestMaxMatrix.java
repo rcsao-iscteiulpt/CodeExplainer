@@ -12,17 +12,17 @@ import pt.iscte.paddle.model.ISelection;
 import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
 
-public class TestMaxArray extends BaseTest {
+public class TestMaxMatrix extends BaseTest {
 
 	IProcedure max = module.addProcedure(INT);
-	IVariableDeclaration array = max.addParameter(INT.array().reference());
+	IVariableDeclaration matrix = max.addParameter(INT.array().array().reference());
 	IBlock body = max.getBody();
 	IVariableDeclaration m = body.addVariable(INT, INT.literal(0));
 	IVariableDeclaration i = body.addVariable(INT);
 	IVariableAssignment iAss = body.addAssignment(i, INT.literal(0));
-	ILoop loop = body.addLoop(SMALLER.on(i, array.length()));
-	ISelection ifstat = loop.addSelection(GREATER.on(array.element(i), m));
-	IVariableAssignment mAss_ = ifstat.addAssignment(m, array.element(i));
+	ILoop loop = body.addLoop(SMALLER.on(i, matrix.element(INT.literal(0)).length()));
+	ISelection ifstat = loop.addSelection(GREATER.on(matrix.element(INT.literal(0), i), m));
+	IVariableAssignment mAss_ = ifstat.addAssignment(m, matrix.element(INT.literal(0),i));
 	IVariableAssignment iInc = loop.addIncrement(i);
 	IReturn ret = body.addReturn(m);
 	

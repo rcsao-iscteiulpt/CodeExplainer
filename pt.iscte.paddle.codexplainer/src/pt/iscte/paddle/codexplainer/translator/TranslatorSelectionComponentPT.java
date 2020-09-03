@@ -21,7 +21,7 @@ import pt.iscte.paddle.model.IVariableExpression;
 public class TranslatorSelectionComponentPT implements TranslatorPT {
 
 	SelectionComponent comp;
-	List<TextComponent> explanationByComponents = new ArrayList<TextComponent>();
+	List<List<TextComponent>> explanationByComponents = new ArrayList<>();
 	private int depthLevel;
 
 	public TranslatorSelectionComponentPT(SelectionComponent comp, int depthLevel) {
@@ -31,59 +31,63 @@ public class TranslatorSelectionComponentPT implements TranslatorPT {
 
 	@Override
 	public void translatePT() {
-		ExpressionTranslatorPT t = new ExpressionTranslatorPT(explanationByComponents, comp.getMethodComponent());
-		addDepthLevel();
-		explanationByComponents.add(new TextComponent("Se "));
+		List<TextComponent> line = new ArrayList<TextComponent>();
+		ExpressionTranslatorPT t = new ExpressionTranslatorPT(line, comp.getMethodComponent());
+		addDepthLevel(line);
+		line.add(new TextComponent("Se "));
 
 		if (!comp.getListVariablesToExplain().isEmpty()) {
 			for (VariableRoleComponent v : comp.getListVariablesToExplain()) {
+				//MWH
 				if (v.getRole() instanceof MostWantedHolder) {
-					String s1 = "menor ";
-					
-					if(((IMostWantedHolder)v.getRole()).getObjective().equals(Objective.GREATER)) {
-						s1 = "maior ";
-					}
 					
 					MostWantedHolder role = (MostWantedHolder) v.getRole();
 					
+					String obj = "";
+					if(!	role.getObjective().equals(IMostWantedHolder.Objective.UNDEFINED)) {
+						obj = t.translateMostWantedholderObjective(role.getObjective());
+					}
 					
-					explanationByComponents.add(new TextComponent("o valor da posição do vetor " + role.getTargetArray()));
-					explanationByComponents.add(new TextComponent(" for " + s1 + "que o "+ s1 
+					line.add(new TextComponent("o valor da posição do vetor ")); 
+					t.linkVariable(role.getTargetArray());
+					line.add(new TextComponent(" "));
+					line.add(new TextComponent("é " + obj + "que o "+  obj 
 							+ "valor encontrado até ao momento", role.getExpressions().get(0))); 
-					explanationByComponents.add(new TextComponent(" guardado na variável "+ v.getVar()));
+					line.add(new TextComponent(" guardado na variável "));
+					t.linkVariable(v.getVar().expression());
 					
 				}
 			}
-			
-			
-			
 		} else {
 			//Basic Explanation
-			t.translateExpression(comp.getGuard());
+			t.translateExpression(comp.getGuard(), true);
 		}
+		
+		explanationByComponents.add(line);
 
 	}
 
-	public String getExplanationText() {
-		String explanationText = "";
+//	public String getExplanationText() {
+//		String explanationText = "";
+//
+//		for (TextComponent t : explanationByComponents) {
+//			explanationText += t.getText();
+//			if (t.getType().equals(TextType.NEWLINE))
+//				explanationText += "\n";
+//		}
+//
+//		return explanationText;
+//	}
 
-		for (TextComponent t : explanationByComponents) {
-			explanationText += t.getText();
-			if (t.getType().equals(TextType.NEWLINE))
-				explanationText += "\n";
-		}
-
-		return explanationText;
-	}
-
-	public List<TextComponent> getExplanationByComponents() {
+	public List<List<TextComponent>> getExplanationByComponents() {
 		return explanationByComponents;
 	}
 	
-	public void addDepthLevel() {
-		for(int i = 0; i < depthLevel; i++)
-			explanationByComponents.add(new TextComponent("--"));
+	public void addDepthLevel(List<TextComponent> line) {
+		for (int i = 0; i < depthLevel; i++)
+			line.add(new TextComponent("       "));
+		if(depthLevel != 0) {
+			line.add(new TextComponent("\u2022 "));
+		}		
 	}
-
-	
 }

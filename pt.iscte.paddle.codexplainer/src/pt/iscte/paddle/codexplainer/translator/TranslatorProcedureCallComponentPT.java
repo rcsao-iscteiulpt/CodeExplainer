@@ -15,7 +15,7 @@ public class TranslatorProcedureCallComponentPT implements TranslatorPT {
 	
 	
 	ProcedureCallComponent comp;
-	List<TextComponent> explanationByComponents = new ArrayList<TextComponent>();
+	List<List<TextComponent>> explanationByComponents = new ArrayList<>();
 	
 	int depthLevel;
 
@@ -26,31 +26,37 @@ public class TranslatorProcedureCallComponentPT implements TranslatorPT {
 	
 	@Override
 	public void translatePT() {
-		ExpressionTranslatorPT t = new ExpressionTranslatorPT(explanationByComponents, comp.getMethodComponent());
-		addDepthLevel();
+		List<TextComponent> line = new ArrayList<TextComponent>();
+		ExpressionTranslatorPT t = new ExpressionTranslatorPT(line, comp.getMethodComponent());
+		addDepthLevel(line);
 		t.translateProcedureCall((IProcedureCallExpression) comp.getElement());
+		
+		explanationByComponents.add(line);
 	}
 
-	public List<TextComponent> getExplanationByComponents() {
+	public List<List<TextComponent>> getExplanationByComponents() {
 		return explanationByComponents;
 	}
 	
-	public void addDepthLevel() {
-		for(int i = 0; i < depthLevel; i++)
-			explanationByComponents.add(new TextComponent("--"));
+	public void addDepthLevel(List<TextComponent> line) {
+		for (int i = 0; i < depthLevel; i++)
+			line.add(new TextComponent("       "));
+		if(depthLevel != 0) {
+			line.add(new TextComponent("\u2022 "));
+		}	
 	}
 
-	@Override
-	public String getExplanationText() {
-		String explanationText = "";
-
-		for (TextComponent t : explanationByComponents) {
-			explanationText += t.getText();
-			if (t.getType().equals(TextType.NEWLINE))
-				explanationText += "\n";
-		}
-
-		return explanationText;
-	}
+//	@Override
+//	public String getExplanationText() {
+//		String explanationText = "";
+//
+//		for (TextComponent t : explanationByComponents) {
+//			explanationText += t.getText();
+//			if (t.getType().equals(TextType.NEWLINE))
+//				explanationText += "\n";
+//		}
+//
+//		return explanationText;
+//	}
 
 }

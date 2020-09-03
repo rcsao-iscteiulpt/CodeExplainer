@@ -7,6 +7,8 @@ import static pt.iscte.paddle.model.IOperator.GREATER;
 import static pt.iscte.paddle.model.IOperator.SMALLER;
 import static pt.iscte.paddle.model.IType.INT;
 
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.Test;
 
 import pt.iscte.paddle.codexplainer.components.MethodComponent;
@@ -53,7 +55,7 @@ class SelectionComponentTest {
 			
 			System.out.println(max);
 			
-			MethodComponent mc = new MethodComponent(max);
+			MethodComponent mc = new MethodComponent(max,  new ArrayList());
 
 			SelectionComponent comp = 
 					new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat, mc);
@@ -94,7 +96,7 @@ class SelectionComponentTest {
 		
 		//System.out.println("Method == " +max);
 		
-		MethodComponent mc = new MethodComponent(max);
+		MethodComponent mc = new MethodComponent(max,  new ArrayList());
 		SelectionComponent comp = 
 				new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat, mc);
 		
@@ -102,7 +104,6 @@ class SelectionComponentTest {
 		TranslatorSelectionComponentPT t = new TranslatorSelectionComponentPT(comp, 0);
 		t.translatePT();
 		System.out.println("\nExplicaçao Selection:\n");
-		System.out.println(t.getExplanationText());
 		
 		System.out.println(comp.getGuardParts());
 		//System.out.println(comp);
@@ -142,7 +143,7 @@ class SelectionComponentTest {
 		
 		//System.out.println("Method == " +max);
 		
-		MethodComponent mc = new MethodComponent(max);
+		MethodComponent mc = new MethodComponent(max,  new ArrayList());
 		SelectionComponent comp = 
 				new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat, mc);
 		
@@ -150,7 +151,6 @@ class SelectionComponentTest {
 		TranslatorSelectionComponentPT t = new TranslatorSelectionComponentPT(comp, 0);
 		t.translatePT();
 		System.out.println("\nExplicaçao Selection:\n");
-		System.out.println(t.getExplanationText());
 		
 		System.out.println(comp.getGuardParts());
 		//System.out.println(comp);

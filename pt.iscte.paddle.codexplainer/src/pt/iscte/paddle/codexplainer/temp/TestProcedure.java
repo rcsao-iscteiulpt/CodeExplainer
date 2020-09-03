@@ -17,22 +17,16 @@ import pt.iscte.paddle.model.IVariableAssignment;
 import pt.iscte.paddle.model.IVariableDeclaration;
 
 public class TestProcedure extends BaseTest {
-	IProcedure proc = getModule().addProcedure(INT.array().reference());
+	IProcedure multiplyArrayValues = getModule().addProcedure(IType.VOID);
 	
-	IRecordType Point = getModule().addRecordType();
-	IVariableDeclaration x = Point.addField(IType.INT);
-	IVariableDeclaration y = Point.addField(IType.INT);
-//	IVariableDeclaration p = proc.addParameter(Point.reference());
-	IVariableDeclaration array = proc.addParameter(INT.array().reference());
+	IVariableDeclaration array = multiplyArrayValues.addParameter(INT.array().reference());
+	IVariableDeclaration n = multiplyArrayValues.addParameter(INT);
 	
-	IBlock body = proc.getBody();
+	IBlock body = multiplyArrayValues.getBody();
 	
-	//IRecordFieldAssignment ass = body.addRecordFieldAssignment(p.field(x), IType.INT.literal(7));
-	IArrayElementAssignment iAss = body.addArrayElementAssignment(array, INT.literal(1), INT.literal(0));
-	
-	IReturn rb = body.addReturn(array);
-	
+	IVariableDeclaration i = body.addVariable(INT, INT.literal(0));
+	ILoop loop = body.addLoop(SMALLER.on(i, array.length()));
+	IArrayElementAssignment arrayAss = loop.addArrayElementAssignment(array, MUL.on(array.element(i), n),i);
+	IVariableAssignment iass = loop.addIncrement(i);
 
-	
-	
 }

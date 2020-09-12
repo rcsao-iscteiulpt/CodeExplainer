@@ -6,7 +6,7 @@ import java.util.List;
 import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 import pt.iscte.paddle.model.roles.impl.FunctionClassifier;
-import pt.iscte.paddle.model.roles.IFunctionClassifier.MethodType;
+import pt.iscte.paddle.model.roles.IFunctionClassifier.Status;
 import pt.iscte.paddle.model.roles.IMostWantedHolder.Objective;
 import pt.iscte.paddle.model.IArrayAllocation;
 import pt.iscte.paddle.model.IArrayElement;
@@ -191,7 +191,7 @@ public class ExpressionTranslatorPT {
 		boolean isRecursive = false;
 		String s1 = "função ";
 		String s2 = "a ";
-		if (mc.getFunctionClassifier().getClassification().equals(MethodType.PROCEDURE)) {
+		if (mc.getFunctionClassifier().getClassification().equals(Status.PROCEDURE)) {
 			s1 = "procedimento ";
 			s2 = "o ";
 		}
@@ -229,7 +229,7 @@ public class ExpressionTranslatorPT {
 					linkVariable(left);
 				}
 			} else {
-				line.add(new TextComponent(" com os argumentos:"));
+				line.add(new TextComponent(" os argumentos:"));
 				for (IExpression e : expression.getArguments()) {
 					//translateExpression(e, false);
 					line.add(new TextComponent(e.toString()));
@@ -248,7 +248,7 @@ public class ExpressionTranslatorPT {
 		String s1 = "função";
 		String s2 = "a ";
 		String s3 = "a ";
-		if (mc.getFunctionClassifier().getClassification().equals(MethodType.PROCEDURE)) {
+		if (mc.getFunctionClassifier().getClassification().equals(Status.PROCEDURE)) {
 			s1 = "procedimento";
 			s2 = "o ";
 			s3 = "e ";
@@ -453,7 +453,7 @@ public class ExpressionTranslatorPT {
 					line.add(new TextComponent("primeira posição", list.get(1)));
 					line.add(new TextComponent(" da "));
 				} else {
-					if(list.get(0) instanceof IVariableExpression) {
+					if(list.get(1) instanceof IVariableExpression) {
 						line.add(new TextComponent("posição "));
 						linkVariable(list.get(1));
 						line.add(new TextComponent(" da "));
@@ -609,13 +609,13 @@ public class ExpressionTranslatorPT {
 		return "";
 	}
 
-	void translateBooleanPrimitive(IExpression ex) {
-		if (ex.isSame(IType.BOOLEAN.literal(true))) {
-			line.add(new TextComponent("verdadeiro "));
-		} else {
-			line.add(new TextComponent("falso "));
-		}
-	}
+//	void translateBooleanPrimitive(IExpression ex) {
+//		if (ex.isSame(IType.BOOLEAN.literal(true))) {
+//			line.add(new TextComponent("verdadeiro "));
+//		} else {
+//			line.add(new TextComponent("falso "));
+//		}
+//	}
 
 	void translateIType(IType type, boolean listswithType) {
 		if (type instanceof IReferenceType) {
@@ -624,10 +624,10 @@ public class ExpressionTranslatorPT {
 				IArrayType t = (IArrayType) ref.getTarget();
 				IType compType;
 				if (t.getComponentType() instanceof IArrayType) {
-					line.add(new TextComponent("matriz"));
+					line.add(new TextComponent("a matriz"));
 					compType = ((IArrayType) t.getComponentType()).getComponentType();
 				} else {
-					line.add(new TextComponent("vetor"));
+					line.add(new TextComponent("o vetor"));
 					compType = t.getComponentType();
 				}
 
@@ -654,8 +654,8 @@ public class ExpressionTranslatorPT {
 		}
 	}
 
-	void translateMethodType(MethodType type) {
-		if (type.equals(MethodType.FUNCTION)) {
+	void translateMethodType(Status type) {
+		if (type.equals(Status.FUNCTION)) {
 			line.add(new TextComponent("função"));
 		} else {
 			line.add(new TextComponent("procedimento"));

@@ -50,7 +50,7 @@ import pt.iscte.paddle.codexplainer.temp.TestBoolean;
 import pt.iscte.paddle.codexplainer.temp.TestFactorialRecursive;
 import pt.iscte.paddle.codexplainer.temp.TestFactorialRecursive2;
 import pt.iscte.paddle.codexplainer.temp.TestIsPrime;
-import pt.iscte.paddle.codexplainer.temp.TestMatrix;
+//import pt.iscte.paddle.codexplainer.temp.TestMatrix;
 import pt.iscte.paddle.codexplainer.temp.TestMatrixFind;
 import pt.iscte.paddle.codexplainer.temp.TestNaturals;
 import pt.iscte.paddle.codexplainer.temp.TestProcedure;
@@ -154,10 +154,10 @@ public class ExplanationVisual {
 		IModule modBoolean = testBoolean.getModule();
 		IProcedure booleanCondition = modBoolean.getProcedure("testCondition");
 		
-		TestMatrix testMatrix = new TestMatrix();
-		testMatrix.setup();
-		IModule modMatrixTest = testMatrix.getModule();
-		IProcedure matrix = modMatrixTest.getProcedure("matrixTest");
+//		TestMatrix testMatrix = new TestMatrix();
+//		testMatrix.setup();
+//		IModule modMatrixTest = testMatrix.getModule();
+//		IProcedure matrix = modMatrixTest.getProcedure("matrixTest");
 		
 		TestSumMatrix testSumMatrix = new TestSumMatrix();
 		testSumMatrix.setup();
@@ -174,7 +174,7 @@ public class ExplanationVisual {
 		openWindow(factorial2, modFactorial2);
 		openWindow(factorial, modFactorial);
 //		
-		//openWindow(sum, modSum);
+		openWindow(sum, modSum);
 		openWindow(max, modMaxArray);
 		openWindow(selection, modSelection);
 		openWindow(procedure, modProcedure);
@@ -185,8 +185,8 @@ public class ExplanationVisual {
 		openWindow(matrixFind, modMatrixFind);
 		openWindow(arrayFind, modArrayFind);
 		openWindow(abs, modAbs);
-		openWindow(matrix, modMatrixTest);
-		openWindow(sumMatrixLine, modSumMatrixLine);
+//		openWindow(matrix, modMatrixTest);
+//		openWindow(sumMatrixLine, modSumMatrixLine);
 		openWindow(subArray, modSubArray);
 		
 		

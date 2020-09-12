@@ -25,7 +25,7 @@ public class TestMatrixFind extends BaseTest {
 	ILoop loopI = body.addLoop(SMALLER.on(i, m.length()));
 	IVariableDeclaration r = loopI.addVariable(INT, INT.literal(0));
 	
-	ILoop loopJ = loopI.addLoop(SMALLER.on(i, m.length(INT.literal(0))));
+	ILoop loopJ = loopI.addLoop(SMALLER.on(r, m.length(INT.literal(0))));
 	ISelection ifstat = loopJ.addSelection(EQUAL.on(m.element(i,r), e));
 	IReturn ret1 = ifstat.addReturn(BOOLEAN.literal(true));
 	

@@ -8,9 +8,10 @@ import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.components.ReturnComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
-import pt.iscte.paddle.model.roles.IFunctionClassifier.MethodType;
+import pt.iscte.paddle.model.roles.IFunctionClassifier.Status;
 import pt.iscte.paddle.model.roles.IGatherer.Operation;
 import pt.iscte.paddle.model.IArrayElement;
+import pt.iscte.paddle.model.ILiteral;
 import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;
@@ -38,11 +39,11 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 		List<TextComponent> firstLine = new ArrayList<TextComponent>();
 		ExpressionTranslatorPT t = new ExpressionTranslatorPT(firstLine);
 		List<IVariableDeclaration> parameters = comp.getParameters();
-		MethodType classifyType = comp.getFunctionClassifier().getClassification();
+		Status classifyType = comp.getFunctionClassifier().getClassification();
 
 		String s1 = "o ";
 		String s2 = "e ";
-		if (classifyType.equals(MethodType.FUNCTION)) {
+		if (classifyType.equals(Status.FUNCTION)) {
 			s1 = "a ";
 			s2 = "a ";
 		}
@@ -54,7 +55,7 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 		t.translateMethodType(classifyType);
 
 		List<IVariableDeclaration> modifiedVariables = new ArrayList<>();
-		if (classifyType.equals(MethodType.PROCEDURE)) {
+		if (classifyType.equals(Status.PROCEDURE)) {
 			modifiedVariables = comp.getFunctionClassifier().getVariables();
 			firstLine.add(new TextComponent(" "));
 			firstLine.add(new TextComponent("altera", comp.getFunctionClassifier().getExpressions()));
@@ -101,7 +102,7 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 				IVariableExpression var = (IVariableExpression) returnList.get(0).getReturnExpression();
 
 				// Case of Procedure and returning that variable
-				if (comp.getFunctionClassifier().getClassification().equals(MethodType.PROCEDURE)
+				if (comp.getFunctionClassifier().getClassification().equals(Status.PROCEDURE)
 						&& modifiedVariables.contains(var.getVariable())) {
 					firstLine.add(new TextComponent("esse "));
 					t.translateIType(var.getType(), false);
@@ -230,7 +231,7 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 				if (comp.getReturnType().equals(IType.BOOLEAN)
 						&& ret1.getExpression().getType() instanceof PrimitiveType
 						&& ret2.getExpression().getType() instanceof PrimitiveType) {
-					t.translateBooleanPrimitive(ret1.getExpression());
+					t.translateLiteral((ILiteral) ret1.getExpression());
 					firstLine.add(new TextComponent("se "));
 					t.translateExpression(sel.getGuard(), true);
 				} else if (ret1.getExpression() instanceof IVariableExpression

@@ -229,7 +229,7 @@ public class ExpressionTranslatorPT {
 					linkVariable(left);
 				}
 			} else {
-				line.add(new TextComponent(" com os argumentos:"));
+				line.add(new TextComponent(" os argumentos:"));
 				for (IExpression e : expression.getArguments()) {
 					//translateExpression(e, false);
 					line.add(new TextComponent(e.toString()));
@@ -483,7 +483,7 @@ public class ExpressionTranslatorPT {
 					line.add(new TextComponent("primeira posição", list.get(1)));
 					line.add(new TextComponent(" da "));
 				} else {
-					if(list.get(0) instanceof IVariableExpression) {
+					if(list.get(1) instanceof IVariableExpression) {
 						line.add(new TextComponent("posição "));
 						linkVariable(list.get(1));
 						line.add(new TextComponent(" da "));
@@ -647,13 +647,13 @@ public class ExpressionTranslatorPT {
 		return "";
 	}
 
-	void translateBooleanPrimitive(IExpression ex) {
-		if (ex.isSame(IType.BOOLEAN.literal(true))) {
-			line.add(new TextComponent("verdadeiro "));
-		} else {
-			line.add(new TextComponent("falso "));
-		}
-	}
+//	void translateBooleanPrimitive(IExpression ex) {
+//		if (ex.isSame(IType.BOOLEAN.literal(true))) {
+//			line.add(new TextComponent("verdadeiro "));
+//		} else {
+//			line.add(new TextComponent("falso "));
+//		}
+//	}
 
 	void translateIType(IType type, boolean listswithType) {
 		if (type instanceof IReferenceType) {
@@ -662,10 +662,10 @@ public class ExpressionTranslatorPT {
 				IArrayType t = (IArrayType) ref.getTarget();
 				IType compType;
 				if (t.getComponentType() instanceof IArrayType) {
-					line.add(new TextComponent("matriz"));
+					line.add(new TextComponent("a matriz"));
 					compType = ((IArrayType) t.getComponentType()).getComponentType();
 				} else {
-					line.add(new TextComponent("vetor"));
+					line.add(new TextComponent("o vetor"));
 					compType = t.getComponentType();
 				}
 

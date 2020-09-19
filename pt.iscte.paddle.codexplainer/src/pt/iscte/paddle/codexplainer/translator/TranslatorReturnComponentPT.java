@@ -6,7 +6,7 @@ import java.util.List;
 import pt.iscte.paddle.codexplainer.components.ReturnComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
-import pt.iscte.paddle.model.roles.IFunctionClassifier.MethodType;
+import pt.iscte.paddle.model.roles.IFunctionClassifier.Status;
 import pt.iscte.paddle.model.IExpression;
 import pt.iscte.paddle.model.IProcedureCall;
 import pt.iscte.paddle.model.IProgramElement;
@@ -40,7 +40,7 @@ public class TranslatorReturnComponentPT implements TranslatorPT {
 
 		String s1 = "função ";
 		String s2 = "a ";
-		if (comp.getMethodComponent().getFunctionClassifier().getClassification().equals(MethodType.PROCEDURE)) {
+		if (comp.getMethodComponent().getFunctionClassifier().getClassification().equals(Status.PROCEDURE)) {
 			s1 = "procedimento ";
 			s2 = "o ";
 		}
@@ -91,7 +91,7 @@ public class TranslatorReturnComponentPT implements TranslatorPT {
 				t.translateExpression(comp.getReturnExpression(), false);
 			} else if(returnList.size() >= 2 && lastReturn.getParent().getParent().isSame(lastReturn.getOwnerProcedure()) 
 					&& lastReturn.isSame(comp.getElement())) {
-				line.add(new TextComponent("Caso esta"));
+				line.add(new TextComponent("Caso a"));
 				
 				//conditionList
 				List<IProgramElement> condList = new ArrayList<IProgramElement>();
@@ -103,15 +103,15 @@ public class TranslatorReturnComponentPT implements TranslatorPT {
 				
 				if(condList.size() == 1) {
 					line.add(new TextComponent(" ")); 
-					line.add(new TextComponent("condição", condList)); 
+					line.add(new TextComponent("condição anterior", condList)); 
 					line.add(new TextComponent(" não seja verdadeira "));
 				} else {
 					line.add(new TextComponent("s ")); 
-					line.add(new TextComponent("condições", condList)); 
+					line.add(new TextComponent("condições anteriores", condList)); 
 					line.add(new TextComponent(" não sejam verdadeiras "));
 				}
 				
-				line.add(new TextComponent(s2 + s1 + "acabará por devolver ")); 
+				line.add(new TextComponent(s2 + s1 + "acaba por devolver ")); 
 				t.translateExpression(comp.getReturnExpression(), false); 
 			} else 
 			{

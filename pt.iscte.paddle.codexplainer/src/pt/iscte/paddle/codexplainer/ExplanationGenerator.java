@@ -38,7 +38,6 @@ public class ExplanationGenerator {
 
 	private int depthLevel = 0;
 	private List<IProgramElement> lastBranchElement = new ArrayList<IProgramElement>();
-	private boolean addElse = false;
 
 	public ExplanationGenerator(IProcedure method) {
 		generateExplanation(method);
@@ -70,7 +69,7 @@ public class ExplanationGenerator {
 		
 		List<Component> components = new ArrayList<>(); 
 		
-		mc = new MethodComponent(proc, fixedValueParameters);
+		mc = new MethodComponent(proc, fixedValueParameters, variablesRoles);
 		
 		new ComponentsVisitor(proc.getBody(), components, variablesRoles, mc);
 		

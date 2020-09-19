@@ -20,14 +20,21 @@ public class MethodComponent {
 	private List<IVariableDeclaration> parameters = new ArrayList<>();
 	private List<IVariableDeclaration> parametersMencioned = new ArrayList<>();
 	private List<FVParameterComponent> fixedValueParameters = new ArrayList<>();
+	private List<VariableRoleComponent> variablesRoles = new ArrayList<>();
 	
 
-	public MethodComponent(IProcedure method, List<FVParameterComponent> fixedValueParameters) {
+	public List<VariableRoleComponent> getVariablesRoles() {
+		return variablesRoles;
+	}
+
+
+	public MethodComponent(IProcedure method, List<FVParameterComponent> fixedValueParameters, List<VariableRoleComponent> variablesRoles) {
 		c = new FunctionClassifier(method);
 		returnType = method.getReturnType();
 		isRecursive = method.isRecursive();
 		parameters = method.getParameters();
 		this.fixedValueParameters = fixedValueParameters;
+		this.variablesRoles = variablesRoles;
 		this.recursive = new Recursive(method);	
 	}
 	

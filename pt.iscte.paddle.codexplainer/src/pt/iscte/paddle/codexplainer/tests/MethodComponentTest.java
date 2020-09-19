@@ -56,7 +56,7 @@ public class MethodComponentTest {
 		System.out.println("Method ==" +max);
 		
 		
-		MethodComponent comp = new MethodComponent(max,  new ArrayList());
+		MethodComponent comp = new MethodComponent(max,  new ArrayList(), null);
 		
 		System.out.println(comp.getReturnType());
 		System.out.println(comp.IsRecursive());
@@ -104,7 +104,7 @@ public class MethodComponentTest {
 		
 		//TODO FIX
 		MethodComponent comp = 
-				new MethodComponent(max,  new ArrayList());
+				new MethodComponent(max,  new ArrayList(), null);
 		
 		
 		TranslatorMethodComponentPT t = new TranslatorMethodComponentPT(comp, new ArrayList<>());

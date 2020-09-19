@@ -55,7 +55,7 @@ class SelectionComponentTest {
 			
 			System.out.println(max);
 			
-			MethodComponent mc = new MethodComponent(max,  new ArrayList());
+			MethodComponent mc = new MethodComponent(max,  new ArrayList(), null);
 
 			SelectionComponent comp = 
 					new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat, mc);
@@ -96,7 +96,7 @@ class SelectionComponentTest {
 		
 		//System.out.println("Method == " +max);
 		
-		MethodComponent mc = new MethodComponent(max,  new ArrayList());
+		MethodComponent mc = new MethodComponent(max,  new ArrayList(), null);
 		SelectionComponent comp = 
 				new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat, mc);
 		
@@ -143,7 +143,7 @@ class SelectionComponentTest {
 		
 		//System.out.println("Method == " +max);
 		
-		MethodComponent mc = new MethodComponent(max,  new ArrayList());
+		MethodComponent mc = new MethodComponent(max,  new ArrayList(), null);
 		SelectionComponent comp = 
 				new SelectionComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), ifstat, mc);
 		

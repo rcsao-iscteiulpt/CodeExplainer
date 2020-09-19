@@ -1,14 +1,12 @@
 package pt.iscte.paddle.codexplainer.temp;
-import static pt.iscte.paddle.model.IOperator.AND;
-import static pt.iscte.paddle.model.IOperator.EQUAL;
-import static pt.iscte.paddle.model.IOperator.NOT;
-import static pt.iscte.paddle.model.IOperator.SMALLER;
+import static pt.iscte.paddle.model.IOperator.*;
 import static pt.iscte.paddle.model.IType.BOOLEAN;
 import static pt.iscte.paddle.model.IType.INT;
 
 import pt.iscte.paddle.interpreter.IExecutionData;
 import pt.iscte.paddle.model.IBlock;
 import pt.iscte.paddle.model.ILoop;
+import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.IProcedure;
 import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;
@@ -28,7 +26,7 @@ public class TestArrayFind extends BaseTest {
 	IVariableAssignment foundAss = body.addAssignment(found, BOOLEAN.literal(false));
 	IVariableDeclaration i = body.addVariable(INT);
 	IVariableAssignment iAss = body.addAssignment(i, INT.literal(0));
-	ILoop loop = body.addLoop(AND.on(found, SMALLER.on(i, array.length())));
+	ILoop loop = body.addLoop(AND.on(IOperator.NOT.on(OR.on(found, NOT.on(found))), SMALLER.on(i, array.length())));
 	ISelection ifstat = loop.addSelection(EQUAL.on(array.element(i), e));
 	IVariableAssignment foundAss_ = ifstat.addAssignment(found, BOOLEAN.literal(true));
 	IVariableAssignment iInc = loop.addIncrement(i);

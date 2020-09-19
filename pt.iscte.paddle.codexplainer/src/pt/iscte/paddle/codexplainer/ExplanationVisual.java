@@ -24,7 +24,6 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import pt.iscte.paddle.javardise.ClassWidget;
 import pt.iscte.paddle.javardise.Constants;
 import pt.iscte.paddle.javardise.service.IClassWidget;
 import pt.iscte.paddle.javardise.service.ICodeDecoration;
@@ -43,7 +42,6 @@ import pt.iscte.paddle.model.IBlock.IVisitor;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
 import pt.iscte.paddle.codexplainer.temp.TestMaxArray;
-import pt.iscte.paddle.codexplainer.temp.TestMaxMatrix;
 import pt.iscte.paddle.codexplainer.temp.TestAbs;
 import pt.iscte.paddle.codexplainer.temp.TestArrayFind;
 import pt.iscte.paddle.codexplainer.temp.TestBoolean;

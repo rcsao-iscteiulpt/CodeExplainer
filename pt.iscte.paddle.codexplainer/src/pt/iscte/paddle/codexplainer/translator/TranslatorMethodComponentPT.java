@@ -7,11 +7,11 @@ import pt.iscte.paddle.codexplainer.components.FVParameterComponent;
 import pt.iscte.paddle.codexplainer.components.MethodComponent;
 import pt.iscte.paddle.codexplainer.components.ReturnComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent;
+import pt.iscte.paddle.codexplainer.components.VariableRoleComponent;
 import pt.iscte.paddle.codexplainer.components.TextComponent.TextType;
 import pt.iscte.paddle.model.roles.IFunctionClassifier.Status;
 import pt.iscte.paddle.model.roles.IGatherer.Operation;
 import pt.iscte.paddle.model.IArrayElement;
-import pt.iscte.paddle.model.ILiteral;
 import pt.iscte.paddle.model.IOperator;
 import pt.iscte.paddle.model.IReturn;
 import pt.iscte.paddle.model.ISelection;
@@ -88,11 +88,12 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 			if (!comp.getReturnType().equals(IType.VOID)) {
 				firstLine.add(new TextComponent(" e"));
 				isEUsed = true;
+			} else {
+				firstLine.add(new TextComponent(", "));
 			}
 		}
 		if (comp.getReturnType().equals(IType.VOID)) {
-			// TODO VOID type method
-			// explanationByComponents.add(new TextComponent("vai "));
+			firstLine.add(new TextComponent("não devolve nada "));
 		} else {
 
 			firstLine.add(new TextComponent(" devolve "));
@@ -124,18 +125,34 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 					}
 					System.out.println(c.getVarReturnRole());
 					if (!c.getVarReturnRole().equals(IVariableRole.NONE)) {
-
-						
 						// ROLE explanation
 						if (c.getVarReturnRole() instanceof IMostWantedHolder) {
 							firstLine.add(new TextComponent("que "));
 							IMostWantedHolder m = (IMostWantedHolder) c.getVarReturnRole();
+							
 							firstLine.add(new TextComponent(
 									"contém o " + t.translateMostWantedholderObjective(m.getObjective()) + "valor "));
-							firstLine.add(new TextComponent("das posições iteradas de "));
+							
+							//GetItera
+							boolean allValues = false;
+							for(VariableRoleComponent varc: comp.getVariablesRoles()) {
+								if(varc.getVar().expression().isSame(m.getIteratorVariable())) {
+									if(varc.getRole() instanceof IArrayIndexIterator) {
+										IArrayIndexIterator role = (IArrayIndexIterator) varc.getRole();
+										allValues = role.isIteratingWholeArray();
+									}	
+								}
+							}	
+							if(allValues) {
+								firstLine.add(new TextComponent("das posições iteradas "));
+								
+							}
+							firstLine.add(new TextComponent("de "));
 							t.translateIType(m.getTargetArray().getVariable().getType(), false);
 							firstLine.add(new TextComponent(" "));
 							t.linkVariable(m.getTargetArray());
+							
+							
 							if (comp.getParameters().contains(m.getTargetArray().getVariable())) {
 								parametersMencioned.add(m.getTargetArray().getVariable());
 								firstLine.add(new TextComponent(" "));
@@ -171,9 +188,9 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 								firstLine.add(new TextComponent("elementos "));
 								firstLine.add(new TextComponent("de "));
 								if (el.getIndexes().size() == 1) {
-									firstLine.add(new TextComponent("vetor "));
+									firstLine.add(new TextComponent("o vetor "));
 								} else if (el.getIndexes().size() == 2) {
-									firstLine.add(new TextComponent("matrix "));
+									firstLine.add(new TextComponent("a matrix "));
 								}
 
 								t.linkVariable((((IArrayElement) g.getAccumulationExpression()).getTarget()));
@@ -204,18 +221,13 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 								t.translateMethodType(classifyType);
 							}
 						} else if (c.getVarReturnRole() instanceof IStepper) {
-							// TODO COUNT Situations
+							firstLine.add(new TextComponent("que contém o numero de occurências de uma determinada condição"));
 						} else if (c.getVarReturnRole() instanceof IOneWayFlag) {
 							IOneWayFlag m = (IOneWayFlag) c.getVarReturnRole();
 							firstLine.add(new TextComponent(
-									"cujo valor vai depender desta"));
-							if(m.getConditions().size() > 1) {
-								firstLine.add(new TextComponent("s "));
-								firstLine.add(new TextComponent("condições", m.getConditions()));
-							} else {
-								firstLine.add(new TextComponent(" "));
-								firstLine.add(new TextComponent("condição", m.getConditions()));
-							}	
+									"cujo valor vai depender de certas "));
+							firstLine.add(new TextComponent("condições", m.getConditions()));
+							
 							firstLine.add(new TextComponent(" "));
 						}
 					}
@@ -231,7 +243,7 @@ public class TranslatorMethodComponentPT implements TranslatorPT {
 				if (comp.getReturnType().equals(IType.BOOLEAN)
 						&& ret1.getExpression().getType() instanceof PrimitiveType
 						&& ret2.getExpression().getType() instanceof PrimitiveType) {
-					t.translateLiteral((ILiteral) ret1.getExpression());
+					t.translateBooleanPrimitive(ret1.getExpression());
 					firstLine.add(new TextComponent("se "));
 					t.translateExpression(sel.getGuard(), true);
 				} else if (ret1.getExpression() instanceof IVariableExpression

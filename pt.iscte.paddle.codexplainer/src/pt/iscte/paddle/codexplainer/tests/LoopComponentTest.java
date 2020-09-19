@@ -55,7 +55,7 @@ class LoopComponentTest {
 		System.out.println(loop);
 			
 		LoopComponent comp = 
-				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max, new ArrayList()));
+				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max, new ArrayList(), null));
 		
 		System.out.println(comp.getGuardParts());
 		System.out.println(comp.getIteratorComponent().getVar());
@@ -97,7 +97,7 @@ class LoopComponentTest {
 		//TODO test loop component iterator null
 		
 		LoopComponent comp = 
-				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max, new ArrayList()));
+				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max, new ArrayList(), null));
 		
 		
 		TranslatorLoopComponentPT t = new TranslatorLoopComponentPT(comp,0);
@@ -146,7 +146,7 @@ class LoopComponentTest {
 		
 		
 		LoopComponent comp = 
-				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max,  new ArrayList()));
+				new LoopComponent(ExplanationGeneratorTest.getVariableRoleTest(max.getVariables()), loop, new MethodComponent(max,  new ArrayList(), null));
 		
 		System.out.println(comp.getGuardParts());
 		System.out.println(comp.getIteratorComponent().getVar());
